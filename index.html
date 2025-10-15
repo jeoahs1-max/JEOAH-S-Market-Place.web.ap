@@ -1,1 +1,142 @@
-<!doctype html><html lang='fr'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width,initial-scale=1'/><title>JEOAH'S Market Place</title><link rel='manifest' href='/manifest.json'/><link rel='stylesheet' href='/styles.min.css'/></head><body><header class='site-header'><div class='container header-row'><div class='logo'><img src='/assets/logo.png' alt='JEOAH'S' style='height:44px'></div><nav class='nav'><a href='/index.html'>Accueil</a><a href='/inscription.html'>Inscription</a><a href='/plans.html'>Plans</a><a href='/faq.html'>FAQ</a></nav><a class='cta' href='/inscription.html'>Commencer</a></div></header><div class='download-banner'><div class='container'><div class='download-left'><strong>🎁 Offre spéciale :</strong> 15 jours gratuits pour les 25 premiers inscrits — Profite maintenant.</div><div class='download-right'><a class='download-btn' href='/JEOAHS_Final_Deploy_v2.zip' download>⬇️ Télécharger la maquette</a></div></div></div><main class='hero container'><div class='hero-left'><h1>Bienvenue sur JEOAH\'S Market Place</h1><p class='lead'>Le shopping le plus intelligent — la plateforme où vendre, acheter et partager devient un plaisir rentable.</p><div class='hero-ctas'><a class='button primary' href='/inscription.html'>Commencer maintenant</a><a class='button ghost' href='#features'>Découvrir</a></div><ul class='features-list'><li>✓ Espace vendeur & affilié</li><li>✓ IA qui génère pubs & descriptions</li><li>✓ Publication automatique selon plan</li><li>✓ PWA installable — mobile & tablette</li></ul></div><div class='hero-right'><img src='/assets/hero-phone.png' alt='preview'/><div class='download-symbol' title='Installer l\'app'>⬇️<span>Installer</span></div></div></main><footer class='site-footer container'><div><h4>Contact</h4><p>Email support: <a href='mailto:jeoahs1@gmail.com'>jeoahs1@gmail.com</a></p></div><div><h4>Suivez-nous</h4><a href='https://www.facebook.com/' target='_blank'>Facebook</a> · <a href='https://www.instagram.com/jeoahsmarketplace' target='_blank'>Instagram</a> · <a href='https://tiktok.com/@jeoahs1' target='_blank'>TikTok</a> · <a href='https://www.youtube.com/@jeoahs1' target='_blank'>YouTube</a></div><small>© JEOAH'S Market Place — Propriétaire : Neyslyne</small></footer><script src='/app.js'></script></body></html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JEOAH'S Market Place</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #222;
+      line-height: 1.6;
+      text-align: center;
+    }
+    header {
+      background: #f8f8f8;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .logo img {
+      height: 50px;
+    }
+    nav a {
+      margin: 0 10px;
+      text-decoration: none;
+      color: #0073e6;
+      font-weight: 600;
+    }
+    .cta {
+      background: #0073e6;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .cta:hover {
+      background: #005bb5;
+    }
+    main {
+      padding: 2rem 1rem;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    .special-offer {
+      background: #f9f9ff;
+      padding: 1rem;
+      border-radius: 10px;
+      margin: 1rem 0;
+    }
+    footer {
+      background: #f1f1f1;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+    button#installBtn {
+      display: none;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+    button#installBtn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="assets/logo.png" alt="Logo JEOAH'S" />
+    </div>
+    <nav>
+      <a href="index.html">Accueil</a>
+      <a href="inscription.html">Inscription</a>
+      <a href="plans.html">Plans</a>
+      <a href="faq.html">FAQ</a>
+    </nav>
+    <a class="cta" href="inscription.html">Commencer</a>
+  </header>
+
+  <main>
+    <div class="special-offer">
+      🎁 <strong>Offre spéciale :</strong> 15 jours gratuits pour les 25 premiers inscrits — Profite maintenant.<br />
+      ⬇️ <a href="maquette.pdf" download>Télécharger la maquette</a>
+    </div>
+
+    <h1>Bienvenue sur JEOAH'S Market Place</h1>
+    <p>Le shopping le plus intelligent — la plateforme où vendre, acheter et partager devient un plaisir rentable.</p>
+
+    <p>
+      <a href="inscription.html">Commencer maintenant</a> |
+      <a href="plans.html">Découvrir</a>
+    </p>
+
+    <ul style="list-style:none; padding:0;">
+      <li>✓ Espace vendeur & affilié</li>
+      <li>✓ IA qui génère pubs & descriptions</li>
+      <li>✓ Publication automatique selon plan</li>
+      <li>✓ PWA installable — mobile & tablette</li>
+    </ul>
+
+    <button id="installBtn">📥 Installer l’application</button>
+  </main>
+
+  <footer>
+    <strong>Contact</strong><br />
+    Email support : <a href="mailto:jeoahs1@gmail.com">jeoahs1@gmail.com</a>
+  </footer>
+
+  <script>
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('installBtn');
+      if (installBtn) {
+        installBtn.style.display = 'inline-block';
+        installBtn.addEventListener('click', async () => {
+          installBtn.style.display = 'none';
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+          deferredPrompt = null;
+        });
+      }
+    });
+  </script>
+</body>
+</html>

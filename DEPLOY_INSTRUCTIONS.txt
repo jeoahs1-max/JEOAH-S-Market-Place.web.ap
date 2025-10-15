@@ -1,0 +1,1 @@
+Upload folder to Vercel or GitHub and deploy.

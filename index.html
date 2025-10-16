@@ -3,140 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JEOAH'S Market Place</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="assets/logo.png" type="image/png" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #fff;
-      color: #222;
-      line-height: 1.6;
-      text-align: center;
-    }
-    header {
-      background: #f8f8f8;
-      padding: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-    .logo img {
-      height: 50px;
-    }
-    nav a {
-      margin: 0 10px;
-      text-decoration: none;
-      color: #0073e6;
-      font-weight: 600;
-    }
-    .cta {
-      background: #0073e6;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .cta:hover {
-      background: #005bb5;
-    }
-    main {
-      padding: 2rem 1rem;
-    }
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 1rem;
-    }
-    .special-offer {
-      background: #f9f9ff;
-      padding: 1rem;
-      border-radius: 10px;
-      margin: 1rem 0;
-    }
-    footer {
-      background: #f1f1f1;
-      padding: 1rem;
-      margin-top: 2rem;
-    }
-    button#installBtn {
-      display: none;
-      background: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      margin-top: 10px;
-    }
-    button#installBtn:hover {
-      background: #218838;
-    }
-  </style>
+  <title>JEOAH’S Market Place</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <img src="assets/logo.png" alt="Logo JEOAH'S" />
-    </div>
+  <!-- ======= En-tête ======= -->
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+    <a href="https://jeoahs-market-place.rocketnew.com">
+      <img src="https://i.ibb.co/Gfrddby1/Screenshot-20251007-140607-Gallery.jpg" alt="Logo JEOAH’S Market Place" style="height: 60px; border-radius: 10px;">
+    </a>
     <nav>
-      <a href="index.html">Accueil</a>
-      <a href="inscription.html">Inscription</a>
-      <a href="plans.html">Plans</a>
-      <a href="faq.html">FAQ</a>
+      <a href="index.html" style="margin: 0 10px;">Accueil</a>
+      <a href="produits-affiliés.html" style="margin: 0 10px;">Produits affiliés</a>
+      <a href="plans.html" style="margin: 0 10px;">Plans</a>
+      <a href="faq.html" style="margin: 0 10px;">FAQ</a>
+      <a href="support.html" style="margin: 0 10px;">Support</a>
     </nav>
-    <a class="cta" href="inscription.html">Commencer</a>
   </header>
 
-  <main>
-    <div class="special-offer">
-      🎁 <strong>Offre spéciale :</strong> 15 jours gratuits pour les 25 premiers inscrits — Profite maintenant.<br />
-      ⬇️ <a href="maquette.pdf" download>Télécharger la maquette</a>
-    </div>
-
-    <h1>Bienvenue sur JEOAH'S Market Place</h1>
-    <p>Le shopping le plus intelligent — la plateforme où vendre, acheter et partager devient un plaisir rentable.</p>
-
-    <p>
-      <a href="inscription.html">Commencer maintenant</a> |
-      <a href="plans.html">Découvrir</a>
-    </p>
-
-    <ul style="list-style:none; padding:0;">
-      <li>✓ Espace vendeur & affilié</li>
-      <li>✓ IA qui génère pubs & descriptions</li>
-      <li>✓ Publication automatique selon plan</li>
-      <li>✓ PWA installable — mobile & tablette</li>
-    </ul>
-
-    <button id="installBtn">📥 Installer l’application</button>
+  <!-- ======= Contenu principal ======= -->
+  <main style="padding: 40px; text-align: center;">
+    <h1>Bienvenue sur <strong>JEOAH’S Market Place</strong></h1>
+    <p>Explorez les meilleures offres, produits affiliés et opportunités de vente !</p>
+    <a href="produits-affiliés.html" style="display: inline-block; background: #007bff; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none;">Voir les produits</a>
   </main>
 
-  <footer>
-    <strong>Contact</strong><br />
-    Email support : <a href="mailto:jeoahs1@gmail.com">jeoahs1@gmail.com</a>
+  <!-- ======= Pied de page ======= -->
+  <footer style="text-align: center; padding: 20px; background: #f8f8f8; font-size: 14px; color: #555;">
+    <p>© 2025 JEOAH’S Market Place — Tous droits réservés.</p>
   </footer>
-
-  <script>
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      const installBtn = document.getElementById('installBtn');
-      if (installBtn) {
-        installBtn.style.display = 'inline-block';
-        installBtn.addEventListener('click', async () => {
-          installBtn.style.display = 'none';
-          deferredPrompt.prompt();
-          await deferredPrompt.userChoice;
-          deferredPrompt = null;
-        });
-      }
-    });
-  </script>
 </body>
 </html>

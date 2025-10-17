@@ -1,1 +1,55 @@
-<!doctype html><html lang='fr'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width,initial-scale=1'/><title>Vendeur - Connexion réseaux</title><link rel='stylesheet' href='/styles.min.css'/></head><body><div class='container'><header class='small-header'><a href='/index.html'>← Accueil</a></header><h1>Connexion aux réseaux</h1><div class='social-grid'><label>Facebook<input id='v_fb' placeholder='Facebook URL' /></label><label>Instagram<input id='v_ig' placeholder='Instagram URL' /></label></div><div class='row'><button id='v_next' class='button primary'>Suivant</button></div></div><script>document.getElementById('v_next').addEventListener('click',function(){sessionStorage.setItem('seller_socials', JSON.stringify({fb:document.getElementById('v_fb').value, ig:document.getElementById('v_ig').value})); location.href='/plans.html';});</script></body></html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurer vos Réseaux - JEOAH'S Vendeur</title>
+    <link rel="stylesheet" href="styles.min.css">
+</head>
+<body>
+    <header style="background: #032C4F; color: #fff; padding: 1rem;">
+        <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo">
+    </header>
+
+    <main>
+        <div class="social-setup-container">
+            <h1>Bienvenue Vendeur !</h1>
+            <p>Connectons vos réseaux sociaux pour maximiser la portée de vos publications et de vos Lives.</p>
+            <p style="color: #032C4F; font-weight: bold;">(Vous pouvez lier jusqu'à 5 comptes)</p>
+            
+            <form id="socialForm">
+                <div class="social-input-group">
+                    <img src="assets/icon-instagram.png" alt="Instagram">
+                    <input type="url" placeholder="Lien Instagram (Ex: instagram.com/vendeur)">
+                </div>
+                <div class="social-input-group">
+                    <img src="assets/icon-facebook.png" alt="Facebook">
+                    <input type="url" placeholder="Lien Facebook (Ex: facebook.com/vendeur)">
+                </div>
+                <div class="social-input-group">
+                    <img src="assets/icon-twitter.png" alt="Twitter/X">
+                    <input type="url" placeholder="Lien Twitter/X (Ex: twitter.com/vendeur)">
+                </div>
+                <div class="social-input-group">
+                    <img src="assets/icon-youtube.png" alt="YouTube">
+                    <input type="url" placeholder="Lien YouTube (Facultatif)">
+                </div>
+                <div class="social-input-group">
+                    <img src="assets/icon-tiktok.png" alt="TikTok">
+                    <input type="url" placeholder="Lien TikTok (Facultatif)">
+                </div>
+
+                <a href="produits-vendeurs.html" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                    Suivant : Mon Tableau de Bord
+                </a>
+            </form>
+            
+            <p style="margin-top: 20px; font-size: 0.9em;"><a href="index.html">Retour à l'accueil</a></p>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 JEOAH’S Market Place</p>
+    </footer>
+</body>
+</html>

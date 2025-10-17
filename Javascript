@@ -1,15 +1,50 @@
-/* App JS - placeholders for Ney chat, language toggle, trial count */
-function setLang(){ /* placeholder for multi-language */ }
-document.addEventListener('DOMContentLoaded', function(){
-  // sample free slots counter (replace with server API)
-  const counter = document.getElementById('freeSlotsCounter');
-  if(counter) counter.innerText = '20 / 20';
-  // cookie handling
-  const consent = localStorage.getItem('jeoahs_ga_consent');
-  if(!consent){
-    const c = document.getElementById('cookie-consent');
-    if(c) c.style.display='flex';
-  }
+// PWA Service Worker Registration (Code existant)
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js")
+  .then(() => console.log("Service Worker enregistré avec succès"))
+  .catch(err => console.error("Erreur SW:", err));
+}
+
+// Nouvelle Logique pour le Formulaire d'Inscription
+document.addEventListener('DOMContentLoaded', () => {
+    const registerForm = document.getElementById('registerForm');
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const isVendeur = document.getElementById('role-vendeur').checked;
+            const isAffilie = document.getElementById('role-affilie').checked;
+
+            // 1. Validation des mots de passe
+            if (password !== confirmPassword) {
+                alert("Erreur: Les mots de passe ne correspondent pas.");
+                return;
+            }
+
+            // 2. Validation du rôle
+            if (!isVendeur && !isAffilie) {
+                alert("Veuillez choisir au moins un rôle (Vendeur ou Affilié).");
+                return;
+            }
+
+            // --- Simulation de l'inscription réussie (cette partie sera remplacée par Firebase/Backend) ---
+            alert("Inscription réussie ! Redirection...");
+            
+            // 3. Redirection selon le rôle
+            if (isVendeur && isAffilie) {
+                // Si l'utilisateur choisit les deux, rediriger vers un tableau de bord commun ou le plus complexe (Vendeur)
+                window.location.href = 'vendor-products.html'; 
+            } else if (isVendeur) {
+                window.location.href = 'vendor-products.html';
+            } else if (isAffilie) {
+                window.location.href = 'affiliate-products.html';
+            }
+        });
+    }
+
+    // [FUTURE IA CHATBOT LOGIC GOES HERE]
+    // ...
 });
-function openChat(){ document.getElementById('chatBox').style.display='block'; }
-function closeChat(){ document.getElementById('chatBox').style.display='none'; }

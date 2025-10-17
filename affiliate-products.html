@@ -1,32 +1,111 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Produits affiliés — JEOAH’S Market Place</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Affilié - JEOAH'S</title>
+    <link rel="stylesheet" href="styles.min.css">
 </head>
 <body>
-  <header style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-    <a href="index.html">
-      <img src="https://i.ibb.co/Gfrddby1/Screenshot-20251007-140607-Gallery.jpg" alt="Logo JEOAH’S Market Place" style="height: 60px; border-radius: 10px;">
-    </a>
-    <nav>
-      <a href="index.html" style="margin: 0 10px;">Accueil</a>
-      <a href="produits-affiliés.html" style="margin: 0 10px;">Produits affiliés</a>
-      <a href="plans.html" style="margin: 0 10px;">Plans</a>
-      <a href="faq.html" style="margin: 0 10px;">FAQ</a>
-      <a href="support.html" style="margin: 0 10px;">Support</a>
-    </nav>
-  </header>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo" style="width: 70px; margin: 0 auto 20px;">
+            <h2>Mon Espace Affilié</h2>
+            <a href="produits-affiliés.html" class="active">
+                <img src="assets/icon-dashboard.png" alt="Dashboard">Tableau de Bord
+            </a>
+            <a href="liens-affiliés.html">
+                <img src="assets/icon-links.png" alt="Plateformes">Plateformes Affiliées
+            </a>
+            <a href="affilié-social.html">
+                <img src="assets/icon-social.png" alt="Réseaux">Réseaux Sociaux
+            </a>
+            <a href="#trafic">
+                <img src="assets/icon-analytics.png" alt="Trafic">Suivi du Trafic
+            </a>
+            <a href="plans.html">
+                <img src="assets/icon-plan.png" alt="Plans">Mon Plan
+            </a>
+            <a href="faq.html">
+                <img src="assets/icon-support.png" alt="Support">Support
+            </a>
+        </aside>
 
-  <main style="padding: 40px; text-align: center;">
-    <h1>Produits affiliés</h1>
-    <p>Découvrez nos meilleurs produits affiliés, prêts à être partagés et promus.</p>
-  </main>
+        <main class="dashboard-content">
+            <h1>Gestion des Produits & Promotions IA</h1>
+            
+            <div style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <p style="color: #032C4F; font-size: 1.1rem;">🌟 **Bienvenue !** L'IA est prête à optimiser vos liens pour vous.</p>
+                <div style="background: #eee; padding: 10px; border-radius: 5px; margin-top: 15px;">
+                    <p style="font-weight: bold; margin: 0;">Trafic Total (7 jours) : <span style="color: #032C4F;">1,245 Clics</span></p>
+                    <p style="font-size: 0.9em; margin: 5px 0 0;">(Le paiement de vos commissions est géré par vos plateformes affiliées externes.)</p>
+                </div>
+            </div>
 
-  <footer style="text-align: center; padding: 20px; background: #f8f8f8; font-size: 14px; color: #555;">
-    <p>© 2025 JEOAH’S Market Place — Tous droits réservés.</p>
-  </footer>
+            <h2>Ajouter un Produit pour la Comparaison IA</h2>
+            <form id="addAffiliateProductForm" style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <input type="url" placeholder="Lien du Produit (Ex: Lien Amazon)" required style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                <textarea placeholder="Description du site affilié ou Brève description pour l'IA" rows="2" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc;"></textarea>
+                
+                <p style="font-weight: bold; margin-bottom: 10px;">Télécharger l'image principale du produit (pour la comparaison et la publicité)</p>
+                <input type="file" accept="image/*" required style="width: 100%;">
+                
+                <p style="font-size: 0.9em; margin: 15px 0; color: #032C4F;">*L'IA va récupérer les produits similaires (même nom/catégorie) sur toutes vos plateformes pour comparaison.</p>
+                
+                <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="generateAd()">
+                    Comparer & Générer Pub IA
+                </button>
+                
+                <div id="publish-confirmation" style="display: none; background: #e6ffe6; color: green; padding: 10px; border-radius: 5px; margin-top: 15px;">
+                    ✅ **Succès :** L'IA a trouvé des comparaisons et créé la publicité ! (Publication automatique selon votre plan.)
+                </div>
+            </form>
+
+            <h2>Mes Produits Affiliés (Comparaisons IA)</h2>
+            <div class="product-grid">
+                <div class="product-card" style="border-left: 5px solid #00c4a7;">
+                    <h3>Casque Audio Sans Fil</h3>
+                    <p style="font-size: 0.9em; font-weight: bold;">Catégorie : Électronique - Tendance 🔥</p>
+                    <div style="text-align: left; margin-top: 10px; font-size: 0.9em;">
+                        <p>🛒 **Amazon :** $49.99 <a href="#" class="btn" style="background: #00c4a7; padding: 5px 10px;">Acheter</a></p>
+                        <p>🛒 **eBay :** $45.00 <a href="#" class="btn" style="background: #00c4a7; padding: 5px 10px;">Acheter</a></p>
+                        <p>🛒 **Walmart :** $52.99</p>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.8em; color: #032C4F;">*Publiée automatiquement sur vos réseaux. (Plan Avancé)*</p>
+                </div>
+                
+                <div class="product-card" style="border-left: 5px solid #FDC830;">
+                    <h3>Livre "L'Art de l'Affiliation"</h3>
+                    <p style="font-size: 0.9em; font-weight: bold;">Catégorie : Maison - Réduction 📉</p>
+                    <div style="text-align: left; margin-top: 10px; font-size: 0.9em;">
+                        <p>🛒 **Amazon :** $19.99 <a href="#" class="btn" style="background: #FDC830; color: #032C4F; padding: 5px 10px;">Acheter</a></p>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.8em; color: #032C4F;">*Publicité Texte simple générée. (Plan Gratuit)*</p>
+                </div>
+
+                <div class="product-card" style="border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; min-height: 280px; cursor: pointer;">
+                    <p style="color: #666; font-weight: bold;">➕ Ajouter un nouveau produit/lien</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    
+    <div class="ia-chat-box" title="Chat IA 24/7">
+        <img src="assets/icon-ai-chat.png" alt="Chat IA">
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Fonction de simulation de la génération d'annonce IA
+        function generateAd() {
+            // Afficher le message de confirmation
+            document.getElementById('publish-confirmation').style.display = 'block';
+            setTimeout(() => {
+                 document.getElementById('publish-confirmation').style.display = 'none';
+            }, 5000); 
+            // NOTE: La logique réelle de publication dépendra de l'API IA et du plan.
+        }
+    </script>
 </body>
 </html>

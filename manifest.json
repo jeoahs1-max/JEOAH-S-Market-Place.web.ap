@@ -1,11 +1,12 @@
 {
-  "name": "JEOAH'S Market Place",
-  "short_name": "JEOAH'S",
+  "name": "Place du marché de JEOAH",
+  "short_name": "JEOAH",
   "start_url": "index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#032C4F",  
-  "description": "La plateforme e-commerce tout-en-un optimisée par l'IA pour les Vendeurs et Affiliés.",
+  "theme_color": "#032C4F",
+  "description": "La plateforme e-commerce tout-en-un.",
   "icons": [
     {
       "src": "assets/icon-192.png",
@@ -16,14 +17,12 @@
       "src": "assets/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
-    }
-    // Ajoutez une icône de masquage pour Android (meilleur look pour PWA)
-    ,
+    },
     {
-      "src": "assets/maskable_icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "source": "assets/maskable_icon.png",
+      "tailles": "512x512",
+      "taper": "image/png",
+      "but": "masquable"
     }
   ]
 }

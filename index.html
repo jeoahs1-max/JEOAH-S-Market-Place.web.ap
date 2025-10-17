@@ -1,36 +1,80 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JEOAH’S Market Place</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JEOAH'S Market Place</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.min.css">
+  <link rel="icon" type="image/png" href="assets/logo.png">
 </head>
 <body>
-  <!-- ======= En-tête ======= -->
-  <header style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-    <a href="https://jeoahs-market-place.rocketnew.com">
-      <img src="https://i.ibb.co/Gfrddby1/Screenshot-20251007-140607-Gallery.jpg" alt="Logo JEOAH’S Market Place" style="height: 60px; border-radius: 10px;">
-    </a>
+  <header>
     <nav>
-      <a href="index.html" style="margin: 0 10px;">Accueil</a>
-      <a href="produits-affiliés.html" style="margin: 0 10px;">Produits affiliés</a>
-      <a href="plans.html" style="margin: 0 10px;">Plans</a>
-      <a href="faq.html" style="margin: 0 10px;">FAQ</a>
-      <a href="support.html" style="margin: 0 10px;">Support</a>
+        <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo">
+        <div class="menu">
+            <a href="index.html">Home</a>
+            <a href="plans.html">Plans</a>
+            <a href="faq.html">Aide</a>
+            <a href="contact.html">Contact</a>
+        </div>
+        <a href="inscription.html" class="btn">Get Started</a>
     </nav>
   </header>
 
-  <!-- ======= Contenu principal ======= -->
-  <main style="padding: 40px; text-align: center;">
-    <h1>Bienvenue sur <strong>JEOAH’S Market Place</strong></h1>
-    <p>Explorez les meilleures offres, produits affiliés et opportunités de vente !</p>
-    <a href="produits-affiliés.html" style="display: inline-block; background: #007bff; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none;">Voir les produits</a>
+  <main>
+    <section class="hero">
+        <div class="hero-text">
+            <h1>JEOAH'S Market Place</h1>
+            <p>La meilleure plateforme pour acheter et vendre des produits de vos détaillants préférés.</p>
+            <a href="inscription.html" class="btn btn-primary">Commencer</a>
+        </div>
+        <div class="hero-image">
+            <img src="assets/mobile-design.png" alt="Illustration de l'application mobile" style="max-width: 450px;"> 
+        </div>
+    </section>
+
+    <section class="features">
+        
+        <div class="feature-item">
+            <img src="assets/icon-products.png" alt="Icône produits">
+            <div>
+                <h3>Produits Centralisés</h3>
+                <p>Trouvez des produits de tous vos détaillants favoris en une seule place.</p>
+            </div>
+        </div>
+        
+        <div class="feature-item">
+            <img src="assets/icon-ai.png" alt="Icône IA">
+            <div>
+                <h3>Alimenté par l'IA</h3>
+                <p>Soyez mis à jour automatiquement avec les nouvelles offres et les produits tendances.</p>
+            </div>
+        </div>
+        
+        <div class="feature-item">
+            <img src="assets/icon-payments.png" alt="Icône paiements">
+            <div>
+                <h3>Paiements Faciles</h3>
+                <p>Payez avec Google Pay, Alipay, PayPal, et plus encore.</p>
+            </div>
+        </div>
+        
+        <div class="feature-item">
+            <img src="assets/icon-globe.png" alt="Icône monde">
+            <div>
+                <h3>Accès Global</h3>
+                <p>Achetez auprès de détaillants du monde entier.</p>
+            </div>
+        </div>
+        
+    </section>
   </main>
 
-  <!-- ======= Pied de page ======= -->
-  <footer style="text-align: center; padding: 20px; background: #f8f8f8; font-size: 14px; color: #555;">
-    <p>© 2025 JEOAH’S Market Place — Tous droits réservés.</p>
-  </footer>
+  <footer>
+    <p>© 2025 JEOAH’S Market Place • Tous droits réservés • Note 4.9 ⭐</p>
+    </footer>
+
+  <script src="app.js"></script>
 </body>
 </html>

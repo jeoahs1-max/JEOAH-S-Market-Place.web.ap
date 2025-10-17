@@ -4,39 +4,47 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inscription — JEOAH’S Market Place</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
+  <link rel="styleshe
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription - JEOAH'S Market Place</title>
+  <link rel="stylesheet" href="styles.min.css">
+  </head>
 <body>
-  <header style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-    <a href="index.html">
-      <img src="https://i.ibb.co/Gfrddby1/Screenshot-20251007-140607-Gallery.jpg" alt="Logo JEOAH’S Market Place" style="height: 60px; border-radius: 10px;">
-    </a>
-    <nav>
-      <a href="index.html" style="margin: 0 10px;">Accueil</a>
-      <a href="produits-affiliés.html" style="margin: 0 10px;">Produits affiliés</a>
-      <a href="plans.html" style="margin: 0 10px;">Plans</a>
-      <a href="faq.html" style="margin: 0 10px;">FAQ</a>
-      <a href="support.html" style="margin: 0 10px;">Support</a>
-    </nav>
+  <header>
+    <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo">
   </header>
 
-  <main style="padding: 40px; text-align: center;">
-    <h1>Créer un compte</h1>
-    <p>Inscrivez-vous pour rejoindre JEOAH’S Market Place et commencer à vendre ou promouvoir vos produits.</p>
+  <main>
+    <h2>Créer un compte</h2>
+    <form id="registerForm">
+      <input type="text" placeholder="Nom complet" required>
+      <input type="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Mot de passe" required>
+      <input type="password" id="confirm_password" placeholder="Confirmer Mot de passe" required>
+      
+      <div style="margin: 20px 0; text-align: left; padding: 0 10%;">
+          <label style="display: block; margin-bottom: 10px;">
+              <input type="checkbox" name="role" value="vendeur" id="role-vendeur" required> 
+              Je veux m'inscrire en tant que **Vendeur**
+          </label>
+          <label style="display: block;">
+              <input type="checkbox" name="role" value="affilie" id="role-affilie"> 
+              Je veux m'inscrire en tant qu'**Affilié**
+          </label>
+      </div>
 
-    <form style="max-width: 400px; margin: 40px auto; text-align: left;">
-      <label>Nom complet</label>
-      <input type="text" placeholder="Votre nom" style="width:100%; margin-bottom:10px; padding:8px;">
-      <label>Email</label>
-      <input type="email" placeholder="Votre email" style="width:100%; margin-bottom:10px; padding:8px;">
-      <label>Mot de passe</label>
-      <input type="password" placeholder="Créer un mot de passe" style="width:100%; margin-bottom:10px; padding:8px;">
-      <button type="submit" style="width:100%; padding:10px; background:#2b7cff; color:white; border:none; border-radius:5px;">S'inscrire</button>
+      <button type="submit" class="btn btn-primary">S’inscrire</button>
     </form>
+    <p><a href="index.html" style="color: #032C4F; text-decoration: none;">Retour à l’accueil</a></p>
   </main>
 
-  <footer style="text-align: center; padding: 20px; background: #f8f8f8; font-size: 14px; color: #555;">
-    <p>© 2025 JEOAH’S Market Place — Tous droits réservés.</p>
+  <footer>
+    <p>© 2025 JEOAH’S Market Place</p>
   </footer>
+  <script src="app.js"></script>
 </body>
 </html>

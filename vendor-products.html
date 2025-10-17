@@ -1,32 +1,92 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Produits vendeurs — JEOAH’S Market Place</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord Vendeur - JEOAH'S</title>
+    <link rel="stylesheet" href="styles.min.css">
 </head>
 <body>
-  <header style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-    <a href="index.html">
-      <img src="https://i.ibb.co/Gfrddby1/Screenshot-20251007-140607-Gallery.jpg" alt="Logo JEOAH’S Market Place" style="height: 60px; border-radius: 10px;">
-    </a>
-    <nav>
-      <a href="index.html" style="margin: 0 10px;">Accueil</a>
-      <a href="produits-affiliés.html" style="margin: 0 10px;">Produits affiliés</a>
-      <a href="plans.html" style="margin: 0 10px;">Plans</a>
-      <a href="faq.html" style="margin: 0 10px;">FAQ</a>
-      <a href="support.html" style="margin: 0 10px;">Support</a>
-    </nav>
-  </header>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo" style="width: 70px; margin: 0 auto 20px;">
+            <h2>Mon Espace Vendeur</h2>
+            <a href="produits-vendeurs.html" class="active">
+                <img src="assets/icon-dashboard.png" alt="Dashboard">Tableau de Bord
+            </a>
+            <a href="fournisseur-step-social.html">
+                <img src="assets/icon-social.png" alt="Réseaux">Réseaux Sociaux
+            </a>
+            <a href="#commandes">
+                <img src="assets/icon-orders.png" alt="Commandes">Suivi Commandes
+            </a>
+            <a href="#retraits">
+                <img src="assets/icon-withdrawal.png" alt="Retraits">Mes Retraits
+            </a>
+            <a href="plans.html">
+                <img src="assets/icon-plan.png" alt="Plans">Mon Plan
+            </a>
+            <a href="faq.html">
+                <img src="assets/icon-support.png" alt="Support">Support
+            </a>
+        </aside>
 
-  <main style="padding: 40px; text-align: center;">
-    <h1>Produits des vendeurs</h1>
-    <p>Ajoutez, modifiez et suivez vos produits directement ici.</p>
-  </main>
+        <main class="dashboard-content">
+            <h1>Tableau de Bord & Gestion des Produits</h1>
 
-  <footer style="text-align: center; padding: 20px; background: #f8f8f8; font-size: 14px; color: #555;">
-    <p>© 2025 JEOAH’S Market Place — Tous droits réservés.</p>
-  </footer>
+            <div style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <p style="color: #032C4F; font-size: 1.1rem;">👋 **Message de Bienvenue !** Nous sommes ravis de vous compter parmi nous. Votre succès est notre mission.</p>
+                <p style="background: #eee; padding: 10px; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    Votre Code Vendeur Unique : <span style="color: #FDC830;">JEOAH-VX9321</span>
+                </p>
+            </div>
+            
+            <div class="balance-card">
+                <h2>Solde Actuel</h2>
+                <p>$1,520.50 USD</p>
+                <p style="font-size: 0.9em; margin-top: 10px;">Votre solde est mis à jour en temps réel. <a href="#retraits" style="color: #FDC830;">Faire un retrait</a></p>
+            </div>
+
+            <h2>Ajouter un Nouveau Produit</h2>
+            <form id="addProductForm" style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <input type="text" placeholder="Titre du Produit" required style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
+                <textarea placeholder="Description du produit (L'IA finira la description en beauté !)" rows="3" required style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;"></textarea>
+                <input type="number" placeholder="Prix (USD)" required style="width: 50%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc;">
+                
+                <p style="font-weight: bold; margin-bottom: 10px;">Télécharger vos 3 photos de produit (Face, Description, Prix)</p>
+                <input type="file" multiple accept="image/*" required style="width: 100%;">
+                
+                <p style="font-size: 0.9em; margin: 15px 0;">*L'IA optimisera vos descriptions et créera la publicité visuelle.</p>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Publier ce Produit</button>
+            </form>
+
+            <h2>Mes Produits Actuels</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <img src="assets/produit-exemple1.jpg" alt="Exemple de produit" style="width: 100%; height: 200px; object-fit: cover; border-radius: 5px;">
+                    <h3>T-Shirt Tendance (Bleu)</h3>
+                    <p>Prix : **$25.00 USD**</p>
+                    <p style="font-size: 0.8em; color: green;">Statut : En ligne (Publiée par l'IA)</p>
+                </div>
+                <div class="product-card">
+                    <img src="assets/produit-exemple2.jpg" alt="Exemple de produit" style="width: 100%; height: 200px; object-fit: cover; border-radius: 5px;">
+                    <h3>Décoration Minimaliste</h3>
+                    <p>Prix : **$40.00 USD**</p>
+                    <p style="font-size: 0.8em; color: orange;">Statut : En attente de validation IA</p>
+                </div>
+                
+                <div class="product-card" style="border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; min-height: 280px; cursor: pointer;">
+                    <p style="color: #666; font-weight: bold;">➕ Ajouter un produit</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    
+    <div class="ia-chat-box" title="Chat IA 24/7">
+        <img src="assets/icon-ai-chat.png" alt="Chat IA">
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>

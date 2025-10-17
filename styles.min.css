@@ -1,1 +1,174 @@
-body{font-family:Arial,Helvetica,sans-serif} .container{max-width:980px;margin:0 auto;padding:18px}
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #ffffff; /* Fond Blanc */
+  color: #333;
+  text-align: center;
+}
+
+header {
+  background: #ffffff; /* Header blanc pour la navigation */
+  color: #333;
+  padding: 1rem;
+}
+
+.logo {
+  width: 100px;
+  height: auto;
+  border-radius: 12px;
+}
+
+/* Nouveau style pour la barre de navigation */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5%;
+}
+
+nav .menu a {
+    text-decoration: none;
+    color: #333;
+    margin: 0 15px;
+    font-weight: 500;
+}
+
+/* Style général des boutons d'action (CTA) */
+.btn {
+  background: #032C4F; /* Bleu pour le bouton "Get Started" en haut */
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 15px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn:hover {
+    background: #001a33;
+}
+
+/* Bouton principal de la page d'accueil (Couleur Jaune) */
+.btn-primary {
+    background: #FDC830; /* Jaune */
+    color: #032C4F;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #e3b02c;
+}
+
+/* Styles de la section "Héro" (bannière principale) */
+.hero {
+    display: flex;
+    text-align: left;
+    padding: 50px 5%;
+    align-items: center;
+}
+
+.hero-text {
+    flex: 1;
+    max-width: 50%;
+}
+
+.hero-text h1 {
+    font-size: 3rem;
+    color: #032C4F; /* Titre en Bleu Marine */
+    line-height: 1.1;
+}
+
+.hero-text p {
+    font-size: 1.2rem;
+    color: #666;
+    margin: 20px 0;
+}
+
+.hero-image {
+    flex: 1;
+    text-align: right;
+}
+
+.hero-image img {
+    max-width: 90%;
+    height: auto;
+}
+
+/* Styles des Fonctionnalités (comme dans le visuel) */
+.features {
+    padding: 50px 5%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    text-align: left;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.feature-item img {
+    width: 30px;
+    height: 30px;
+    margin-right: 15px;
+    margin-top: 5px;
+}
+
+.feature-item h3 {
+    margin: 0;
+    color: #032C4F;
+    font-size: 1.1rem;
+}
+
+.feature-item p {
+    margin-top: 5px;
+    font-size: 0.95rem;
+    color: #666;
+}
+
+
+/* Footer (Maintenir le style sombre pour le bas) */
+footer {
+  background: #032C4F; /* Bleu Marine */
+  color: #fff;
+  padding: 1.5rem;
+  font-size: 0.9em;
+  margin-top: 50px;
+}
+
+/* Media Queries pour le Responsive Mobile */
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+    }
+
+    .hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 30px 5%;
+    }
+
+    .hero-text, .hero-image {
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .hero-image {
+        margin-top: 30px;
+    }
+
+    .hero-text h1 {
+        font-size: 2.2rem;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+}

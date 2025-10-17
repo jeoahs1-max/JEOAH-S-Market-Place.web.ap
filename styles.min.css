@@ -171,4 +171,160 @@ footer {
     .features {
         grid-template-columns: 1fr;
     }
+}/* --- Styles spécifiques au Tableau de Bord (Dashboard) --- */
+
+.dashboard-layout {
+    display: flex;
+    min-height: 80vh; /* Assure que le contenu principal est visible */
+    text-align: left;
+}
+
+/* Menu de navigation latérale (Sidebar) */
+.sidebar {
+    width: 250px;
+    background: #032C4F; /* Bleu Marine */
+    color: #fff;
+    padding: 20px 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+    color: #FDC830; /* Jaune */
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    text-decoration: none;
+    color: #fff;
+    border-left: 5px solid transparent;
+    transition: background 0.3s, border-left 0.3s;
+}
+
+.sidebar a:hover, .sidebar a.active {
+    background: rgba(255, 255, 255, 0.1);
+    border-left: 5px solid #FDC830; /* Bordure Jaune pour actif/survol */
+}
+
+.sidebar a img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    filter: invert(1); /* Rendre les icônes blanches */
+}
+
+/* Contenu principal du tableau de bord */
+.dashboard-content {
+    flex-grow: 1;
+    padding: 30px;
+    background: #f7f7f7; /* Fond légèrement grisé pour la zone de travail */
+}
+
+.dashboard-content h1 {
+    color: #032C4F;
+    border-bottom: 2px solid #FDC830;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+}
+
+/* --- Style Spécifique au Formulaire Social (fournisseur-step-social.html) --- */
+.social-setup-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.social-input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.social-input-group img {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
+
+.social-input-group input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Style de la carte de Solde */
+.balance-card {
+    background: #032C4F;
+    color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.balance-card h2 {
+    margin: 0 0 10px 0;
+    color: #FDC830;
+    font-size: 1.8rem;
+}
+
+.balance-card p {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Style pour les produits (cartes) */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.product-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    border-left: 5px solid #FDC830;
+}
+
+.product-card h3 {
+    color: #032C4F;
+    margin-top: 0;
+}
+
+/* Style de la boîte de dialogue IA */
+.ia-chat-box {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: #FDC830;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 1000;
+}
+
+.ia-chat-box img {
+    width: 30px;
+    height: 30px;
+    filter: invert(1); /* Icône foncée sur fond jaune */
 }

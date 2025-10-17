@@ -1,32 +1,47 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Liens d’affiliation — JEOAH’S Market Place</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter vos Plateformes - JEOAH'S Affilié</title>
+    <link rel="stylesheet" href="styles.min.css">
 </head>
 <body>
-  <header style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-    <a href="index.html">
-      <img src="https://i.ibb.co/Gfrddby1/Screenshot-20251007-140607-Gallery.jpg" alt="Logo JEOAH’S Market Place" style="height: 60px; border-radius: 10px;">
-    </a>
-    <nav>
-      <a href="index.html" style="margin: 0 10px;">Accueil</a>
-      <a href="produits-affiliés.html" style="margin: 0 10px;">Produits affiliés</a>
-      <a href="plans.html" style="margin: 0 10px;">Plans</a>
-      <a href="faq.html" style="margin: 0 10px;">FAQ</a>
-      <a href="support.html" style="margin: 0 10px;">Support</a>
-    </nav>
-  </header>
+    <header style="background: #032C4F; color: #fff; padding: 1rem;">
+        <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo">
+    </header>
 
-  <main style="padding: 40px; text-align: center;">
-    <h1>Vos liens d’affiliation</h1>
-    <p>Ajoutez ici vos liens affiliés et gérez vos promotions facilement.</p>
-  </main>
+    <main>
+        <div class="social-setup-container">
+            <h1>Étape 1 : Vos Plateformes Affiliées</h1>
+            <p>Veuillez ajouter les liens ou ID de vos programmes d'affiliation (Amazon, eBay, etc.) pour que l'IA puisse récupérer vos produits.</p>
+            <p style="color: #032C4F; font-weight: bold;">(1 à 5 plateformes max. pour commencer)</p>
+            
+            <form id="platformLinkForm">
+                <div class="social-input-group">
+                    <img src="assets/icon-amazon.png" alt="Amazon">
+                    <input type="text" placeholder="Lien/ID Amazon Affiliate" required>
+                </div>
+                <div class="social-input-group">
+                    <img src="assets/icon-ebay.png" alt="eBay">
+                    <input type="text" placeholder="Lien/ID eBay Partner Network (Facultatif)">
+                </div>
+                <div class="social-input-group">
+                    <img src="assets/icon-walmart.png" alt="Walmart">
+                    <input type="text" placeholder="Lien/ID Walmart Affiliates (Facultatif)">
+                </div>
+                <a href="affilié-social.html" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                    Suivant : Lier mes Réseaux Sociaux
+                </a>
+            </form>
+            
+            <p style="margin-top: 20px; font-size: 0.9em;"><a href="index.html">Retour à l'accueil</a></p>
+        </div>
+    </main>
 
-  <footer style="text-align: center; padding: 20px; background: #f8f8f8; font-size: 14px; color: #555;">
-    <p>© 2025 JEOAH’S Market Place — Tous droits réservés.</p>
-  </footer>
+    <footer>
+        <p>© 2025 JEOAH’S Market Place</p>
+    </footer>
 </body>
 </html>

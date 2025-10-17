@@ -1,1 +1,55 @@
-<!doctype html><html lang='fr'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width,initial-scale=1'/><title>Affilié - Connexion réseaux</title><link rel='stylesheet' href='/styles.min.css'/></head><body><div class='container'><header class='small-header'><a href='/index.html'>← Accueil</a></header><h1>Connexion aux réseaux</h1><input id='a_fb' placeholder='Facebook URL'/><input id='a_ig' placeholder='Instagram URL'/><div class='row'><button id='a_next' class='button primary'>Suivant</button></div></div><script>document.getElementById('a_next').addEventListener('click',function(){sessionStorage.setItem('affiliate_socials', JSON.stringify({fb:document.getElementById('a_fb').value, ig:document.getElementById('a_ig').value})); location.href='/affiliate-products.html';});</script></body></html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurer vos Réseaux - JEOAH'S Affilié</title>
+    <link rel="stylesheet" href="styles.min.css">
+</head>
+<body>
+    <header style="background: #032C4F; color: #fff; padding: 1rem;">
+        <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo">
+    </header>
+
+    <main>
+        <div class="social-setup-container">
+            <h1>Étape 2 : Vos Réseaux Sociaux</h1>
+            <p>Connectons vos réseaux sociaux pour y publier automatiquement les publicités générées par l'IA.</p>
+            <p style="color: #032C4F; font-weight: bold;">(Vous pouvez lier jusqu'à 5 comptes)</p>
+            
+            <form id="affiliateSocialForm">
+                <div class="social-input-group">
+                    <img src="assets/icon-instagram.png" alt="Instagram">
+                    <input type="url" placeholder="Lien Instagram (Ex: instagram.com/affilie)">
+                </div>
+                <div class="social-input-group">
+                    <img src="assets/icon-facebook.png" alt="Facebook">
+                    <input type="url" placeholder="Lien Facebook (Ex: facebook.com/affilie)">
+                </div>
+                <div class="social-input-group">
+                    <img src="assets/icon-twitter.png" alt="Twitter/X">
+                    <input type="url" placeholder="Lien Twitter/X (Ex: twitter.com/affilie)">
+                </div>
+                <div class="social-input-group">
+                    <img src="assets/icon-youtube.png" alt="YouTube">
+                    <input type="url" placeholder="Lien YouTube (Facultatif)">
+                </div>
+                <div class="social-input-group">
+                    <img src="assets/icon-tiktok.png" alt="TikTok">
+                    <input type="url" placeholder="Lien TikTok (Facultatif)">
+                </div>
+
+                <a href="produits-affiliés.html" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                    Suivant : Aller au Tableau de Bord
+                </a>
+            </form>
+            
+            <p style="margin-top: 20px; font-size: 0.9em;"><a href="index.html">Retour à l'accueil</a></p>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 JEOAH’S Market Place</p>
+    </footer>
+</body>
+</html>

@@ -1,1 +1,64 @@
-<!doctype html><html><body>Admin (demo)</body></html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrateur - JEOAH'S</title>
+    <link rel="stylesheet" href="styles.min.css">
+    <style>
+        .admin-login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .admin-dashboard-content {
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+    <header style="background: #032C4F; color: #fff; padding: 1rem;">
+        <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo">
+    </header>
+
+    <main>
+        <div class="admin-login-container" id="adminLogin">
+            <h2>Accès Administrateur</h2>
+            <p style="color: red;">Accès réservé à : Utilisateur de cet site (jeoahs1@gmail.com)</p>
+            <input type="email" placeholder="Email (jeoahs1@gmail.com)" value="jeoahs1@gmail.com" readonly style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc;">
+            <input type="password" placeholder="Mot de passe" required style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
+            <button class="btn btn-primary" style="width: 100%;">Se Connecter</button>
+        </div>
+
+        <div class="admin-dashboard-content" id="adminContent" style="display: none;">
+            <h1>Bienvenue, Utilisateur de cet site (Admin)</h1>
+            <p>Interface de contrôle : Gestion des utilisateurs, validation des retraits et surveillance de l'IA.</p>
+            
+            <h2 style="color: #032C4F;">Statistiques Globales</h2>
+            <div class="product-grid">
+                <div class="product-card"><h3>120</h3><p>Nouveaux Inscrits</p></div>
+                <div class="product-card"><h3>$5,500 USD</h3><p>Total Retraits en attente</p></div>
+                <div class="product-card" style="border-left: 5px solid red;"><h3>7</h3><p>Problèmes Signalés par Ney</p></div>
+            </div>
+            
+            <h2 style="color: #032C4F; margin-top: 30px;">Configuration Globale des Paiements</h2>
+            <p>Intégrer les clés API ici : Mon Cash, Nat Cash, Zelle, PayPal, Alipay, Google Pay, etc.</p>
+            <p style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #FDC830; margin-top: 20px;">
+                <span style="font-weight: bold;">Taux de change USD Actif :</span> L'IA maintient un taux de change en direct pour toutes les monnaies afin de faciliter les paiements.
+            </p>
+        </div>
+    </main>
+    <script>
+        // Simulation pour l'exemple. Remplacer par Firebase Auth.
+        document.querySelector('.admin-login-container button').addEventListener('click', () => {
+            document.getElementById('adminLogin').style.display = 'none';
+            document.getElementById('adminContent').style.display = 'block';
+            alert('Connexion Admin simulée réussie !');
+        });
+    </script>
+</body>
+</html>

@@ -3,101 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ & Support - JEOAH'S Market Place</title>
+    <title>Foire aux Questions - JEOAH'S</title>
     <link rel="stylesheet" href="styles.min.css">
-    <style>
-        .faq-section {
-            max-width: 800px;
-            margin: 50px auto;
-            text-align: left;
-        }
-        .faq-item {
-            border: 1px solid #eee;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            overflow: hidden;
-        }
-        .faq-question {
-            background: #f4f4f4;
-            padding: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            display: block;
-            color: #032C4F;
-            border-bottom: 1px solid #eee;
-        }
-        .faq-answer {
-            padding: 15px;
-            background: #fff;
-            display: none;
-        }
-        .rating-box {
-            background: #FDC830;
-            padding: 20px;
-            border-radius: 8px;
-            color: #032C4F;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-    </style>
 </head>
 <body>
     <header>
-        <nav style="justify-content: center;">
-            <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo">
+        <nav>
+            <span style="font-size: 1.8rem; font-weight: bold; color: #032C4F;">JEOAH'S</span> <div class="menu">
+                <a href="index.html">Home</a>
+                <a href="plans.html">Plans</a>
+                <a href="faq.html" class="active">Aide</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            <a href="inscription.html" class="btn">Get Started</a>
         </nav>
     </header>
 
-    <main>
-        <div class="faq-section">
-            <h1 style="color: #032C4F; text-align: center;">Questions Fréquentes & Support</h1>
+    <main class="dashboard-content" style="background: #ffffff;">
+        <h1 style="text-align: center;">Foire aux Questions</h1>
+        <p style="text-align: center;">Retrouvez ici les réponses aux questions les plus fréquentes sur JEOAH'S Market Place.</p>
 
-            <div class="rating-box">
-                <p style="font-size: 1.5rem; margin: 0;">Nous visons l'excellence : **Note Actuelle 4.7 ⭐**</p>
-                <p style="margin: 5px 0 0;">Votre satisfaction est notre priorité. Aidez-nous à rester la **référence #1**!</p>
-            </div>
-
-            <p style="font-size: 1.1rem; color: #032C4F; font-weight: bold;">Besoin d'aide immédiate ? Parlez à Ney, notre assistant IA ! (Bouton en bas à droite).</p>
-
-            <div class="faq-item">
-                <button class="faq-question">Comment fonctionne l'automatisation de l'IA pour mes publicités ?</button>
-                <div class="faq-answer">
-                    <p>L'IA (Ney) analyse votre produit ou lien, trouve les heures de pointe sur vos réseaux sociaux (connectés) et publie automatiquement le contenu visuel et le texte générés. La fréquence dépend de votre plan d'abonnement.</p>
-                </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">Comment fonctionnent les retraits et les frais ?</button>
-                <div class="faq-answer">
-                    <p>Le système est automatisé : vous pouvez effectuer jusqu'à deux retraits par jour, d'un montant variant de 50 USD à 100 USD maximum par transaction. Des frais minimes sont appliqués par l'IA en fonction du moyen de paiement choisi (Zelle, PayPal, etc.). Vous devez laisser un solde minimum sur votre compte pour le renouvellement automatique de votre plan mensuel.</p>
-                </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">Puis-je utiliser l'application sans internet (Offline) ?</button>
-                <div class="faq-answer">
-                    <p>Oui ! Grâce à notre technologie PWA, une fois l'application installée sur votre téléphone, tablette ou ordinateur portable, vous pouvez consulter vos données hors ligne et travailler. L'IA met à jour les informations dès que vous êtes reconnecté.</p>
-                </div>
-            </div>
+        <div style="max-width: 800px; margin: 30px auto; text-align: left;">
             
-            <h3 style="margin-top: 30px; color: #032C4F;">Informations Générales</h3>
-            <p>Notre adresse email officielle : **jeoahs1@gmail.com**.</p>
-            <p>Le créateur de ce site est l'**Utilisateur de cet site** (Admin & Affilié). L'assistant technique est l'IA **Ney**.</p>
+            <details class="faq-item" open>
+                <summary style="font-weight: bold; color: #032C4F; cursor: pointer; border-bottom: 1px solid #ccc; padding: 10px 0;">Comment fonctionne le paiement avec MonCash et NatCash ?</summary>
+                <p style="padding: 15px;">JEOAH'S s'est intégré directement aux API de MonCash et NatCash. Les paiements sont traités instantanément, que vous achetiez un produit ou que vous receviez des fonds en tant que vendeur. Notre système IA gère la validation et la sécurité de chaque transaction mobile.</p>
+            </details>
+
+            <details class="faq-item">
+                <summary style="font-weight: bold; color: #032C4F; cursor: pointer; border-bottom: 1px solid #ccc; padding: 10px 0;">Comment gérez-vous les conversions de devises (Gourde vers USD) ?</summary>
+                <p style="padding: 15px;">Notre système IA (Ney) utilise les taux de change du marché en temps réel pour toutes les transactions. Si un produit est vendu en USD et que l'acheteur paie en Gourdes (MonCash/NatCash), l'IA applique la conversion instantanément et fournit un reçu clair avec le taux utilisé. Cela garantit que les vendeurs reçoivent le montant correct.</p>
+            </details>
+
+            <details class="faq-item">
+                <summary style="font-weight: bold; color: #032C4F; cursor: pointer; border-bottom: 1px solid #ccc; padding: 10px 0;">Quels sont les frais de transaction pour les vendeurs ?</summary>
+                <p style="padding: 15px;">Les frais sont de 5% du montant de la vente pour tous les plans. Ces frais couvrent la sécurité, les frais de conversion (MonCash, NatCash, ou Global) et la maintenance de la plateforme IA. Il n'y a pas de frais cachés.</p>
+            </details>
+
+            <details class="faq-item">
+                <summary style="font-weight: bold; color: #032C4F; cursor: pointer; border-bottom: 1px solid #ccc; padding: 10px 0;">Comment devenir un affilié ?</summary>
+                <p style="padding: 15px;">Après votre inscription gratuite, accédez à votre tableau de bord. La section "Affiliation" vous permet de générer des liens uniques pour n'importe quel produit sur la marketplace. Vous gagnez une commission sur chaque vente générée par vos liens.</p>
+            </details>
 
         </div>
+
     </main>
 
-    <div class="ia-chat-box" title="Chat IA 24/7">
-        <img src="assets/icon-ai-chat.png" alt="Chat IA">
-    </div>
-    
-    <script>
-        // Script pour l'ouverture/fermeture des réponses FAQ
-        document.querySelectorAll('.faq-question').forEach(button => {
-            button.addEventListener('click', () => {
-                const answer = button.nextElementSibling;
-                answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-            });
-        });
-    </script>
+    <footer>
+        <p>Suivez-nous sur nos réseaux pour les mises à jour et les Lives :</p>
+        <div class="social-icons">
+            <a href="https://www.tiktok.com/@jeoahs1" target="_blank" title="TikTok JEOAH'S"><img src="assets/icon-tiktok.png" alt="TikTok"></a>
+            <a href="https://www.facebook.com/share/17DnLVek27/" target="_blank" title="Facebook JEOAH'S"><img src="assets/icon-facebook.png" alt="Facebook"></a>
+            <a href="https://www.instagram.com/jeoahsmarketplace?igsh=b2ZvbW5yOXI1eDlo" target="_blank" title="Instagram JEOAH'S"><img src="assets/icon-instagram.png" alt="Instagram"></a>
+            <a href="https://www.youtube.com/@jeoahs1" target="_blank" title="YouTube JEOAH'S"><img src="assets/icon-youtube.png" alt="YouTube"></a>
+            <a href="#twitter" target="_blank" title="Twitter/X"><img src="assets/icon-twitter.png" alt="Twitter"></a>
+            <a href="#snapchat" target="_blank" title="Snapchat"><img src="assets/icon-snapchat.png" alt="Snapchat"></a>
+            <a href="#reddit" target="_blank" title="Reddit"><img src="assets/icon-reddit.png" alt="Reddit"></a>
+            <a href="#telegram" target="_blank" title="Telegram"><img src="assets/icon-telegram.png" alt="Telegram"></a>
+            <a href="#quora" target="_blank" title="Quora"><img src="assets/icon-quora.png" alt="Quora"></a>
+        </div>
+        <p style="margin-top: 15px;">© 2025 JEOAH’S Market Place • Contact : jeoahs1@gmail.com</p>
+    </footer>
+
     <script src="app.js"></script>
 </body>
 </html>

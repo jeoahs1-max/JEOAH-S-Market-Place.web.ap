@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plans d'Abonnement - JEOAH'S</title>
+    <title>Plans d'Automatisation IA - JEOAH'S</title>
     <link rel="stylesheet" href="styles.min.css">
     
+    <!-- STYLE DE L'ASSISTANT IA ET GRILLE TARIFAIRE -->
     <style>
         .ia-chat-box {
             position: fixed;
@@ -26,6 +27,81 @@
             width: 35px;
             height: 35px;
         }
+        .plans-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        .plan-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            width: 100%;
+            max-width: 280px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #eee;
+        }
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        .plan-card.highlight {
+            border-color: #FDC830;
+            background-color: #fff9e6;
+        }
+        .plan-card h3 {
+            font-size: 1.6rem;
+            color: #032C4F;
+            margin-bottom: 5px;
+        }
+        .plan-card .price {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        .plan-card .price span {
+            font-size: 1.2rem;
+            font-weight: normal;
+        }
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+        .plan-features li {
+            margin-bottom: 12px;
+            color: #444;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: flex-start;
+        }
+        .plan-features li .icon {
+            font-weight: bold;
+            color: #1abc9c;
+            margin-right: 8px;
+            line-height: 1.4;
+        }
+        .plan-features li.pro-limit .icon { color: #f39c12; }
+        .plan-features li.negative .icon { color: #e74c3c; }
+        
+        @media (max-width: 768px) {
+            .plans-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .plan-card {
+                max-width: 90%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -38,71 +114,97 @@
                 <a href="faq.html">Aide</a>
                 <a href="contact.html">Contact</a> 
             </div>
-            <a href="inscription.html" class="btn">Get Started</a>
+            <a href="inscription.html" class="btn">S'inscrire</a>
         </nav>
     </header>
 
-    <main class="dashboard-content" style="background: #ffffff; min-height: 80vh;">
-        <h1 style="text-align: center;">Choisissez Votre Plan d'Abonnement</h1>
-        <p style="text-align: center; max-width: 600px; margin: 10px auto 30px;">
-            Devenez un détaillant pour vendre vos produits ou un affilié pour gagner des commissions.
-            Obtenez **15 jours gratuits** en vous inscrivant à n'importe quel plan !
+    <main class="dashboard-content" style="background: #f4f7f9; min-height: 80vh; padding: 40px 20px;">
+        <h1 style="text-align: center; color: #032C4F; margin-bottom: 10px;">Grille Tarifaire d'Automatisation IA</h1>
+        <p style="text-align: center; max-width: 700px; margin: 0 auto 40px; color: #666;">
+            Optimisez votre présence en ligne grâce à notre Assistant IA, Ney. Tous les plans payants incluent 
+            **15 jours d'essai gratuits** et 0% de frais sur les ventes.
         </p>
 
         <div class="plans-container">
-            <div class="plan-card free-plan">
-                <h3>Acheteur/Essai (Gratuit)</h3>
-                <p style="font-size: 2.2rem; font-weight: bold;">$0<span style="font-size: 1.2rem;">/mois</span></p>
+            
+            <!-- Plan 1 : GRATUIT -->
+            <div class="plan-card">
+                <h3>Gratuit (Essai)</h3>
+                <p class="price">$0<span style="color: #666;">/mois</span></p>
                 <ul class="plan-features">
-                    <li>✓ Accès complet à la Market Place (Acheteur)</li>
-                    <li>✓ Création de profil Vendeur/Affilié (Mode Brouillon)</li>
-                    <li>✓ Assistant IA (Ney) disponible 24/7</li>
-                    <li>✓ Paiements MonCash, NatCash, Global (pour l'achat)</li>
-                    <li>X Publication des produits/Liens d'affiliation bloquée</li>
+                    <li><span class="icon">✔️</span> Affichage de produit **Manuel**</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> **5** Résumés IA (Petite description)</li>
+                    <li class="negative"><span class="icon">❌</span> Publication **bloquée**</li>
+                    <li><span class="icon">✔️</span> Accès à la Market Place (Acheteur)</li>
+                    <li><span class="icon">✔️</span> Support IA (Ney) 24/7</li>
                 </ul>
-                <a href="inscription.html" class="btn btn-primary" style="background-color: #032C4F;">Commencer Gratuitement</a>
+                <a href="inscription.html" class="btn btn-primary" style="background-color: #032C4F;">Démarrer Gratuitement</a>
             </div>
 
-            <div class="plan-card premium-plan">
-                <h3>Détaillant (Vendeur)</h3>
-                <p style="font-size: 2.2rem; font-weight: bold;">$25<span style="font-size: 1.2rem;">/mois</span></p>
+            <!-- Plan 2 : MENSUEL -->
+            <div class="plan-card" style="border-color: #007bff;">
+                <h3>Mensuel</h3>
+                <p class="price">$25<span style="color: #666;">/mois</span></p>
                 <ul class="plan-features">
-                    <li>✓ Vendez un nombre illimité de produits</li>
-                    <li>✓ Prenez vos commandes directement</li>
-                    <li>✓ Paiement par MonCash, NatCash, Global (Pour le client)</li>
-                    <li>**✓ Frais de transaction : 0%** (Inclus dans l'abonnement)</li>
-                    <li>**✓ Frais de retrait : Varient** selon le moyen de paiement (MonCash, NatCash, etc.)</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> Affichage de produit **IA (25)**</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> **25** Résumés IA détaillés</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> **3** Publications visuelles/mois</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> **10** Textes Publicitaires (Copywriting)</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> **3** Réseaux sociaux couverts</li>
+                    <li><span class="icon">✅</span> Choix des heures de publication par IA</li>
                 </ul>
-                <a href="inscription.html" class="btn btn-primary">Devenir Détaillant</a>
+                <a href="inscription.html?plan=mensuel" class="btn btn-primary" style="background-color: #007bff;">S'abonner Mensuel</a>
             </div>
 
-            <div class="plan-card affiliate-plan">
-                <h3>Affilié (Marketing)</h3>
-                <p style="font-size: 2.2rem; font-weight: bold;">$5<span style="font-size: 1.2rem;">/mois</span></p>
+            <!-- Plan 3 : 3 MOIS -->
+            <div class="plan-card">
+                <h3>3 Mois (Économie)</h3>
+                <p class="price">$70<span style="color: #666;">/3 mois</span></p>
                 <ul class="plan-features">
-                    <li>✓ Créez des liens d'affiliation illimités</li>
-                    <li>✓ Gagnez **10% de commission sur les ventes**</li>
-                    <li>✓ Dashboard de suivi des gains</li>
-                    <li>✓ Paiements rapides (MonCash, NatCash, PayPal)</li>
+                    <li><span class="icon">✔️</span> Affichage de produit **IA Illimité**</li>
+                    <li><span class="icon">✔️</span> Résumés IA **Illimités**</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> **10** Publications visuelles/mois</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> **25** Textes Publicitaires (Copywriting)</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> **5** Réseaux sociaux couverts</li>
+                    <li><span class="icon">✅</span> Optimisation du calendrier de publication IA</li>
                 </ul>
-                <a href="inscription.html" class="btn btn-primary" style="background-color: #007bff;">Devenir Affilié</a>
+                <a href="inscription.html?plan=trimestriel" class="btn btn-primary" style="background-color: #3498db;">S'abonner 3 Mois</a>
+            </div>
+            
+            <!-- Plan 4 : 6 MOIS -->
+            <div class="plan-card">
+                <h3>6 Mois (Populaire)</h3>
+                <p class="price">$120<span style="color: #666;">/6 mois</span></p>
+                <ul class="plan-features">
+                    <li><span class="icon">✔️</span> Affichage de produit **IA Illimité**</li>
+                    <li><span class="icon">✔️</span> Résumés IA **Illimités**</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> **15** Publications visuelles/mois</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> **35** Textes Publicitaires (Copywriting)</li>
+                    <li class="pro-limit"><span class="icon">⚠️</span> **7** Réseaux sociaux couverts</li>
+                    <li><span class="icon">✅</span> Support et Rapports de Performance IA</li>
+                </ul>
+                <a href="inscription.html?plan=semestriel" class="btn btn-primary" style="background-color: #2ecc71;">S'abonner 6 Mois</a>
             </div>
 
-            <div class="plan-card annual-plan" style="border: 3px solid #FDC830; background-color: #fff9e6;">
-                <h3 style="background-color: #FDC830; color: #032C4F; padding: 10px;">Détaillant Annuel (Beta)</h3>
-                <p style="font-size: 2.2rem; font-weight: bold; color: #032C4F;">$250<span style="font-size: 1.2rem;">/an</span></p>
-                <p style="color: red; font-weight: bold;">**BETA OFFERTE : 2 mois gratuits pour les 25 premiers !**</p>
-                <p style="margin-top: 10px; font-size: 0.9em;">(Passe à 1 mois gratuit après le 25e abonné.)</p>
+            <!-- Plan 5 : 1 AN (Highlight) -->
+            <div class="plan-card highlight">
+                <h3>1 An (Le Meilleur Choix)</h3>
+                <p class="price" style="color: #FDC830;">$250<span style="color: #666;">/an</span></p>
                 <ul class="plan-features">
-                    <li>✓ Accès complet Détaillant (Vendez illimité)</li>
-                    <li>✓ Économisez $50 par an</li>
-                    <li>✓ Priorité au support IA/Humain</li>
+                    <li><span class="icon">👑</span> Affichage de produit **Illimité**</li>
+                    <li><span class="icon">👑</span> Résumés IA **Illimités**</li>
+                    <li><span class="icon">👑</span> **25** Publications visuelles/mois</li>
+                    <li><span class="icon">👑</span> **50** Textes Publicitaires (Copywriting)</li>
+                    <li><span class="icon">👑</span> **TOUS** Réseaux sociaux couverts</li>
+                    <li><span class="icon">🎁</span> **1 Mois Bonus offert**</li>
                 </ul>
-                <a href="inscription.html" class="btn btn-primary" style="background-color: #032C4F;">S'abonner à l'Annuel</a>
+                <a href="inscription.html?plan=annuel" class="btn btn-primary" style="background-color: #FDC830; color: #032C4F;">S'abonner 1 An</a>
             </div>
+
         </div>
     </main>
 
+    <!-- ASSISTANT IA (NEY) -->
     <div class="ia-chat-box" onclick="alert('Bienvenue ! Je suis Ney, l\'Assistant IA de JEOAH\'S. Je suis disponible pour répondre à vos questions 24/7. Le chat sera activé dès le lancement de la version Beta !');">
         <img src="assets/icon-ai.png" alt="Chat IA">
     </div>

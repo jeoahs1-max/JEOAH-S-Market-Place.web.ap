@@ -1,50 +1,76 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inscription — JEOAH’S Market Place</title>
-  <link rel="styleshe
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inscription - JEOAH'S Market Place</title>
-  <link rel="stylesheet" href="styles.min.css">
-  </head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - JEOAH'S</title>
+    <link rel="stylesheet" href="styles.min.css">
+</head>
 <body>
-  <header>
-    <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo">
-  </header>
+    <header>
+        <nav>
+            <span style="font-size: 1.8rem; font-weight: bold; color: #032C4F;">JEOAH'S</span>
+            <div class="menu">
+                <a href="index.html">Home</a>
+                <a href="plans.html">Plans</a>
+                <a href="faq.html">Aide</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            <a href="inscription.html" class="btn active">S'inscrire</a>
+        </nav>
+    </header>
 
-  <main>
-    <h2>Créer un compte</h2>
-    <form id="registerForm">
-      <input type="text" placeholder="Nom complet" required>
-      <input type="email" placeholder="Email" required>
-      <input type="password" id="password" placeholder="Mot de passe" required>
-      <input type="password" id="confirm_password" placeholder="Confirmer Mot de passe" required>
-      
-      <div style="margin: 20px 0; text-align: left; padding: 0 10%;">
-          <label style="display: block; margin-bottom: 10px;">
-              <input type="checkbox" name="role" value="vendeur" id="role-vendeur" required> 
-              Je veux m'inscrire en tant que **Vendeur**
-          </label>
-          <label style="display: block;">
-              <input type="checkbox" name="role" value="affilie" id="role-affilie"> 
-              Je veux m'inscrire en tant qu'**Affilié**
-          </label>
-      </div>
+    <main class="dashboard-content" style="background: #ffffff; min-height: 80vh;">
+        <h1 style="text-align: center;">Rejoignez JEOAH'S Market Place</h1>
+        
+        <div class="social-setup-container" style="max-width: 500px; margin-top: 20px;">
+            <p style="color: #666; margin-bottom: 25px;">Créez votre compte en tant que **Détaillant** ou **Affilié**.</p>
+            
+            <form id="inscription-form">
+                <div class="social-input-group">
+                    <label for="nom" style="width: 100px; text-align: left;">Nom Complet :</label>
+                    <input type="text" id="nom" placeholder="Votre nom" required>
+                </div>
+                <div class="social-input-group">
+                    <label for="email" style="width: 100px; text-align: left;">Email :</label>
+                    <input type="email" id="email" placeholder="Votre email" required>
+                </div>
+                <div class="social-input-group">
+                    <label for="password" style="width: 100px; text-align: left;">Mot de passe :</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="social-input-group" style="justify-content: space-between;">
+                    <label for="role" style="width: 100px; text-align: left;">Rôle :</label>
+                    <select id="role" style="flex-grow: 1; padding: 10px; border-radius: 5px;">
+                        <option value="acheteur">Acheteur (Gratuit)</option>
+                        <option value="vendeur">Détaillant (Vendeur)</option>
+                        <option value="affilie">Affilié</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Créer Mon Compte</button>
+            </form>
+            
+            <p style="font-size: 0.9em; margin-top: 20px;">En cliquant sur "Créer Mon Compte", vous acceptez nos <a href="#">Conditions générales</a>.</p>
+        </div>
+    </main>
 
-      <button type="submit" class="btn btn-primary">S’inscrire</button>
-    </form>
-    <p><a href="index.html" style="color: #032C4F; text-decoration: none;">Retour à l’accueil</a></p>
-  </main>
+    <footer>
+        <p>Suivez-nous sur nos réseaux pour les mises à jour et les Lives :</p>
+        <div class="social-icons">
+            <a href="https://www.tiktok.com/@jeoahs1" target="_blank" title="TikTok JEOAH'S"><img src="assets/icon-tiktok.png" alt="TikTok"></a>
+            <a href="https://www.facebook.com/share/17DnLVek27/" target="_blank" title="Facebook JEOAH'S"><img src="assets/icon-facebook.png" alt="Facebook"></a>
+            <a href="https://www.instagram.com/jeoahsmarketplace?igsh=b2ZvbW5yOXI1eDlo" target="_blank" title="Instagram JEOAH'S"><img src="assets/icon-instagram.png" alt="Instagram"></a>
+            <a href="https://www.youtube.com/@jeoahs1" target="_blank" title="YouTube JEOAH'S"><img src="assets/icon-youtube.png" alt="YouTube"></a>
+            <a href="#twitter" target="_blank" title="Twitter/X"><img src="assets/icon-twitter.png" alt="Twitter"></a>
+            <a href="#snapchat" target="_blank" title="Snapchat"><img src="assets/icon-snapchat.png" alt="Snapchat"></a>
+            <a href="#reddit" target="_blank" title="Reddit"><img src="assets/icon-reddit.png" alt="Reddit"></a>
+            <a href="#telegram" target="_blank" title="Telegram"><img src="assets/icon-telegram.png" alt="Telegram"></a>
+            <a href="#quora" target="_blank" title="Quora"><img src="assets/icon-quora.png" alt="Quora"></a>
+        </div>
+        <p style="margin-top: 15px;">© 2025 JEOAH’S Market Place • Contact : jeoahs1@gmail.com</p>
+    </footer>
 
-  <footer>
-    <p>© 2025 JEOAH’S Market Place</p>
-  </footer>
-  <script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

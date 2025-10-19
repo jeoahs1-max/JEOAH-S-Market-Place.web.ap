@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aide et FAQ - JEOAH'S</title>
     <link rel="stylesheet" href="styles.min.css">
+    
     <style>
-        /* Style pour la chatbox IA */
+        /* Styles pour la navigation, le footer et l'IA (comme dans les autres pages) */
         .ia-chat-box {
             position: fixed;
             bottom: 20px;
@@ -27,6 +28,33 @@
             width: 35px;
             height: 35px;
         }
+        
+        /* Styles spécifiques pour la FAQ */
+        .faq-section {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .faq-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .faq-item h3 {
+            cursor: pointer;
+            color: #032C4F;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .faq-answer {
+            padding-left: 20px;
+            color: #444;
+            /* Le JS gérera l'affichage/masquage */
+            display: block; 
+        }
+        .faq-answer ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
     </style>
 </head>
 <body>
@@ -43,46 +71,77 @@
         </nav>
     </header>
 
-    <main class="dashboard-content" style="background: #ffffff; min-height: 80vh; max-width: 800px; margin: 0 auto; padding-top: 40px;">
-        <h1 style="text-align: center; color: #032C4F; margin-bottom: 30px;">Questions Fréquentes (FAQ)</h1>
-        
-        <div class="faq-container">
-            <h2 style="color: #FDC830; margin-top: 30px;">Vendre et Frais</h2>
-            
-            <details class="faq-item">
-                <summary style="font-weight: bold; color: #032C4F; cursor: pointer; border-bottom: 1px solid #ccc; padding: 10px 0;">Quel est le coût pour devenir détaillant ou affilié ?</summary>
-                <p style="padding: 15px;">Les frais d'abonnement dépendent du plan choisi. Nous offrons un plan **Gratuit** avec accès à l'Assistant IA, et des plans **Détaillant** et **Affilié** payants. Consultez la page <a href="plans.html">Plans</a> pour les détails.</p>
-            </details>
+    <main class="dashboard-content" style="background: #ffffff; min-height: 80vh;">
+        <h1 style="text-align: center;">Foire Aux Questions (FAQ)</h1>
+        <p style="text-align: center; max-width: 600px; margin: 10px auto 30px;">
+            Trouvez rapidement les réponses à vos questions sur les plans, les frais et notre technologie.
+        </p>
 
-            <details class="faq-item">
-                <summary style="font-weight: bold; color: #032C4F; cursor: pointer; border-bottom: 1px solid #ccc; padding: 10px 0;">Quels sont les frais de transaction pour les vendeurs ?</summary>
-                <p style="padding: 15px;">Nous appliquons une commission simple de **5%** sur le prix de vente final pour les détaillants (vendeurs) qui utilisent un plan payant. Cette commission est utilisée pour couvrir les frais de service, d'hébergement, et d'analyse IA.</p>
-            </details>
+        <div class="faq-section">
             
-            <h2 style="color: #FDC830; margin-top: 30px;">Paiements et Retraits</h2>
-            
-            <details class="faq-item">
-                <summary style="font-weight: bold; color: #032C4F; cursor: pointer; border-bottom: 1px solid #ccc; padding: 10px 0;">Comment les acheteurs peuvent-ils payer ?</summary>
-                <p style="padding: 15px;">Nous acceptons les paiements via MonCash, NatCash, et les principales cartes de crédit/débit via notre passerelle de paiement sécurisée.</p>
-            </details>
+            <h2>Comptes et Inscription</h2>
+            <div class="faq-item">
+                <h3>Q : Puis-je passer du rôle d'Acheteur à Détaillant ou Affilié ?</h3>
+                <div class="faq-answer">
+                    <p>Oui ! Vous n'avez pas besoin de vous réinscrire. Une fois connecté, vous pourrez mettre à niveau votre compte vers le plan Détaillant ou Affilié directement depuis votre tableau de bord, sans perdre vos données.</p>
+                </div>
+            </div>
 
-            <details class="faq-item">
-                <summary style="font-weight: bold; color: #032C4F; cursor: pointer; border-bottom: 1px solid #ccc; padding: 10px 0;">Comment puis-je retirer mes gains (vendeur ou affilié) ?</summary>
-                <p style="padding: 15px;">Les retraits sont gérés via le tableau de bord dans la section "Paiements". Nous supportons les virements vers MonCash, NatCash, et PayPal (selon les régions). Des frais de retrait minimes peuvent s'appliquer.</p>
-            </details>
-
-            <h2 style="color: #FDC830; margin-top: 30px;">Affiliation et Parrainage</h2>
+            <div class="faq-item">
+                <h3>Q : Ai-je droit à un essai gratuit ?</h3>
+                <div class="faq-answer">
+                    <p>Oui. Chaque nouvel utilisateur inscrit bénéficie d'une période d'essai de **15 jours gratuits** sur le plan de son choix (Détaillant ou Affilié).</p>
+                </div>
+            </div>
             
-            <details class="faq-item">
-                <summary style="font-weight: bold; color: #032C4F; cursor: pointer; border-bottom: 1px solid #ccc; padding: 10px 0;">Comment devenir un affilié ?</summary>
-                <p style="padding: 15px;">Après votre inscription, accédez à votre tableau de bord. La section "Affiliation" vous permet de générer des liens uniques pour n'importe quel produit sur la marketplace. Vous gagnez une commission sur chaque vente générée par vos liens.</p>
-            </details>
+            <h2>Frais et Paiements</h2>
             
-            <details class="faq-item">
-                <summary style="font-weight: bold; color: #032C4F; cursor: pointer; border-bottom: 1px solid #ccc; padding: 10px 0;">**Comment fonctionne le gain du parrainage ?**</summary>
-                <p style="padding: 15px;">Le gain de parrainage est basé sur les **abonnements payants** et non sur les simples partages. Pour recevoir votre commission, la personne parrainée (via votre lien unique ou ID) doit s'inscrire ET **s'abonner à un plan payant** (Détaillant ou Affilié). Les inscriptions gratuites ne génèrent pas de gain de parrainage pour vous.</p>
-            </details>
+            <div class="faq-item">
+                <h3>Q : Quels sont les frais de transaction pour les détaillants (vendeurs) ?</h3>
+                <div class="faq-answer">
+                    <p>Contrairement à d'autres plateformes, **JEOAH'S ne retient aucune commission sur vos ventes.** Les frais de transaction sont inclus dans votre abonnement Détaillant (0% de frais sur les fonds reçus).</p>
+                    <p>Nous appliquons uniquement des **frais de retrait** pour couvrir les coûts de transfert (MonCash, NatCash, PayPal, etc.). Ces frais dépendent du montant et du mode de paiement choisi.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <h3>Q : Quels sont les modes de paiement pris en charge ?</h3>
+                <div class="faq-answer">
+                    <p>Nous prenons en charge les paiements locaux (MonCash, NatCash) ainsi que les paiements globaux pour les achats (PayPal, cartes de crédit/débit).</p>
+                </div>
+            </div>
 
+            <h2>Affiliation et Parrainage</h2>
+            
+            <div class="faq-item">
+                <h3>Q : Quel est le pourcentage de commission pour un Affilié ?</h3>
+                <div class="faq-answer">
+                    <p>Les affiliés gagnent une commission de **10% sur les ventes** générées via leur lien unique. Tous les gains sont traçables dans votre tableau de bord.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <h3>Q : Comment fonctionne le programme de parrainage et de réduction sur l'abonnement ?</h3>
+                <div class="faq-answer">
+                    <p>Lorsque vous parrainez de nouveaux membres qui s'abonnent à un plan payant (Détaillant ou Affilié) via votre lien unique (disponible dans votre Tableau de Bord), vous gagnez une réduction sur votre propre abonnement :</p>
+                    <ul>
+                        <li>**15 abonnés payants :** Vous bénéficiez de **5% de réduction** sur votre plan.</li>
+                        <li>**25 abonnés payants :** Vous bénéficiez de **10% de réduction** sur votre plan.</li>
+                        <li>**50 abonnés payants :** Vous bénéficiez de **25% de réduction** sur votre plan.</li>
+                        <li>**100 abonnés payants :** Vous bénéficiez de **50% de réduction** sur votre plan.</li>
+                    </ul>
+                    <p>Le montant minimum de retrait et le nombre de retraits journaliers dépendront du palier atteint et sont gérés par le système de compte de l'utilisateur.</p>
+                </div>
+            </div>
+            
+            <h2>Technologie et IA</h2>
+            <div class="faq-item">
+                <h3>Q : Qu'est-ce que l'Assistant IA (Ney) ?</h3>
+                <div class="faq-answer">
+                    <p>Ney est notre assistant IA qui gère le support client 24/7. Pour les affiliés et détaillants, il utilise les données de vos produits/liens pour générer des textes de promotion et des visuels prêts à être publiés sur vos réseaux sociaux (après votre approbation).</p>
+                </div>
+            </div>
+            
         </div>
     </main>
 
@@ -91,19 +150,7 @@
     </div>
 
     <footer>
-        <p>Suivez-nous sur nos réseaux pour les mises à jour et les Lives :</p>
-        <div class="social-icons">
-            <a href="https://www.tiktok.com/@jeoahs1" target="_blank" title="TikTok JEOAH'S"><img src="assets/icon-tiktok.png" alt="TikTok"></a>
-            <a href="https://www.facebook.com/share/17DnLVek27/" target="_blank" title="Facebook JEOAH'S"><img src="assets/icon-facebook.png" alt="Facebook"></a>
-            <a href="https://www.instagram.com/jeoahsmarketplace?igsh=b2ZvbW5yOXI1eDlo" target="_blank" title="Instagram JEOAH'S"><img src="assets/icon-instagram.png" alt="Instagram"></a>
-            <a href="https://www.youtube.com/@jeoahs1" target="_blank" title="YouTube JEOAH'S"><img src="assets/icon-youtube.png" alt="YouTube"></a>
-            <a href="#twitter" target="_blank" title="Twitter/X"><img src="assets/icon-twitter.png" alt="Twitter"></a>
-            <a href="#snapchat" target="_blank" title="Snapchat"><img src="assets/icon-snapchat.png" alt="Snapchat"></a>
-            <a href="#reddit" target="_blank" title="Reddit"><img src="assets/icon-reddit.png" alt="Reddit"></a>
-            <a href="#telegram" target="_blank" title="Telegram"><img src="assets/icon-telegram.png" alt="Telegram"></a>
-            <a href="#quora" target="_blank" title="Quora"><img src="assets/icon-quora.png" alt="Quora"></a>
-        </div>
-        <p style="margin-top: 15px;">© 2025 JEOAH’S Market Place • Contact : jeoahs1@gmail.com</p>
+        <p>© 2025 JEOAH’S Market Place</p>
     </footer>
 
     <script src="app.js"></script>

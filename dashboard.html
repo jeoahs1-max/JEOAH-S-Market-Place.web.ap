@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord - JEOAH'S</title>
+    <link rel="stylesheet" href="styles.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <span style="font-size: 1.8rem; font-weight: bold; color: #032C4F;">JEOAH'S</span>
+            <div class="menu">
+                <a href="index.html">Home</a>
+                <a href="plans.html">Plans</a>
+                <a href="faq.html">Aide</a>
+                <a href="contact.html">Contact</a>
+            </div>
+            <a href="inscription.html" class="btn">Mon Compte</a>
+        </nav>
+    </header>
+
+    <div class="dashboard-layout">
+        <div class="sidebar">
+            <h2>Dashboard</h2>
+            <a href="dashboard.html" class="active">Vue d'ensemble</a>
+            <a href="#produits">Gestion Produits</a>
+            <a href="#paiements">Paiements & Solde</a>
+            <a href="#affil">Affiliation</a>
+            <a href="#aide">Aide IA</a>
+        </div>
+
+        <div class="dashboard-content">
+            <h1>Bienvenue, Détaillant JEOAH'S !</h1>
+            
+            <div class="balance-card">
+                <h2>Solde Actuel (USD)</h2>
+                <p>$3,450.00</p>
+                <a href="#retrait" class="btn btn-primary" style="background: #fff; color: #032C4F; margin-top: 10px;">Demander un Retrait</a>
+            </div>
+            
+            <h2 style="color: #032C4F;">Vos Dernières Ventes</h2>
+            <div class="product-grid">
+                
+                <div class="product-card">
+                    <h3 style="color: #007bff;">Vente Réussie</h3>
+                    <p>Produit: Téléphone XYZ</p>
+                    <p>Montant: $150.00 (Via MonCash)</p>
+                </div>
+                
+                <div class="product-card">
+                    <h3 style="color: #007bff;">Vente Réussie</h3>
+                    <p>Produit: Ordinateur portable</p>
+                    <p>Montant: $500.00 (Via Paiement Global)</p>
+                </div>
+                
+                <div class="product-card">
+                    <h3 style="color: #007bff;">Statut Affiliation</h3>
+                    <p>Commissions en attente : $45.00</p>
+                    <p>Clics uniques : 780</p>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+    <div class="ia-chat-box">
+        <img src="assets/icon-ai.png" alt="Chat IA">
+    </div>
+
+    <footer>
+        <p>© 2025 JEOAH’S Market Place</p>
+    </footer>
+    <script src="app.js"></script>
+</body>
+</html>

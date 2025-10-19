@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription - JEOAH'S</title>
     <link rel="stylesheet" href="styles.min.css">
+    
+    <style>
+        /* Style pour la chatbox IA */
+        .ia-chat-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: #007bff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        .ia-chat-box img {
+            width: 35px;
+            height: 35px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -26,7 +49,7 @@
         <div class="social-setup-container" style="max-width: 500px; margin-top: 20px;">
             <p style="color: #666; margin-bottom: 25px;">Créez votre compte en tant que **Détaillant** ou **Affilié**.</p>
             
-            <form action="index.html" onsubmit="alert('Merci ! L\'ouverture des comptes est planifiée pour la date de lancement. Votre email a été enregistré. Le bouton est temporairement désactivé pour la phase de pré-lancement.'); return false;">
+            <form id="registerForm">
                 
                 <div class="social-input-group">
                     <label for="nom" style="width: 100px; text-align: left;">Nom Complet :</label>
@@ -40,25 +63,34 @@
                     <label for="password" style="width: 100px; text-align: left;">Mot de passe :</label>
                     <input type="password" id="password" required>
                 </div>
+                <div class="social-input-group">
+                    <label for="confirm_password" style="width: 100px; text-align: left;">Confirmer Mot de passe :</label>
+                    <input type="password" id="confirm_password" required>
+                </div>
                 <div class="social-input-group" style="justify-content: space-between;">
                     <label for="role" style="width: 100px; text-align: left;">Rôle :</label>
                     <select id="role" style="flex-grow: 1; padding: 10px; border-radius: 5px;">
-                        <option value="acheteur">Acheteur (Gratuit)</option>
+                        <option value="acheteur">Acheteur (Gratuit - $0/mois)</option>
                         <option value="vendeur">Détaillant (Vendeur)</option>
                         <option value="affilie">Affilié</option>
                     </select>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Créer Mon Compte</button>
+                <button type="submit" class="btn btn-primary">Créer Mon Compte (15 Jours Gratuits)</button>
             </form>
             
-            <p style="font-size: 0.9em; margin-top: 20px;">En cliquant sur "Créer Mon Compte", vous acceptez nos <a href="#">Conditions générales</a>.</p>
+            <p style="font-size: 0.9em; margin-top: 20px;">En cliquant sur "Créer Mon Compte", vous acceptez nos 
+                <a href="terms.html">Conditions générales</a>.</p>
         </div>
     </main>
 
+    <div class="ia-chat-box" onclick="alert('Bienvenue ! Je suis Ney, l\'Assistant IA de JEOAH\'S. Je suis disponible pour répondre à vos questions 24/7. Le chat sera activé dès le lancement de la version Beta !');">
+        <img src="assets/icon-ai.png" alt="Chat IA">
+    </div>
+
     <footer>
-        <p>Suivez-nous sur nos réseaux...</p>
-        </footer>
+        <p>© 2025 JEOAH’S Market Place</p>
+    </footer>
 
     <script src="app.js"></script>
 </body>

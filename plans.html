@@ -1,11 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nos Plans - JEOAH'S</title>
+    <title>Plans d'Abonnement - JEOAH'S</title>
     <link rel="stylesheet" href="styles.min.css">
+    
     <style>
         .ia-chat-box {
             position: fixed;
@@ -36,65 +36,70 @@
                 <a href="index.html">Home</a>
                 <a href="plans.html" class="active">Plans</a>
                 <a href="faq.html">Aide</a>
-                <a href="contact.html">Contact</a>
+                <a href="contact.html">Contact</a> 
             </div>
             <a href="inscription.html" class="btn">Get Started</a>
         </nav>
     </header>
 
     <main class="dashboard-content" style="background: #ffffff; min-height: 80vh;">
-        <h1 style="text-align: center; color: #032C4F;">Choisissez Votre Plan d'Abonnement</h1>
-        <p style="text-align: center; color: #666; margin-bottom: 40px;">
-            Devenez un détaillant pour vendre vos produits ou un affilié pour gagner des commissions. 
-            <br>Obtenez **2 mois gratuits** en choisissant le plan annuel ! **Les 100 premiers inscrits profitent de 15 jours offerts (avec tous les avantages d'un plan payant) !**
+        <h1 style="text-align: center;">Choisissez Votre Plan d'Abonnement</h1>
+        <p style="text-align: center; max-width: 600px; margin: 10px auto 30px;">
+            Devenez un détaillant pour vendre vos produits ou un affilié pour gagner des commissions.
+            Obtenez **15 jours gratuits** en vous inscrivant à n'importe quel plan !
         </p>
-        
-        <div class="product-grid" style="max-width: 1000px; margin: 0 auto;">
-            
-            <div class="product-card" style="border-left: 5px solid #032C4F;">
-                <h3 style="color: #032C4F;">Acheteur/Essai (Gratuit)</h3>
-                <p class="balance-card" style="background: #e9e9e9; color: #032C4F; padding: 10px; margin: 15px 0;">
-                    <span style="font-size: 2.2rem; font-weight: bold;">$0</span>/mois
-                </p>
-                <ul>
+
+        <div class="plans-container">
+            <div class="plan-card free-plan">
+                <h3>Acheteur/Essai (Gratuit)</h3>
+                <p style="font-size: 2.2rem; font-weight: bold;">$0<span style="font-size: 1.2rem;">/mois</span></p>
+                <ul class="plan-features">
                     <li>✓ Accès complet à la Market Place (Acheteur)</li>
                     <li>✓ Création de profil Vendeur/Affilié (Mode Brouillon)</li>
-                    <li>✓ **Assistant IA (Ney) disponible 24/7**</li>
+                    <li>✓ Assistant IA (Ney) disponible 24/7</li>
                     <li>✓ Paiements MonCash, NatCash, Global (pour l'achat)</li>
-                    <li>✗ Publication des produits/Liens d'affiliation bloquée</li>
+                    <li>X Publication des produits/Liens d'affiliation bloquée</li>
                 </ul>
-                <a href="inscription.html" class="btn" style="background: #032C4F;">Commencer Gratuitement</a>
+                <a href="inscription.html" class="btn btn-primary" style="background-color: #032C4F;">Commencer Gratuitement</a>
             </div>
 
-            <div class="product-card" style="border-left: 5px solid #FDC830;">
-                <h3 style="color: #FDC830;">Détaillant (Vendeur)</h3>
-                <p class="balance-card" style="background: #FDC830; color: #032C4F; padding: 10px; margin: 15px 0;">
-                    <span style="font-size: 2.2rem; font-weight: bold;">$25</span>/mois
-                </p>
-                <ul>
-                    <li>✓ **Accès complet à la Market Place (Achat/Vente)**</li>
-                    <li>✓ Publication de produits illimités</li>
-                    <li>✓ Paiement par MonCash, NatCash, Global</li>
-                    <li>✓ Dashboard d'analyse des ventes IA</li>
-                    <li>✓ Commission de 5% par transaction</li>
+            <div class="plan-card premium-plan">
+                <h3>Détaillant (Vendeur)</h3>
+                <p style="font-size: 2.2rem; font-weight: bold;">$25<span style="font-size: 1.2rem;">/mois</span></p>
+                <ul class="plan-features">
+                    <li>✓ Vendez un nombre illimité de produits</li>
+                    <li>✓ Prenez vos commandes directement</li>
+                    <li>✓ Paiement par MonCash, NatCash, Global (Pour le client)</li>
+                    <li>**✓ Frais de transaction : 0%** (Inclus dans l'abonnement)</li>
+                    <li>**✓ Frais de retrait : Varient** selon le moyen de paiement (MonCash, NatCash, etc.)</li>
                 </ul>
                 <a href="inscription.html" class="btn btn-primary">Devenir Détaillant</a>
             </div>
-            
-            <div class="product-card" style="border-left: 5px solid #007bff;">
-                <h3 style="color: #007bff;">Affilié (Marketing)</h3>
-                <p class="balance-card" style="background: #e9f5ff; color: #032C4F; padding: 10px; margin: 15px 0;">
-                    <span style="font-size: 2.2rem; font-weight: bold;">$5</span>/mois
-                </p>
-                <ul>
-                    <li>✓ **Accès complet à la Market Place (Achat/Promotion)**</li>
-                    <li>✓ Création et publication de liens illimités</li>
-                    <li>✓ Gagnez 10% de commission sur les ventes</li>
+
+            <div class="plan-card affiliate-plan">
+                <h3>Affilié (Marketing)</h3>
+                <p style="font-size: 2.2rem; font-weight: bold;">$5<span style="font-size: 1.2rem;">/mois</span></p>
+                <ul class="plan-features">
+                    <li>✓ Créez des liens d'affiliation illimités</li>
+                    <li>✓ Gagnez **10% de commission sur les ventes**</li>
+                    <li>✓ Dashboard de suivi des gains</li>
                     <li>✓ Paiements rapides (MonCash, NatCash, PayPal)</li>
                 </ul>
-                <a href="inscription.html" class="btn" style="background: #007bff;">Devenir Affilié</a>
+                <a href="inscription.html" class="btn btn-primary" style="background-color: #007bff;">Devenir Affilié</a>
             </div>
-            
+
+            <div class="plan-card annual-plan" style="border: 3px solid #FDC830; background-color: #fff9e6;">
+                <h3 style="background-color: #FDC830; color: #032C4F; padding: 10px;">Détaillant Annuel (Beta)</h3>
+                <p style="font-size: 2.2rem; font-weight: bold; color: #032C4F;">$250<span style="font-size: 1.2rem;">/an</span></p>
+                <p style="color: red; font-weight: bold;">**BETA OFFERTE : 2 mois gratuits pour les 25 premiers !**</p>
+                <p style="margin-top: 10px; font-size: 0.9em;">(Passe à 1 mois gratuit après le 25e abonné.)</p>
+                <ul class="plan-features">
+                    <li>✓ Accès complet Détaillant (Vendez illimité)</li>
+                    <li>✓ Économisez $50 par an</li>
+                    <li>✓ Priorité au support IA/Humain</li>
+                </ul>
+                <a href="inscription.html" class="btn btn-primary" style="background-color: #032C4F;">S'abonner à l'Annuel</a>
+            </div>
         </div>
     </main>
 
@@ -103,19 +108,7 @@
     </div>
 
     <footer>
-        <p>Suivez-nous sur nos réseaux pour les mises à jour et les Lives :</p>
-        <div class="social-icons">
-            <a href="https://www.tiktok.com/@jeoahs1" target="_blank" title="TikTok JEOAH'S"><img src="assets/icon-tiktok.png" alt="TikTok"></a>
-            <a href="https://www.facebook.com/share/17DnLVek27/" target="_blank" title="Facebook JEOAH'S"><img src="assets/icon-facebook.png" alt="Facebook"></a>
-            <a href="https://www.instagram.com/jeoahsmarketplace?igsh=b2ZvbW5yOXI1eDlo" target="_blank" title="Instagram JEOAH'S"><img src="assets/icon-instagram.png" alt="Instagram"></a>
-            <a href="https://www.youtube.com/@jeoahs1" target="_blank" title="YouTube JEOAH'S"><img src="assets/icon-youtube.png" alt="YouTube"></a>
-            <a href="#twitter" target="_blank" title="Twitter/X"><img src="assets/icon-twitter.png" alt="Twitter"></a>
-            <a href="#snapchat" target="_blank" title="Snapchat"><img src="assets/icon-snapchat.png" alt="Snapchat"></a>
-            <a href="#reddit" target="_blank" title="Reddit"><img src="assets/icon-reddit.png" alt="Reddit"></a>
-            <a href="#telegram" target="_blank" title="Telegram"><img src="assets/icon-telegram.png" alt="Telegram"></a>
-            <a href="#quora" target="_blank" title="Quora"><img src="assets/icon-quora.png" alt="Quora"></a>
-        </div>
-        <p style="margin-top: 15px;">© 2025 JEOAH’S Market Place • Contact : jeoahs1@gmail.com</p>
+        <p>© 2025 JEOAH’S Market Place</p>
     </footer>
 
     <script src="app.js"></script>

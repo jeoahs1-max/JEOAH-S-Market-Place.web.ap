@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -5,6 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nos Plans - JEOAH'S</title>
     <link rel="stylesheet" href="styles.min.css">
+    <style>
+        .ia-chat-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: #007bff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        .ia-chat-box img {
+            width: 35px;
+            height: 35px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -24,7 +46,7 @@
         <h1 style="text-align: center; color: #032C4F;">Choisissez Votre Plan d'Abonnement</h1>
         <p style="text-align: center; color: #666; margin-bottom: 40px;">
             Devenez un détaillant pour vendre vos produits ou un affilié pour gagner des commissions. 
-            <br>Obtenez **2 mois gratuits** en choisissant le plan annuel !
+            <br>Obtenez **2 mois gratuits** en choisissant le plan annuel ! **Les 100 premiers inscrits profitent de 15 jours offerts (avec tous les avantages d'un plan payant) !**
         </p>
         
         <div class="product-grid" style="max-width: 1000px; margin: 0 auto;">
@@ -37,7 +59,7 @@
                 <ul>
                     <li>✓ Accès complet à la Market Place (Acheteur)</li>
                     <li>✓ Création de profil Vendeur/Affilié (Mode Brouillon)</li>
-                    <li>✓ Assistant IA (Ney) disponible 24/7</li>
+                    <li>✓ **Assistant IA (Ney) disponible 24/7**</li>
                     <li>✓ Paiements MonCash, NatCash, Global (pour l'achat)</li>
                     <li>✗ Publication des produits/Liens d'affiliation bloquée</li>
                 </ul>
@@ -50,11 +72,11 @@
                     <span style="font-size: 2.2rem; font-weight: bold;">$25</span>/mois
                 </p>
                 <ul>
-                    <li>✓ Vendez un nombre illimité de produits</li>
-                    <li>✓ **Prenez vos commandes directement**</li>
-                    <li>✓ Paiement par MonCash, NatCash, Global (Pour le client)</li>
-                    <li>✓ **Frais de transaction : 5%** (retenus sur les fonds reçus)</li>
-                    <li>✓ **Frais de retrait** : Varient selon le moyen de paiement (MonCash, NatCash, etc.)</li>
+                    <li>✓ **Accès complet à la Market Place (Achat/Vente)**</li>
+                    <li>✓ Publication de produits illimités</li>
+                    <li>✓ Paiement par MonCash, NatCash, Global</li>
+                    <li>✓ Dashboard d'analyse des ventes IA</li>
+                    <li>✓ Commission de 5% par transaction</li>
                 </ul>
                 <a href="inscription.html" class="btn btn-primary">Devenir Détaillant</a>
             </div>
@@ -65,9 +87,9 @@
                     <span style="font-size: 2.2rem; font-weight: bold;">$5</span>/mois
                 </p>
                 <ul>
+                    <li>✓ **Accès complet à la Market Place (Achat/Promotion)**</li>
                     <li>✓ Création et publication de liens illimités</li>
-                    <li>✓ **Gagnez 10% de commission sur les ventes**</li>
-                    <li>✓ Dashboard de suivi des gains</li>
+                    <li>✓ Gagnez 10% de commission sur les ventes</li>
                     <li>✓ Paiements rapides (MonCash, NatCash, PayPal)</li>
                 </ul>
                 <a href="inscription.html" class="btn" style="background: #007bff;">Devenir Affilié</a>
@@ -75,6 +97,10 @@
             
         </div>
     </main>
+
+    <div class="ia-chat-box" onclick="alert('Bienvenue ! Je suis Ney, l\'Assistant IA de JEOAH\'S. Je suis disponible pour répondre à vos questions 24/7. Le chat sera activé dès le lancement de la version Beta !');">
+        <img src="assets/icon-ai.png" alt="Chat IA">
+    </div>
 
     <footer>
         <p>Suivez-nous sur nos réseaux pour les mises à jour et les Lives :</p>

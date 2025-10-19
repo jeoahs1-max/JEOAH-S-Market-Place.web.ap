@@ -6,20 +6,7 @@ if ("serviceWorker" in navigator) {
 }
 
 // Configuration Firebase (PLACEHOLDER - REMPLACER AVEC VOS CLÉS !)
-// VOUS DEVEZ REMPLACER CES VALEURS PAR VOS VRAIES CLÉS DE CONFIGURATION FIREBASE !
-const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-};
-
 // L'initialisation doit être faite dans le code réel de production
-// firebase.initializeApp(firebaseConfig);
-// const functions = firebase.functions();
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
@@ -29,11 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
         registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const email = document.getElementById('email').value; // Supposons que vous avez un champ email
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm_password').value;
-            
-            // Validation simple
+            // Récupère le rôle sélectionné
+            const role = document.getElementById('role').value; 
+
+            // 1. Validation des mots de passe
             if (password !== confirmPassword) {
                 alert("Erreur: Les mots de passe ne correspondent pas.");
                 return;
@@ -43,28 +32,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Message pour l'utilisateur
-            alert("Connexion à la base de données pour l'inscription 15 jours en cours... Veuillez patienter.");
+            alert("Connexion à la base de données pour l'inscription (15 jours d'essai) en cours... Veuillez patienter.");
 
             try {
-                // --- Bloc qui appellera votre fonction Firebase dans la version finale ---
-                
-                // const claimSlot = functions.httpsCallable('claimFreeSlot');
-                // const result = await claimSlot({ email: email });
-                
-                // if (result.data.ok) {
-                    alert(`Inscription réussie et compte créé ! Vous bénéficiez des 15 jours d'essai. Votre lien unique (ID) est en cours de création. Redirection vers le tableau de bord interne.`);
-                    window.location.href = 'dashboard.html'; // Redirection vers le tableau de bord simulé
-                // } else {
-                //     alert("Erreur: Désolé, plus de slots gratuits disponibles ou erreur inconnue.");
-                // }
+                // SIMULATION DE CONNEXION FIREBASE RÉUSSIE
+
+                // 2. Redirection spécifique selon le rôle
+                if (role === 'vendeur') {
+                    // Redirection vers l'étape 1 du Détaillant (Setup social)
+                    window.location.href = 'vendor-setup.html'; 
+                } else if (role === 'affilie') {
+                    // Redirection vers l'étape 1 de l'Affilié (Setup ID)
+                    window.location.href = 'affiliate-setup.html'; 
+                } else {
+                    // Acheteur ou défaut va directement au tableau de bord
+                    window.location.href = 'dashboard.html';
+                }
 
             } catch (error) {
-                // En cas d'échec de la connexion réelle, on avertit et redirige pour les tests.
-                alert(`Erreur Firebase (Simulée) : Le backend n'est pas encore actif. Nous allons quand même vous rediriger pour le test.`);
-                window.location.href = 'dashboard.html'; // Redirection forcée pour le test
+                // En cas d'échec de la connexion Firebase (si elle est active)
+                alert(`Erreur Firebase : Connexion échouée. Redirection forcée pour le test.`);
+                window.location.href = 'dashboard.html'; 
             }
-
         });
     }
 });

@@ -5,46 +5,66 @@ if ("serviceWorker" in navigator) {
   .catch(err => console.error("Erreur SW:", err));
 }
 
-// Nouvelle Logique pour le Formulaire d'Inscription
+// Configuration Firebase (PLACEHOLDER - REMPLACER AVEC VOS CLÉS !)
+// VOUS DEVEZ REMPLACER CES VALEURS PAR VOS VRAIES CLÉS DE CONFIGURATION FIREBASE !
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
+
+// L'initialisation doit être faite dans le code réel de production
+// firebase.initializeApp(firebaseConfig);
+// const functions = firebase.functions();
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
-
+    
+    // --- Logique d'Inscription (Prêt pour la Connexion Backend) ---
     if (registerForm) {
-        registerForm.addEventListener('submit', function(e) {
+        registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            const email = document.getElementById('email').value; // Supposons que vous avez un champ email
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm_password').value;
-            const isVendeur = document.getElementById('role-vendeur').checked;
-            const isAffilie = document.getElementById('role-affilie').checked;
-
-            // 1. Validation des mots de passe
+            
+            // Validation simple
             if (password !== confirmPassword) {
                 alert("Erreur: Les mots de passe ne correspondent pas.");
                 return;
             }
-
-            // 2. Validation du rôle
-            if (!isVendeur && !isAffilie) {
-                alert("Veuillez choisir au moins un rôle (Vendeur ou Affilié).");
+            if (!email) {
+                alert("Erreur: L'email est requis.");
                 return;
             }
 
-            // --- Simulation de l'inscription réussie (cette partie sera remplacée par Firebase/Backend) ---
-            alert("Inscription réussie ! Redirection...");
-            
-            // 3. Redirection selon le rôle
-            if (isVendeur && isAffilie) {
-                // Si l'utilisateur choisit les deux, rediriger vers un tableau de bord commun ou le plus complexe (Vendeur)
-                window.location.href = 'vendor-products.html'; 
-            } else if (isVendeur) {
-                window.location.href = 'vendor-products.html';
-            } else if (isAffilie) {
-                window.location.href = 'affiliate-products.html';
+            // Message pour l'utilisateur
+            alert("Connexion à la base de données pour l'inscription 15 jours en cours... Veuillez patienter.");
+
+            try {
+                // --- Bloc qui appellera votre fonction Firebase dans la version finale ---
+                
+                // const claimSlot = functions.httpsCallable('claimFreeSlot');
+                // const result = await claimSlot({ email: email });
+                
+                // if (result.data.ok) {
+                    alert(`Inscription réussie et compte créé ! Vous bénéficiez des 15 jours d'essai. Votre lien unique (ID) est en cours de création. Redirection vers le tableau de bord interne.`);
+                    window.location.href = 'dashboard.html'; // Redirection vers le tableau de bord simulé
+                // } else {
+                //     alert("Erreur: Désolé, plus de slots gratuits disponibles ou erreur inconnue.");
+                // }
+
+            } catch (error) {
+                // En cas d'échec de la connexion réelle, on avertit et redirige pour les tests.
+                alert(`Erreur Firebase (Simulée) : Le backend n'est pas encore actif. Nous allons quand même vous rediriger pour le test.`);
+                window.location.href = 'dashboard.html'; // Redirection forcée pour le test
             }
+
         });
     }
-
-    // [FUTURE IA CHATBOT LOGIC GOES HERE]
-    // ...
 });

@@ -1,111 +1,170 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Espace Affilié - JEOAH'S</title>
-    <link rel="stylesheet" href="styles.min.css">
-</head>
-<body>
-    <div class="dashboard-layout">
-        <aside class="sidebar">
-            <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo" style="width: 70px; margin: 0 auto 20px;">
-            <h2>Mon Espace Affilié</h2>
-            <a href="produits-affiliés.html" class="active">
-                <img src="assets/icon-dashboard.png" alt="Dashboard">Tableau de Bord
-            </a>
-            <a href="liens-affiliés.html">
-                <img src="assets/icon-links.png" alt="Plateformes">Plateformes Affiliées
-            </a>
-            <a href="affilié-social.html">
-                <img src="assets/icon-social.png" alt="Réseaux">Réseaux Sociaux
-            </a>
-            <a href="#trafic">
-                <img src="assets/icon-analytics.png" alt="Trafic">Suivi du Trafic
-            </a>
-            <a href="plans.html">
-                <img src="assets/icon-plan.png" alt="Plans">Mon Plan
-            </a>
-            <a href="faq.html">
-                <img src="assets/icon-support.png" alt="Support">Support
-            </a>
-        </aside>
-
-        <main class="dashboard-content">
-            <h1>Gestion des Produits & Promotions IA</h1>
-            
-            <div style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-                <p style="color: #032C4F; font-size: 1.1rem;">🌟 **Bienvenue !** L'IA est prête à optimiser vos liens pour vous.</p>
-                <div style="background: #eee; padding: 10px; border-radius: 5px; margin-top: 15px;">
-                    <p style="font-weight: bold; margin: 0;">Trafic Total (7 jours) : <span style="color: #032C4F;">1,245 Clics</span></p>
-                    <p style="font-size: 0.9em; margin: 5px 0 0;">(Le paiement de vos commissions est géré par vos plateformes affiliées externes.)</p>
-                </div>
-            </div>
-
-            <h2>Ajouter un Produit pour la Comparaison IA</h2>
-            <form id="addAffiliateProductForm" style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-                <input type="url" placeholder="Lien du Produit (Ex: Lien Amazon)" required style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                <textarea placeholder="Description du site affilié ou Brève description pour l'IA" rows="2" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc;"></textarea>
-                
-                <p style="font-weight: bold; margin-bottom: 10px;">Télécharger l'image principale du produit (pour la comparaison et la publicité)</p>
-                <input type="file" accept="image/*" required style="width: 100%;">
-                
-                <p style="font-size: 0.9em; margin: 15px 0; color: #032C4F;">*L'IA va récupérer les produits similaires (même nom/catégorie) sur toutes vos plateformes pour comparaison.</p>
-                
-                <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="generateAd()">
-                    Comparer & Générer Pub IA
-                </button>
-                
-                <div id="publish-confirmation" style="display: none; background: #e6ffe6; color: green; padding: 10px; border-radius: 5px; margin-top: 15px;">
-                    ✅ **Succès :** L'IA a trouvé des comparaisons et créé la publicité ! (Publication automatique selon votre plan.)
-                </div>
-            </form>
-
-            <h2>Mes Produits Affiliés (Comparaisons IA)</h2>
-            <div class="product-grid">
-                <div class="product-card" style="border-left: 5px solid #00c4a7;">
-                    <h3>Casque Audio Sans Fil</h3>
-                    <p style="font-size: 0.9em; font-weight: bold;">Catégorie : Électronique - Tendance 🔥</p>
-                    <div style="text-align: left; margin-top: 10px; font-size: 0.9em;">
-                        <p>🛒 **Amazon :** $49.99 <a href="#" class="btn" style="background: #00c4a7; padding: 5px 10px;">Acheter</a></p>
-                        <p>🛒 **eBay :** $45.00 <a href="#" class="btn" style="background: #00c4a7; padding: 5px 10px;">Acheter</a></p>
-                        <p>🛒 **Walmart :** $52.99</p>
-                    </div>
-                    <p style="margin-top: 10px; font-size: 0.8em; color: #032C4F;">*Publiée automatiquement sur vos réseaux. (Plan Avancé)*</p>
-                </div>
-                
-                <div class="product-card" style="border-left: 5px solid #FDC830;">
-                    <h3>Livre "L'Art de l'Affiliation"</h3>
-                    <p style="font-size: 0.9em; font-weight: bold;">Catégorie : Maison - Réduction 📉</p>
-                    <div style="text-align: left; margin-top: 10px; font-size: 0.9em;">
-                        <p>🛒 **Amazon :** $19.99 <a href="#" class="btn" style="background: #FDC830; color: #032C4F; padding: 5px 10px;">Acheter</a></p>
-                    </div>
-                    <p style="margin-top: 10px; font-size: 0.8em; color: #032C4F;">*Publicité Texte simple générée. (Plan Gratuit)*</p>
-                </div>
-
-                <div class="product-card" style="border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; min-height: 280px; cursor: pointer;">
-                    <p style="color: #666; font-weight: bold;">➕ Ajouter un nouveau produit/lien</p>
-                </div>
-            </div>
-
-        </main>
-    </div>
+    <title>Tableau de Bord Affilié - JEOAH'S Market Place</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
-    <div class="ia-chat-box" title="Chat IA 24/7">
-        <img src="assets/icon-ai-chat.png" alt="Chat IA">
-    </div>
-
-    <script src="app.js"></script>
     <script>
-        // Fonction de simulation de la génération d'annonce IA
-        function generateAd() {
-            // Afficher le message de confirmation
-            document.getElementById('publish-confirmation').style.display = 'block';
-            setTimeout(() => {
-                 document.getElementById('publish-confirmation').style.display = 'none';
-            }, 5000); 
-            // NOTE: La logique réelle de publication dépendra de l'API IA et du plan.
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], },
+                    colors: {
+                        'primary-blue': '#1D4ED8',
+                        'accent-orange': '#F97316',
+                        'gray-bg': '#F3F4F6',
+                        'dark-text': '#1F2937',
+                    }
+                }
+            }
         }
     </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+        /* Style spécifique pour la barre latérale sur mobile */
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                z-index: 50;
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-dark-text min-h-screen flex flex-col">
+
+    <header class="sticky top-0 bg-white shadow-md z-40">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <button id="menu-toggle" class="md:hidden text-gray-600 hover:text-primary-blue focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <span class="text-2xl font-bold text-primary-blue">JEOAH'S <span class="text-green-600">Affilié</span></span>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-600 hover:text-primary-blue transition">
+                    <i class="fas fa-bell text-xl"></i>
+                </button>
+                <div class="relative">
+                    <span class="text-sm font-medium text-gray-700">Bonjour, [Nom Affilié]</span>
+                    <button id="profile-menu-button" class="ml-2 w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-primary-blue font-bold focus:outline-none">
+                        A
+                    </button>
+                    </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex flex-1 pt-0">
+
+        <aside id="sidebar" class="fixed md:sticky top-0 md:top-[64px] h-full md:h-screen w-64 bg-white shadow-xl md:shadow-none p-4 flex-shrink-0">
+            <nav class="space-y-2">
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-white bg-green-600 font-semibold transition duration-200">
+                    <i class="fas fa-chart-bar w-5"></i>
+                    <span>Tableau de Bord</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200">
+                    <i class="fas fa-link w-5"></i>
+                    <span>Générateur de Liens</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200">
+                    <i class="fas fa-tags w-5"></i>
+                    <span>Produits Actifs</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200">
+                    <i class="fas fa-wallet w-5"></i>
+                    <span>Commissions & Retraits</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Paramètres</span>
+                </a>
+                <a href="inscription.html" class="flex items-center space-x-3 p-3 rounded-lg text-red-600 hover:bg-red-50 transition duration-200 mt-6 pt-4 border-t border-gray-100">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </nav>
+        </aside>
+
+        <div class="flex-1 p-4 md:p-8 overflow-y-auto">
+            
+            <h2 class="text-3xl font-extrabold text-dark-text mb-6">Aperçu du Compte Affilié</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-green-600">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-500">Gains Totaux (Ney)</span>
+                        <i class="fas fa-hand-holding-usd text-2xl text-green-600"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-dark-text mt-2">$ 0.00 <span class="text-base font-normal text-gray-400">USD</span></p>
+                    <p class="text-xs text-green-500 mt-1"><i class="fas fa-arrow-up"></i> +0% ce mois-ci</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-primary-blue">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-500">Total Clics sur Liens</span>
+                        <i class="fas fa-mouse-pointer text-2xl text-primary-blue"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-dark-text mt-2">0</p>
+                    <p class="text-xs text-gray-400 mt-1">Nombre de clics uniques sur vos liens</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-accent-orange">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-500">Taux de Conversion</span>
+                        <i class="fas fa-percent text-2xl text-accent-orange"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-dark-text mt-2">0.00%</p>
+                    <p class="text-xs text-gray-400 mt-1">Ventes par rapport aux clics</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-purple-500">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-500">Produits Recommandés</span>
+                        <i class="fas fa-thumbs-up text-2xl text-purple-500"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-dark-text mt-2">0</p>
+                    <p class="text-xs text-gray-400 mt-1">Produits que vous avez activés pour l'affiliation</p>
+                </div>
+
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-dark-text">Catalogue de Produits pour Affiliation</h3>
+                    <a href="#" class="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200">
+                        <i class="fas fa-search-plus"></i>
+                        <span>Explorer le Catalogue</span>
+                    </a>
+                </div>
+
+                <div class="text-center py-10">
+                    <i class="fas fa-link text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 font-medium">Commencez par choisir des produits à promouvoir.</p>
+                    <p class="text-sm text-gray-400 mt-1">Utilisez l'explorateur pour activer les liens d'affiliation.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+            
+            // Logique d'overlay (comme pour le vendeur)
+        });
+    </script>
+    
 </body>
 </html>

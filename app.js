@@ -592,5 +592,22 @@ async function displayComparisonLinks(affiliateId, container) {
 
     } catch (error) {
         console.error("Erreur lors du chargement des liens de comparaison:", error);
+    }// --- E. Logique d'Affichage des Produits Affiliés (produits-affiliés.html) ---
+    if (path.includes('produits-affiliés.html')) {
+        displayAffiliateProducts();
     }
-}
+    
+    // --- F. Logique d'Affichage de la Page Produit (produit.html) ---
+    if (path.includes('produit.html')) {
+        displayProductDetails();
+    }
+}// ... (le bloc que vous venez d'ajouter)
+    
+    // --- G. Logique IA (Démo - Simplifiée) ---
+    const aiDemoButton = document.getElementById('ai-demo-button');
+    if (aiDemoButton) {
+        aiDemoButton.addEventListener('click', () => {
+            showNotification("La démo IA sera disponible après l'intégration des Cloud Functions!", 'info');
+        });
+    }
+}); // <-- Fin du DOMContentLoaded. RIEN après cette ligne, sauf si c'est pour l'export.

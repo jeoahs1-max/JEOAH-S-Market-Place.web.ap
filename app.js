@@ -315,7 +315,7 @@ function displayVendorProducts() {
                         
                         <div class="text-right">
                             <p class="font-bold text-gray-800">${product.stock} en Stock</p>
-                            <a href="#" class="text-sm text-blue-500 hover:underline">Modifier</a>
+                            <a href="modifier-produit.html?id=${product.id}" class="text-sm text-blue-500 hover:underline">Modifier</a>
                         </div>
                     </div>
                 `;
@@ -680,6 +680,183 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- F. Logique d'Affichage de la Page Produit (produit.html) ---
     if (path.includes('produit.html')) {
         displayProductDetails();
+        // -----------------------------------------------------------------
+// 8. LOGIQUE DE MODIFICATION & SUPPRESSION DE PRODUIT (Vendeur)
+// -----------------------------------------------------------------
+
+/**
+ * Charge les détails du produit dans le formulaire pour la modification.
+ */
+async function loadProductForEdit() {
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    const loadingMessage = document.getElementById('loadingMessage');
+    const editForm = document.getElementById('editProductForm');
+
+    if (!productId) {
+        if(loadingMessage) loadingMessage.innerHTML = '<div class="text-red-500">ID de produit manquant.</div>';
+        return;
+    }
+    
+    if (!window.auth.currentUser) {
+        // Rediriger ou montrer un message si non connecté
+        if(loadingMessage) loadingMessage.innerHTML = '<div class="text-red-500">Veuillez vous connecter.</div>';
+        return;
+    }
+
+    try {
+        const productRef = doc(window.db, "products", productId);
+        const productSnapshot = await getDoc(productRef);
+
+        if (!productSnapshot.exists()) {
+            if(loadingMessage) loadingMessage.innerHTML = '<div class="text-red-500">Produit non trouvé.</div>';
+            return;
+        }
+
+        const product = productSnapshot.data();
+        
+        // Vérification de sécurité: S'assurer que le vendeur est le propriétaire
+        if (product.vendorId !== window.auth.currentUser.uid) {
+            if(loadingMessage) loadingMessage.innerHTML = '<div class="text-red-500">Accès refusé. Vous n\'êtes pas le propriétaire de ce produit.</div>';
+            return;
+        }
+
+        // 1. Pré-remplir le formulaire
+        document.getElementById('product_id').value = productId;
+        document.getElementById('product_name').value = product.name;
+        document.getElementById('product-title-display').textContent = `Modification de : ${product.name}`;
+        document.getElementById('product_description').value = product.description;
+        document.getElementById('product_category').value = product.category;
+        document.getElementById('selling_price').value = product.price;
+        document.getElementById('product_cost').value = product.cost;
+        document.getElementById('affiliate_commission').value = product.affiliateCommissionPercent;
+        document.getElementById('product_stock').value = product.stock;
+
+        // 2. Afficher les images actuelles
+        const imagesDisplay = document.getElementById('currentImagesDisplay');
+        imagesDisplay.innerHTML = '';
+        if (product.imageUrls && product.imageUrls.length > 0) {
+            product.imageUrls.forEach(url => {
+                imagesDisplay.innerHTML += `<img src="${url}" class="w-20 h-20 object-cover rounded shadow-sm" alt="Image actuelle">`;
+            });
+        } else {
+             imagesDisplay.innerHTML = `<p class="text-sm text-gray-500">Aucune image actuelle.</p>`;
+        }
+
+
+        // Afficher le formulaire et masquer le message de chargement
+        if(loadingMessage) loadingMessage.style.display = 'none';
+        if(editForm) editForm.style.display = 'block';
+
+    } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+        if(loadingMessage) loadingMessage.innerHTML = `<div class="text-red-500">Erreur de chargement des données du produit.</div>`;
+    }
+}
+
+
+/**
+ * Sauvegarde les modifications du produit dans Firestore.
+ */
+async function saveProductChanges(form) {
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "Sauvegarde en cours...";
+    
+    const productId = form.product_id.value;
+    const vendorId = window.auth.currentUser ? window.auth.currentUser.uid : null;
+
+    if (!productId || !vendorId) {
+        showNotification("Erreur: ID de produit ou session utilisateur manquant.", 'error');
+        submitButton.disabled = false;
+        submitButton.textContent = "Sauvegarder les Modifications";
+        return;
+    }
+
+    try {
+        const imagesInput = document.getElementById('product_images');
+        const newImages = imagesInput.files;
+        let imageUrlsToMerge = [];
+
+        // 1. Gérer le téléchargement des nouvelles images (si présentes)
+        if (newImages.length > 0) {
+            showNotification("Téléchargement des nouvelles images...", 'info');
+            // Utiliser la fonction existante de l'étape 4
+            imageUrlsToMerge = await uploadProductImages(newImages, productId, vendorId); 
+        }
+
+        // 2. Préparer les données de mise à jour
+        const updatedData = {
+            name: form.product_name.value.trim(),
+            description: form.product_description.value.trim(),
+            category: form.product_category.value,
+            stock: parseInt(form.product_stock.value, 10),
+            
+            price: parseFloat(form.selling_price.value),
+            cost: parseFloat(form.product_cost.value) || 0,
+            affiliateCommissionPercent: parseFloat(form.affiliate_commission.value),
+            
+            lastUpdated: new Date()
+        };
+
+        // Si de nouvelles images ont été téléchargées, nous les ajoutons à la liste existante
+        if (imageUrlsToMerge.length > 0) {
+            // NOTE: Ceci *ajoute* les nouvelles images. Pour remplacer, vous auriez besoin d'une logique plus complexe (supprimer les anciennes).
+            const productRef = doc(window.db, "products", productId);
+            const currentSnapshot = await getDoc(productRef);
+            const currentImageUrls = currentSnapshot.data().imageUrls || [];
+            
+            updatedData.imageUrls = [...currentImageUrls, ...imageUrlsToMerge];
+        }
+
+        // 3. Effectuer la mise à jour Firestore
+        await updateDoc(doc(window.db, "products", productId), updatedData);
+        
+        showNotification("Produit mis à jour avec succès!", 'success');
+        
+        // 4. Redirection
+        setTimeout(() => {
+            window.location.href = 'produits-vendeurs.html';
+        }, 1500);
+
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour du produit:", error);
+        showNotification(`Erreur critique : Impossible de sauvegarder les modifications. ${error.message}`, 'error');
+        submitButton.disabled = false;
+        submitButton.textContent = "Sauvegarder les Modifications";
+    }
+}
+
+
+/**
+ * Supprime le produit de Firestore et redirige.
+ */
+async function deleteProduct(productId) {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.")) {
+        return;
+    }
+    
+    if (!window.auth.currentUser) {
+        showNotification("Session expirée. Veuillez vous reconnecter.", 'error');
+        return;
+    }
+    
+    try {
+        // NOTE: Une logique de suppression dans Storage serait optimale ici, 
+        // mais pour simplifier on supprime juste le document Firestore.
+        await deleteDoc(doc(window.db, "products", productId));
+        
+        showNotification("Produit supprimé avec succès.", 'success');
+        
+        setTimeout(() => {
+            window.location.href = 'produits-vendeurs.html'; // Retour au dashboard
+        }, 1000);
+
+    } catch (error) {
+        console.error("Erreur lors de la suppression du produit:", error);
+        showNotification(`Erreur: Impossible de supprimer le produit. ${error.message}`, 'error');
+    }
+}
     }
     
     // --- G. Logique IA (Démo - Simplifiée) ---
@@ -690,3 +867,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+// ... (Dans le bloc document.addEventListener('DOMContentLoaded', ... ))
+
+    // --- F. Logique d'Affichage de la Page Produit (produit.html) ---
+    if (path.includes('produit.html')) {
+        displayProductDetails();
+    }
+    
+    // --- G. Logique de Modification Produit (modifier-produit.html) ---
+    if (path.includes('modifier-produit.html')) {
+        loadProductForEdit();
+        
+        const form = document.getElementById('editProductForm');
+        if (form) {
+            form.addEventListener('submit', (e) => { 
+                e.preventDefault(); 
+                saveProductChanges(form); 
+            });
+        }
+        
+        const deleteBtn = document.getElementById('deleteProductButton');
+        const productId = new URLSearchParams(window.location.search).get('id');
+        if (deleteBtn && productId) {
+            deleteBtn.addEventListener('click', () => {
+                deleteProduct(productId);
+            });
+        }
+    }
+
+    // --- H. Logique IA (Démo - Simplifiée) --- 
+    // ... (Le reste du code, y compris le bloc IA et la fermeture finale)

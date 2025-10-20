@@ -1,47 +1,126 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajouter vos Plateformes - JEOAH'S Affilié</title>
-    <link rel="stylesheet" href="styles.min.css">
+    <title>Étape 1/2: Liens d'Affiliation - JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], },
+                    colors: {
+                        'primary-blue': '#1D4ED8',
+                        'accent-orange': '#F97316',
+                        'gray-bg': '#F3F4F6',
+                        'dark-text': '#1F2937',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+    </style>
 </head>
-<body>
-    <header style="background: #032C4F; color: #fff; padding: 1rem;">
-        <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo">
-    </header>
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <main>
-        <div class="social-setup-container">
-            <h1>Étape 1 : Vos Plateformes Affiliées</h1>
-            <p>Veuillez ajouter les liens ou ID de vos programmes d'affiliation (Amazon, eBay, etc.) pour que l'IA puisse récupérer vos produits.</p>
-            <p style="color: #032C4F; font-weight: bold;">(1 à 5 plateformes max. pour commencer)</p>
-            
-            <form id="platformLinkForm">
-                <div class="social-input-group">
-                    <img src="assets/icon-amazon.png" alt="Amazon">
-                    <input type="text" placeholder="Lien/ID Amazon Affiliate" required>
-                </div>
-                <div class="social-input-group">
-                    <img src="assets/icon-ebay.png" alt="eBay">
-                    <input type="text" placeholder="Lien/ID eBay Partner Network (Facultatif)">
-                </div>
-                <div class="social-input-group">
-                    <img src="assets/icon-walmart.png" alt="Walmart">
-                    <input type="text" placeholder="Lien/ID Walmart Affiliates (Facultatif)">
-                </div>
-                <a href="affilié-social.html" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
-                    Suivant : Lier mes Réseaux Sociaux
-                </a>
-            </form>
-            
-            <p style="margin-top: 20px; font-size: 0.9em;"><a href="index.html">Retour à l'accueil</a></p>
-        </div>
-    </main>
+    <div class="w-full max-w-lg bg-white rounded-xl shadow-2xl p-8 space-y-8">
+        
+        <header class="text-center">
+            <h1 class="text-3xl font-extrabold text-dark-text">Étape 1/2 : Vos Réseaux d'Affiliation</h1>
+            <p class="mt-2 text-sm text-gray-500">Ajoutez vos liens ou ID d'affiliation pour maximiser vos gains via Ney. (20 max, 6 affichés).</p>
+        </header>
 
-    <footer>
-        <p>© 2025 JEOAH’S Market Place</p>
-    </footer>
+        <form id="affiliateLinksForm" class="space-y-6">
+            
+            <div>
+                <label for="amazon_link" class="block text-sm font-medium text-gray-700 flex items-center">
+                    <i class="fab fa-amazon text-lg text-accent-orange mr-2"></i> Lien d'Affiliation Amazon
+                </label>
+                <input type="url" id="amazon_link" name="amazon_link" placeholder="https://..."
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+            </div>
+
+            <div>
+                <label for="temu_link" class="block text-sm font-medium text-gray-700 flex items-center">
+                    <i class="fas fa-shopping-bag text-lg text-primary-blue mr-2"></i> Lien ou Code Temu
+                </label>
+                <input type="text" id="temu_link" name="temu_link" placeholder="Code ou lien Temu"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+            </div>
+
+            <div>
+                <label for="aliexpress_link" class="block text-sm font-medium text-gray-700 flex items-center">
+                    <i class="fas fa-store text-lg text-red-500 mr-2"></i> Lien d'Affiliation AliExpress
+                </label>
+                <input type="url" id="aliexpress_link" name="aliexpress_link" placeholder="https://..."
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+            </div>
+
+            <div>
+                <label for="ebay_link" class="block text-sm font-medium text-gray-700 flex items-center">
+                    <i class="fab fa-ebay text-lg text-blue-600 mr-2"></i> Lien d'Affiliation eBay
+                </label>
+                <input type="url" id="ebay_link" name="ebay_link" placeholder="https://..."
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+            </div>
+
+            <div class="pt-4 border-t border-gray-100 space-y-4">
+                <p class="text-xs text-gray-500 font-semibold">Ajouter 2 liens personnalisés si nécessaire :</p>
+                <div>
+                    <label for="custom_link_1" class="block text-sm font-medium text-gray-700">Lien Affiliation Personnalisé 1</label>
+                    <input type="url" id="custom_link_1" name="custom_link_1" placeholder="Nom du programme ou Lien"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                </div>
+                <div>
+                    <label for="custom_link_2" class="block text-sm font-medium text-gray-700">Lien Affiliation Personnalisé 2</label>
+                    <input type="url" id="custom_link_2" name="custom_link_2" placeholder="Nom du programme ou Lien"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                </div>
+            </div>
+
+            <div class="flex space-x-4 pt-4">
+                <button type="button" id="skipButton"
+                        class="w-1/2 flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-lg font-medium text-gray-700 bg-white hover:bg-gray-100 focus:outline-none transition duration-200">
+                    Sauter cette étape
+                </button>
+                <button type="submit" id="nextButton"
+                        class="w-1/2 flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-accent-orange hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-orange transition duration-200">
+                    Suivant
+                </button>
+            </div>
+            
+        </form>
+
+    </div>
+
+    <script type="module">
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // NOTE: La logique de sauvegarde sera ajoutée dans app.js ou un nouveau fichier js
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('affiliateLinksForm');
+            const skipButton = document.getElementById('skipButton');
+
+            // Logique de Soumission (Bouton Suivant)
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Ici, le code enverrait les données à Firestore.
+                // Après envoi, redirection vers l'étape suivante : setup social
+                window.location.href = 'affilié-social.html';
+            });
+
+            // Logique du Bouton Sauter
+            skipButton.addEventListener('click', () => {
+                // Redirection immédiate vers l'étape suivante (setup social)
+                window.location.href = 'affilié-social.html';
+            });
+        });
+    </script>
+    
 </body>
 </html>

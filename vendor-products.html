@@ -3,90 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de Bord Vendeur - JEOAH'S</title>
-    <link rel="stylesheet" href="styles.min.css">
+    <title>Tableau de Bord Vendeur - JEOAH'S Market Place</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], },
+                    colors: {
+                        'primary-blue': '#1D4ED8',
+                        'accent-orange': '#F97316',
+                        'gray-bg': '#F3F4F6',
+                        'dark-text': '#1F2937',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+        /* Style spécifique pour la barre latérale sur mobile */
+        @media (max-width: 768px) {
+            #sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                z-index: 50;
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
 </head>
-<body>
-    <div class="dashboard-layout">
-        <aside class="sidebar">
-            <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo" style="width: 70px; margin: 0 auto 20px;">
-            <h2>Mon Espace Vendeur</h2>
-            <a href="produits-vendeurs.html" class="active">
-                <img src="assets/icon-dashboard.png" alt="Dashboard">Tableau de Bord
-            </a>
-            <a href="fournisseur-step-social.html">
-                <img src="assets/icon-social.png" alt="Réseaux">Réseaux Sociaux
-            </a>
-            <a href="#commandes">
-                <img src="assets/icon-orders.png" alt="Commandes">Suivi Commandes
-            </a>
-            <a href="#retraits">
-                <img src="assets/icon-withdrawal.png" alt="Retraits">Mes Retraits
-            </a>
-            <a href="plans.html">
-                <img src="assets/icon-plan.png" alt="Plans">Mon Plan
-            </a>
-            <a href="faq.html">
-                <img src="assets/icon-support.png" alt="Support">Support
-            </a>
-        </aside>
+<body class="bg-gray-50 text-dark-text min-h-screen flex flex-col">
 
-        <main class="dashboard-content">
-            <h1>Tableau de Bord & Gestion des Produits</h1>
-
-            <div style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-                <p style="color: #032C4F; font-size: 1.1rem;">👋 **Message de Bienvenue !** Nous sommes ravis de vous compter parmi nous. Votre succès est notre mission.</p>
-                <p style="background: #eee; padding: 10px; border-radius: 5px; display: inline-block; font-weight: bold;">
-                    Votre Code Vendeur Unique : <span style="color: #FDC830;">JEOAH-VX9321</span>
-                </p>
+    <header class="sticky top-0 bg-white shadow-md z-40">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <button id="menu-toggle" class="md:hidden text-gray-600 hover:text-primary-blue focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <span class="text-2xl font-bold text-primary-blue">JEOAH'S <span class="text-accent-orange">Vendeur</span></span>
             </div>
             
-            <div class="balance-card">
-                <h2>Solde Actuel</h2>
-                <p>$1,520.50 USD</p>
-                <p style="font-size: 0.9em; margin-top: 10px;">Votre solde est mis à jour en temps réel. <a href="#retraits" style="color: #FDC830;">Faire un retrait</a></p>
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-600 hover:text-primary-blue transition">
+                    <i class="fas fa-bell text-xl"></i>
+                </button>
+                <div class="relative">
+                    <span class="text-sm font-medium text-gray-700">Bonjour, [Nom Vendeur]</span>
+                    <button id="profile-menu-button" class="ml-2 w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-primary-blue font-bold focus:outline-none">
+                        J
+                    </button>
+                    </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex flex-1 pt-0">
+
+        <aside id="sidebar" class="fixed md:sticky top-0 md:top-[64px] h-full md:h-screen w-64 bg-white shadow-xl md:shadow-none p-4 flex-shrink-0">
+            <nav class="space-y-2">
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-white bg-primary-blue font-semibold transition duration-200">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Tableau de Bord</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200">
+                    <i class="fas fa-box w-5"></i>
+                    <span>Mes Produits</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200">
+                    <i class="fas fa-shopping-cart w-5"></i>
+                    <span>Commandes</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200">
+                    <i class="fas fa-wallet w-5"></i>
+                    <span>Paiements & Retraits</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-200">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Paramètres</span>
+                </a>
+                <a href="inscription.html" class="flex items-center space-x-3 p-3 rounded-lg text-red-600 hover:bg-red-50 transition duration-200 mt-6 pt-4 border-t border-gray-100">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </nav>
+        </aside>
+
+        <div class="flex-1 p-4 md:p-8 overflow-y-auto">
+            
+            <h2 class="text-3xl font-extrabold text-dark-text mb-6">Aperçu du Compte Vendeur</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-primary-blue">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-500">Revenus Totaux (Ney)</span>
+                        <i class="fas fa-dollar-sign text-2xl text-primary-blue"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-dark-text mt-2">$ 0.00 <span class="text-base font-normal text-gray-400">USD</span></p>
+                    <p class="text-xs text-green-500 mt-1"><i class="fas fa-arrow-up"></i> +0% ce mois-ci</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-accent-orange">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-500">Total Ventes</span>
+                        <i class="fas fa-shopping-basket text-2xl text-accent-orange"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-dark-text mt-2">0</p>
+                    <p class="text-xs text-gray-400 mt-1">Nombre total d'articles vendus</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-green-500">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-500">Gains Affiliés</span>
+                        <i class="fas fa-handshake text-2xl text-green-500"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-dark-text mt-2">$ 0.00</p>
+                    <p class="text-xs text-gray-400 mt-1">Commissions gagnées via l'affiliation</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-purple-500">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-500">Produits Actifs</span>
+                        <i class="fas fa-tags text-2xl text-purple-500"></i>
+                    </div>
+                    <p class="text-3xl font-bold text-dark-text mt-2">0</p>
+                    <p class="text-xs text-gray-400 mt-1">Produits en ligne et prêts à être vendus</p>
+                </div>
+
             </div>
 
-            <h2>Ajouter un Nouveau Produit</h2>
-            <form id="addProductForm" style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
-                <input type="text" placeholder="Titre du Produit" required style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                <textarea placeholder="Description du produit (L'IA finira la description en beauté !)" rows="3" required style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;"></textarea>
-                <input type="number" placeholder="Prix (USD)" required style="width: 50%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc;">
-                
-                <p style="font-weight: bold; margin-bottom: 10px;">Télécharger vos 3 photos de produit (Face, Description, Prix)</p>
-                <input type="file" multiple accept="image/*" required style="width: 100%;">
-                
-                <p style="font-size: 0.9em; margin: 15px 0;">*L'IA optimisera vos descriptions et créera la publicité visuelle.</p>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Publier ce Produit</button>
-            </form>
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-dark-text">Liste de Vos Produits (0)</h3>
+                    <a href="#" class="flex items-center space-x-2 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-700 transition duration-200">
+                        <i class="fas fa-plus"></i>
+                        <span>Ajouter un Produit</span>
+                    </a>
+                </div>
 
-            <h2>Mes Produits Actuels</h2>
-            <div class="product-grid">
-                <div class="product-card">
-                    <img src="assets/produit-exemple1.jpg" alt="Exemple de produit" style="width: 100%; height: 200px; object-fit: cover; border-radius: 5px;">
-                    <h3>T-Shirt Tendance (Bleu)</h3>
-                    <p>Prix : **$25.00 USD**</p>
-                    <p style="font-size: 0.8em; color: green;">Statut : En ligne (Publiée par l'IA)</p>
-                </div>
-                <div class="product-card">
-                    <img src="assets/produit-exemple2.jpg" alt="Exemple de produit" style="width: 100%; height: 200px; object-fit: cover; border-radius: 5px;">
-                    <h3>Décoration Minimaliste</h3>
-                    <p>Prix : **$40.00 USD**</p>
-                    <p style="font-size: 0.8em; color: orange;">Statut : En attente de validation IA</p>
-                </div>
-                
-                <div class="product-card" style="border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; min-height: 280px; cursor: pointer;">
-                    <p style="color: #666; font-weight: bold;">➕ Ajouter un produit</p>
+                <div class="text-center py-10">
+                    <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 font-medium">Vous n'avez pas encore ajouté de produit.</p>
+                    <p class="text-sm text-gray-400 mt-1">Cliquez sur "Ajouter un Produit" pour démarrer vos ventes.</p>
                 </div>
             </div>
 
-        </main>
-    </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+            
+            // Masquer ou afficher le contenu pour le focus sur mobile
+            if (sidebar.classList.contains('open')) {
+                // Créer un overlay pour masquer le reste de l'écran (si nécessaire)
+            } else {
+                // Supprimer l'overlay
+            }
+        });
+    </script>
     
-    <div class="ia-chat-box" title="Chat IA 24/7">
-        <img src="assets/icon-ai-chat.png" alt="Chat IA">
-    </div>
-
-    <script src="app.js"></script>
 </body>
 </html>

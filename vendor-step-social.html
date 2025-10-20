@@ -3,53 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurer vos Réseaux - JEOAH'S Vendeur</title>
-    <link rel="stylesheet" href="styles.min.css">
+    <title>Configuration: Liens Sociaux - JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], },
+                    colors: {
+                        'primary-blue': '#1D4ED8',
+                        'accent-orange': '#F97316',
+                        'gray-bg': '#F3F4F6',
+                        'dark-text': '#1F2937',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+    </style>
 </head>
-<body>
-    <header style="background: #032C4F; color: #fff; padding: 1rem;">
-        <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo">
-    </header>
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <main>
-        <div class="social-setup-container">
-            <h1>Bienvenue Vendeur !</h1>
-            <p>Connectons vos réseaux sociaux pour maximiser la portée de vos publications et de vos Lives.</p>
-            <p style="color: #032C4F; font-weight: bold;">(Vous pouvez lier jusqu'à 5 comptes)</p>
+    <div class="w-full max-w-lg bg-white rounded-xl shadow-2xl p-8 space-y-8">
+        
+        <header class="text-center">
+            <h1 class="text-3xl font-extrabold text-dark-text">Votre Boutique : Réseaux Sociaux</h1>
+            <p class="mt-2 text-sm text-gray-500">Ajoutez jusqu'à 5 liens sociaux pour vos promotions. Cela aide Ney à cibler vos clients. (Non obligatoire)</p>
+        </header>
+
+        <form id="supplierSocialForm" class="space-y-6">
             
-            <form id="socialForm">
-                <div class="social-input-group">
-                    <img src="assets/icon-instagram.png" alt="Instagram">
-                    <input type="url" placeholder="Lien Instagram (Ex: instagram.com/vendeur)">
+            <div class="p-4 bg-gray-50 rounded-lg text-center">
+                <p class="text-xs font-semibold text-gray-600 mb-2">Exemples de plateformes :</p>
+                <div class="flex flex-wrap justify-center space-x-4 text-xl">
+                    <i class="fab fa-instagram text-pink-600" title="Instagram"></i>
+                    <i class="fab fa-tiktok text-black" title="TikTok"></i>
+                    <i class="fab fa-youtube text-red-600" title="YouTube"></i>
+                    <i class="fab fa-twitter text-blue-400" title="X/Twitter"></i>
+                    <i class="fab fa-facebook text-blue-700" title="Facebook"></i>
+                    <i class="fab fa-snapchat text-yellow-500" title="Snapchat"></i>
+                    <i class="fab fa-linkedin text-blue-800" title="LinkedIn"></i>
+                    <i class="fab fa-telegram text-blue-500" title="Telegram"></i>
+                    <i class="fab fa-quora text-red-800" title="Quora"></i>
+                    <i class="fab fa-reddit text-orange-600" title="Reddit"></i>
                 </div>
-                <div class="social-input-group">
-                    <img src="assets/icon-facebook.png" alt="Facebook">
-                    <input type="url" placeholder="Lien Facebook (Ex: facebook.com/vendeur)">
-                </div>
-                <div class="social-input-group">
-                    <img src="assets/icon-twitter.png" alt="Twitter/X">
-                    <input type="url" placeholder="Lien Twitter/X (Ex: twitter.com/vendeur)">
-                </div>
-                <div class="social-input-group">
-                    <img src="assets/icon-youtube.png" alt="YouTube">
-                    <input type="url" placeholder="Lien YouTube (Facultatif)">
-                </div>
-                <div class="social-input-group">
-                    <img src="assets/icon-tiktok.png" alt="TikTok">
-                    <input type="url" placeholder="Lien TikTok (Facultatif)">
-                </div>
+            </div>
 
-                <a href="produits-vendeurs.html" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
-                    Suivant : Mon Tableau de Bord
-                </a>
-            </form>
+            <div class="space-y-4">
+                
+                <div>
+                    <label for="social_link_1" class="block text-sm font-medium text-gray-700">Lien Social 1 (Principal de la Boutique)</label>
+                    <input type="url" id="social_link_1" name="social_link_1" placeholder="https://instagram.com/votre_boutique..."
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                </div>
+                <div>
+                    <label for="social_link_2" class="block text-sm font-medium text-gray-700">Lien Social 2</label>
+                    <input type="url" id="social_link_2" name="social_link_2" placeholder="https://"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                </div>
+                <div>
+                    <label for="social_link_3" class="block text-sm font-medium text-gray-700">Lien Social 3</label>
+                    <input type="url" id="social_link_3" name="social_link_3" placeholder="https://"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                </div>
+                <div>
+                    <label for="social_link_4" class="block text-sm font-medium text-gray-700">Lien Social 4</label>
+                    <input type="url" id="social_link_4" name="social_link_4" placeholder="https://"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                </div>
+                <div>
+                    <label for="social_link_5" class="block text-sm font-medium text-gray-700">Lien Social 5 (Max)</label>
+                    <input type="url" id="social_link_5" name="social_link_5" placeholder="https://"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                </div>
+            </div>
             
-            <p style="margin-top: 20px; font-size: 0.9em;"><a href="index.html">Retour à l'accueil</a></p>
-        </div>
-    </main>
+            <div class="flex space-x-4 pt-4">
+                <button type="button" id="skipButton"
+                        class="w-1/2 flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-lg font-medium text-gray-700 bg-white hover:bg-gray-100 focus:outline-none transition duration-200">
+                    Sauter cette étape
+                </button>
+                <button type="submit" id="nextButton"
+                        class="w-1/2 flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-primary-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue transition duration-200">
+                    Terminer et accéder au Tableau de Bord
+                </button>
+            </div>
+            
+        </form>
 
-    <footer>
-        <p>© 2025 JEOAH’S Market Place</p>
-    </footer>
+    </div>
+
+    <script type="module">
+        // NOTE: La logique de sauvegarde sera ajoutée dans app.js ou un nouveau fichier js
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('supplierSocialForm');
+            const skipButton = document.getElementById('skipButton');
+
+            // Logique de Soumission (Bouton Terminer)
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Ici, le code enverrait les données à Firestore.
+                // Après envoi, le Vendeur a terminé l'onboarding. Redirection vers le Dashboard.
+                window.location.href = 'produits-vendeurs.html'; // Le Dashboard du Vendeur
+            });
+
+            // Logique du Bouton Sauter
+            skipButton.addEventListener('click', () => {
+                // Redirection immédiate vers le Dashboard
+                window.location.href = 'produits-vendeurs.html';
+            });
+        });
+    </script>
+    
 </body>
 </html>

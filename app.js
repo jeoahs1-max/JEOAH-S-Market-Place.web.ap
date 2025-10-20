@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isTrial: isTrial,
                 trialEnds: trialEnds,
                 // IMPORTANT: À terme, votre propre UID Admin doit être marqué ici
-                isAdmin: (email === "votre.email.admin@exemple.com"), // À personnaliser
+                isAdmin: (email === "jeoahs1@gmail.com"), // À personnaliser
                 createdAt: new Date()
             });
 

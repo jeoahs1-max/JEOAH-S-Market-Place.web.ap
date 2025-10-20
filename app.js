@@ -60,7 +60,87 @@ function showNotification(message, type) {
  * @returns {string} L'ID personnalisé.
  */
 function generateCustomId(rolePrefix, uid) {
-    // Utilise une partie de l'UID pour garantir l'unicité
+    //// --- 4. FONCTIONS DE SAUVEGARDE DE L'ONBOARDING ---
+
+/**
+ * Sauvegarde les liens sociaux (Vendeur, Affilié, Acheteur) dans Firestore.
+ * @param {HTMLFormElement} form - Le formulaire d'entrée des liens sociaux.
+ * @param {string} nextUrl - L'URL de redirection après la sauvegarde.
+ */
+async function saveSocialLinks(form, nextUrl) {
+    if (!window.auth.currentUser) {
+        showNotification("Session expirée. Veuillez vous reconnecter.", 'error');
+        setTimeout(() => { window.location.href = 'connexion.html'; }, 1500);
+        return;
+    }
+    
+    const uid = window.auth.currentUser.uid;
+    const links = [];
+    
+    // Récupération des 5 liens sociaux
+    for (let i = 1; i <= 5; i++) {
+        const link = form[`social_link_${i}`].value.trim();
+        if (link) links.push(link);
+    }
+    
+    try {
+        const userRef = doc(window.db, "users", uid);
+        await setDoc(userRef, { 
+            socials: links, // Mise à jour du champ 'socials'
+            onboardingComplete: true // Marquer l'onboarding comme terminé
+        }, { merge: true });
+
+        showNotification("Configuration sociale sauvegardée avec succès!", 'success');
+        
+        setTimeout(() => {
+            window.location.href = nextUrl;
+        }, 500);
+
+    } catch (error) {
+        showNotification(`Erreur de sauvegarde sociale : ${error.message}`, 'error');
+    }
+}
+
+/**
+ * Sauvegarde les liens d'affiliation externes dans le document utilisateur Firestore.
+ * Utilisé uniquement par l'Affilié sur liens-d-affiliation.html.
+ * @param {HTMLFormElement} form - Le formulaire d'entrée des liens d'affiliation.
+ */
+async function saveAffiliateLinks(form) {
+    if (!window.auth.currentUser) {
+        window.location.href = 'connexion.html'; 
+        return;
+    }
+    
+    const uid = window.auth.currentUser.uid;
+    
+    // Récupération des liens spécifiques à l'affiliation
+    const links = {
+        amazon: form.amazon_link.value.trim() || null,
+        temu: form.temu_link.value.trim() || null,
+        aliexpress: form.aliexpress_link.value.trim() || null,
+        ebay: form.ebay_link.value.trim() || null,
+        custom1: form.custom_link_1.value.trim() || null,
+        custom2: form.custom_link_2.value.trim() || null,
+    };
+
+    try {
+        const userRef = doc(window.db, "users", uid);
+        await setDoc(userRef, { 
+            affiliateLinks: links 
+        }, { merge: true }); // 'merge: true' garde les autres champs intacts
+        
+        showNotification("Liens d'affiliation sauvegardés avec succès!", 'success');
+        
+        // Redirection vers l'étape suivante: setup social pour l'Affilié
+        setTimeout(() => {
+            window.location.href = 'affilié-social.html';
+        }, 500);
+
+    } catch (error) {
+        showNotification(`Erreur lors de la sauvegarde des liens: ${error.message}`, 'error');
+    }
+} Utilise une partie de l'UID pour garantir l'unicité
     const uniquePart = uid.substring(0, 8).toUpperCase(); 
     return `${rolePrefix}${uniquePart}`;
 }
@@ -197,5 +277,94 @@ document.addEventListener('DOMContentLoaded', () => {
         aiDemoButton.addEventListener('click', () => {
             showNotification("La démo IA sera disponible après l'intégration des Cloud Functions!", 'info');
         });
+    }
+});// -----------------------------------------------------------------
+// 5. Logique des Formulaires d'Onboarding (Post-Inscription)
+// -----------------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+    // S'assurer que les services Firebase sont chargés
+    if (!window.auth || !window.db) return;
+
+    const path = window.location.pathname;
+
+    // --- A. Logique Affilié: Liens Externes (liens-d-affiliation.html) ---
+    if (path.includes('liens-d-affiliation.html')) {
+        const form = document.getElementById('affiliateLinksForm');
+        const skipButton = document.getElementById('skipButton');
+
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveAffiliateLinks(form);
+            });
+        }
+        
+        if (skipButton) {
+             skipButton.addEventListener('click', () => {
+                // Pas de sauvegarde, redirection vers l'étape suivante (affilié-social)
+                window.location.href = 'affilié-social.html';
+            });
+        }
+    }
+    
+    // --- B. Logique Social Vendeur (fournisseur-step-social.html) ---
+    if (path.includes('fournisseur-step-social.html')) {
+        const form = document.getElementById('supplierSocialForm');
+        const skipButton = document.getElementById('skipButton');
+        const nextUrl = 'produits-vendeurs.html'; // Dashboard Vendeur
+        
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveSocialLinks(form, nextUrl);
+            });
+        }
+        
+        if (skipButton) {
+             skipButton.addEventListener('click', () => {
+                window.location.href = nextUrl;
+            });
+        }
+    }
+
+    // --- C. Logique Social Affilié (affilié-social.html) ---
+    if (path.includes('affilié-social.html')) {
+        const form = document.getElementById('affiliateSocialForm');
+        const skipButton = document.getElementById('skipButton');
+        const nextUrl = 'produits-affiliés.html'; // Dashboard Affilié
+        
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveSocialLinks(form, nextUrl);
+            });
+        }
+        
+        if (skipButton) {
+             skipButton.addEventListener('click', () => {
+                window.location.href = nextUrl;
+            });
+        }
+    }
+    
+    // --- D. Logique Social Acheteur (acheteur-social-setup.html) ---
+    if (path.includes('acheteur-social-setup.html')) {
+        const form = document.getElementById('buyerSocialForm');
+        const skipButton = document.getElementById('skipButton');
+        const nextUrl = 'index.html'; // Vitrine
+        
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveSocialLinks(form, nextUrl);
+            });
+        }
+        
+        if (skipButton) {
+             skipButton.addEventListener('click', () => {
+                window.location.href = nextUrl;
+            });
+        }
     }
 });

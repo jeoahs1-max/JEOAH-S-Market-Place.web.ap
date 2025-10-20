@@ -331,7 +331,7 @@ function displayVendorProducts() {
 }
 
 // -----------------------------------------------------------------
-// 5. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
+// 6. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
 // -----------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -473,3 +473,124 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+// -----------------------------------------------------------------
+// 7. LOGIQUE D'AFFICHAGE DES DÉTAILS DU PRODUIT (produit.html)
+// -----------------------------------------------------------------
+
+/**
+ * Affiche les détails d'un produit et les liens d'affiliation alternatifs de l'affilié.
+ */
+async function displayProductDetails() {
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    const affiliateId = params.get('affiliate');
+
+    const productContainer = document.getElementById('productDetailsContainer');
+    const comparisonContainer = document.getElementById('comparisonLinks');
+
+    if (!productId || !productContainer) {
+        if(productContainer) productContainer.innerHTML = '<div class="text-center py-10 text-red-500">Produit non trouvé.</div>';
+        return;
+    }
+
+    try {
+        // 1. Récupérer les détails du produit (Firestore)
+        const productDoc = await doc(window.db, "products", productId);
+        const productSnapshot = await getDoc(productDoc);
+
+        if (!productSnapshot.exists()) {
+            productContainer.innerHTML = '<div class="text-center py-10 text-red-500">Ce produit n\'existe pas.</div>';
+            return;
+        }
+
+        const product = productSnapshot.data();
+
+        // 2. Afficher les détails principaux
+        let imagesHtml = product.imageUrls.map(url => `<img src="${url}" class="w-full h-auto object-cover rounded-lg mb-2 shadow-md" alt="${product.name}">`).join('');
+        
+        productContainer.innerHTML = `
+            <div class="md:grid md:grid-cols-2 gap-8">
+                <div class="image-gallery">
+                    ${imagesHtml}
+                </div>
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900">${product.name}</h1>
+                    <p class="text-2xl font-semibold text-indigo-600 mt-2">$${product.price.toFixed(2)}</p>
+                    <div class="mt-4">
+                        <p class="text-gray-700 font-medium">Description :</p>
+                        <p class="text-gray-600">${product.description}</p>
+                    </div>
+                    <div class="mt-4">
+                         <button class="bg-indigo-600 text-white py-3 px-6 rounded-md hover:bg-indigo-700 transition duration-150 font-semibold w-full">
+                            Acheter via JEOAH'S
+                        </button>
+                    </div>
+                    
+                    ${comparisonContainer ? '<div id="comparisonLinks" class="mt-8"></div>' : ''}
+                </div>
+            </div>
+        `;
+        
+        // 3. Afficher les liens de comparaison si un Affilié est présent
+        if (affiliateId && comparisonContainer) {
+            await displayComparisonLinks(affiliateId, comparisonContainer);
+        }
+
+
+    } catch (error) {
+        console.error("Erreur lors du chargement des détails du produit:", error);
+        productContainer.innerHTML = `<div class="text-center py-10 text-red-500">Erreur critique de chargement.</div>`;
+    }
+}
+
+
+/**
+ * Récupère les liens d'affiliation génériques de l'Affilié et les affiche.
+ */
+async function displayComparisonLinks(affiliateId, container) {
+    try {
+        const affiliateDoc = await doc(window.db, "users", affiliateId);
+        const affiliateSnapshot = await getDoc(affiliateDoc);
+        
+        if (!affiliateSnapshot.exists() || !affiliateSnapshot.data().affiliateLinks) {
+            container.innerHTML = `<p class="text-sm text-gray-500 mt-4">Pas de liens de comparaison disponibles pour cet affilié.</p>`;
+            return;
+        }
+
+        const links = affiliateSnapshot.data().affiliateLinks;
+        let comparisonHtml = `<h3 class="text-xl font-semibold mb-3 border-b pb-2">Comparer les prix chez nos partenaires</h3>`;
+        let linksFound = false;
+        
+        // Mapping simple pour l'affichage (utilisez le lien générique de l'Affilié)
+        const linkMap = {
+            amazon: { name: "Amazon", color: "bg-yellow-600" },
+            temu: { name: "Temu", color: "bg-blue-600" },
+            aliexpress: { name: "AliExpress", color: "bg-red-600" },
+            ebay: { name: "eBay", color: "bg-purple-600" }
+            // Ajoutez custom1 et custom2 si nécessaire
+        };
+
+        for (const [key, details] of Object.entries(linkMap)) {
+            const url = links[key];
+            if (url) {
+                // Redirection vers le lien générique de l'Affilié (pour le moment)
+                comparisonHtml += `
+                    <a href="${url}" target="_blank" class="${details.color} text-white py-3 px-6 rounded-md hover:opacity-90 transition duration-150 font-semibold block mt-2 text-center">
+                        Voir le produit sur ${details.name} (Lien Affilié)
+                    </a>
+                `;
+                linksFound = true;
+            }
+        }
+        
+        if (linksFound) {
+            container.innerHTML = comparisonHtml;
+        } else {
+             container.innerHTML = `<p class="text-sm text-gray-500 mt-4">Aucun lien d'affiliation externe trouvé pour ce partenaire.</p>`;
+        }
+
+
+    } catch (error) {
+        console.error("Erreur lors du chargement des liens de comparaison:", error);
+    }
+}

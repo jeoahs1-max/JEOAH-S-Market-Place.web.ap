@@ -1,13 +1,14 @@
 // =================================================================
 // src/public/app.js - Logique Principale du Frontend
-// Code COMPLET pour l'authentification, l'onboarding et la gestion des produits.
+// Code COMPLET pour l'authentification, l'onboarding, la gestion des produits
+// Vendeur et Affilié, et l'affichage des détails de produit.
 // =================================================================
 
 // -----------------------------------------------------------------
 // 1. Dépendances Firebase (Imports)
 // -----------------------------------------------------------------
-import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { doc, setDoc, collection, getDocs, query, where, limit, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { doc, setDoc, collection, getDocs, query, where, limit, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
 
@@ -249,13 +250,11 @@ async function saveNewProduct(form) {
         submitButton.textContent = "Sauvegarder le Produit";
     }
 }
+
+
 // -----------------------------------------------------------------
 // 5. LOGIQUE D'AFFICHAGE DES PRODUITS (Vendeur Dashboard)
 // -----------------------------------------------------------------
-
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
 
 /**
  * Récupère et affiche les produits du vendeur connecté.
@@ -330,8 +329,211 @@ function displayVendorProducts() {
     });
 }
 
+
 // -----------------------------------------------------------------
-// 6. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
+// 6. LOGIQUE D'AFFICHAGE DES PRODUITS (Affilié Dashboard)
+// -----------------------------------------------------------------
+
+/**
+ * Récupère et affiche TOUS les produits de la marketplace pour l'Affilié.
+ */
+function displayAffiliateProducts() {
+    const productsContainer = document.getElementById('affiliateProductsList');
+    if (!productsContainer) return; 
+
+    productsContainer.innerHTML = '<div class="text-center py-10 text-gray-500">Chargement de tous les produits disponibles...</div>';
+    
+    // Attendre que l'état d'authentification soit résolu
+    onAuthStateChanged(window.auth, async (user) => {
+        if (!user || !window.db) {
+            productsContainer.innerHTML = '<div class="text-center py-10 text-red-500">Veuillez vous connecter pour voir les produits.</div>';
+            return;
+        }
+
+        const affiliateId = user.uid; 
+        
+        try {
+            // 1. Requête Firestore: Chercher TOUS les produits actifs
+            const productsRef = collection(window.db, "products");
+            const querySnapshot = await getDocs(productsRef); // Pas de filtre par UID
+
+            if (querySnapshot.empty) {
+                productsContainer.innerHTML = `
+                    <div class="text-center py-20 border-2 border-dashed border-gray-200 rounded-lg">
+                        <p class="text-gray-600 mb-4">Aucun produit n'est disponible pour l'affiliation pour l'instant.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            productsContainer.innerHTML = ''; // Nettoyer le message de chargement
+            
+            // 2. Génération du HTML
+            querySnapshot.forEach((doc) => {
+                const product = doc.data();
+                
+                // Calcul du montant de la commission
+                const commissionAmount = (product.price * (product.affiliateCommissionPercent / 100)).toFixed(2);
+                
+                // Lien de parrainage dynamique:
+                // format: [URL_FRONTEND]/produit.html?id=[ID_PRODUIT]&affiliate=[ID_AFFILIÉ]
+                const affiliateLink = `${window.location.origin}/produit.html?id=${product.id}&affiliate=${affiliateId}`;
+
+                const productHtml = `
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-100 flex items-center">
+                        <img src="${product.imageUrls[0] || 'placeholder.png'}" alt="${product.name}" class="w-16 h-16 object-cover rounded mr-4">
+                        
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-semibold text-gray-800">${product.name}</h3>
+                            <p class="text-sm text-gray-500">Prix: $${product.price.toFixed(2)} - Commission: ${product.affiliateCommissionPercent}% ($${commissionAmount})</p>
+                        </div>
+                        
+                        <div class="text-right">
+                            <button 
+                                onclick="navigator.clipboard.writeText('${affiliateLink}'); showNotification('Lien copié !', 'success');"
+                                class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition font-medium text-sm"
+                            >
+                                Copier le Lien
+                            </button>
+                        </div>
+                    </div>
+                `;
+                productsContainer.innerHTML += productHtml;
+            });
+
+        } catch (error) {
+            console.error("Erreur lors de la récupération des produits affiliés:", error);
+            productsContainer.innerHTML = `<div class="text-center py-10 text-red-500">Erreur: Impossible de charger les produits.</div>`;
+        }
+    });
+}
+
+
+// -----------------------------------------------------------------
+// 7. LOGIQUE D'AFFICHAGE DES DÉTAILS DU PRODUIT (produit.html)
+// -----------------------------------------------------------------
+
+/**
+ * Récupère les liens d'affiliation génériques de l'Affilié et les affiche.
+ */
+async function displayComparisonLinks(affiliateId, container) {
+    try {
+        const affiliateDoc = doc(window.db, "users", affiliateId);
+        const affiliateSnapshot = await getDoc(affiliateDoc);
+        
+        if (!affiliateSnapshot.exists() || !affiliateSnapshot.data().affiliateLinks) {
+            container.innerHTML = `<p class="text-sm text-gray-500 mt-4">Pas de liens de comparaison disponibles pour cet affilié.</p>`;
+            return;
+        }
+
+        const links = affiliateSnapshot.data().affiliateLinks;
+        let comparisonHtml = `<h3 class="text-xl font-semibold mb-3 border-b pb-2">Comparer les prix chez nos partenaires</h3>`;
+        let linksFound = false;
+        
+        // Mapping simple pour l'affichage (utilisez le lien générique de l'Affilié)
+        const linkMap = {
+            amazon: { name: "Amazon", color: "bg-yellow-600" },
+            temu: { name: "Temu", color: "bg-blue-600" },
+            aliexpress: { name: "AliExpress", color: "bg-red-600" },
+            ebay: { name: "eBay", color: "bg-purple-600" }
+            // Ajoutez custom1 et custom2 si nécessaire
+        };
+
+        for (const [key, details] of Object.entries(linkMap)) {
+            const url = links[key];
+            if (url) {
+                // Redirection vers le lien générique de l'Affilié (pour le moment)
+                comparisonHtml += `
+                    <a href="${url}" target="_blank" class="${details.color} text-white py-3 px-6 rounded-md hover:opacity-90 transition duration-150 font-semibold block mt-2 text-center">
+                        Voir le produit sur ${details.name} (Lien Affilié)
+                    </a>
+                `;
+                linksFound = true;
+            }
+        }
+        
+        if (linksFound) {
+            container.innerHTML = comparisonHtml;
+        } else {
+             container.innerHTML = `<p class="text-sm text-gray-500 mt-4">Aucun lien d'affiliation externe trouvé pour ce partenaire.</p>`;
+        }
+
+
+    } catch (error) {
+        console.error("Erreur lors du chargement des liens de comparaison:", error);
+    }
+}
+
+/**
+ * Affiche les détails d'un produit et les liens d'affiliation alternatifs de l'affilié.
+ */
+async function displayProductDetails() {
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    const affiliateId = params.get('affiliate');
+
+    const productContainer = document.getElementById('productDetailsContainer');
+    // Le comparisonContainer doit être défini sur la page produit.html
+    const comparisonContainer = document.getElementById('comparisonLinks'); 
+
+    if (!productId || !productContainer) {
+        if(productContainer) productContainer.innerHTML = '<div class="text-center py-10 text-red-500">Produit non trouvé.</div>';
+        return;
+    }
+
+    try {
+        // 1. Récupérer les détails du produit (Firestore)
+        const productDoc = doc(window.db, "products", productId);
+        const productSnapshot = await getDoc(productDoc);
+
+        if (!productSnapshot.exists()) {
+            productContainer.innerHTML = '<div class="text-center py-10 text-red-500">Ce produit n\'existe pas.</div>';
+            return;
+        }
+
+        const product = productSnapshot.data();
+
+        // 2. Afficher les détails principaux
+        let imagesHtml = product.imageUrls.map(url => `<img src="${url}" class="w-full h-auto object-cover rounded-lg mb-2 shadow-md" alt="${product.name}">`).join('');
+        
+        productContainer.innerHTML = `
+            <div class="md:grid md:grid-cols-2 gap-8">
+                <div class="image-gallery">
+                    ${imagesHtml}
+                </div>
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900">${product.name}</h1>
+                    <p class="text-2xl font-semibold text-indigo-600 mt-2">$${product.price.toFixed(2)}</p>
+                    <div class="mt-4">
+                        <p class="text-gray-700 font-medium">Description :</p>
+                        <p class="text-gray-600">${product.description}</p>
+                    </div>
+                    <div class="mt-4">
+                         <button class="bg-indigo-600 text-white py-3 px-6 rounded-md hover:bg-indigo-700 transition duration-150 font-semibold w-full">
+                            Acheter via JEOAH'S
+                        </button>
+                    </div>
+                    
+                    <div id="comparisonLinks" class="mt-8"></div>
+                </div>
+            </div>
+        `;
+        
+        // 3. Afficher les liens de comparaison si un Affilié est présent
+        // Note: comparisonContainer est ré-initialisé ici si l'élément existe.
+        if (affiliateId && document.getElementById('comparisonLinks')) {
+            await displayComparisonLinks(affiliateId, document.getElementById('comparisonLinks'));
+        }
+
+    } catch (error) {
+        console.error("Erreur lors du chargement des détails du produit:", error);
+        productContainer.innerHTML = `<div class="text-center py-10 text-red-500">Erreur critique de chargement.</div>`;
+    }
+}
+
+
+// -----------------------------------------------------------------
+// 8. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
 // -----------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -465,134 +667,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- D. Logique IA (Démo - Simplifiée) ---
-    const aiDemoButton = document.getElementById('ai-demo-button');
-    if (aiDemoButton) {
-        aiDemoButton.addEventListener('click', () => {
-            showNotification("La démo IA sera disponible après l'intégration des Cloud Functions!", 'info');
-        });
+    // --- D. Logique d'Affichage Vendeur (produits-vendeurs.html) ---
+    if (path.includes('produits-vendeurs.html')) {
+        displayVendorProducts();
     }
-});
-// -----------------------------------------------------------------
-// 7. LOGIQUE D'AFFICHAGE DES DÉTAILS DU PRODUIT (produit.html)
-// -----------------------------------------------------------------
-
-/**
- * Affiche les détails d'un produit et les liens d'affiliation alternatifs de l'affilié.
- */
-async function displayProductDetails() {
-    const params = new URLSearchParams(window.location.search);
-    const productId = params.get('id');
-    const affiliateId = params.get('affiliate');
-
-    const productContainer = document.getElementById('productDetailsContainer');
-    const comparisonContainer = document.getElementById('comparisonLinks');
-
-    if (!productId || !productContainer) {
-        if(productContainer) productContainer.innerHTML = '<div class="text-center py-10 text-red-500">Produit non trouvé.</div>';
-        return;
-    }
-
-    try {
-        // 1. Récupérer les détails du produit (Firestore)
-        const productDoc = await doc(window.db, "products", productId);
-        const productSnapshot = await getDoc(productDoc);
-
-        if (!productSnapshot.exists()) {
-            productContainer.innerHTML = '<div class="text-center py-10 text-red-500">Ce produit n\'existe pas.</div>';
-            return;
-        }
-
-        const product = productSnapshot.data();
-
-        // 2. Afficher les détails principaux
-        let imagesHtml = product.imageUrls.map(url => `<img src="${url}" class="w-full h-auto object-cover rounded-lg mb-2 shadow-md" alt="${product.name}">`).join('');
-        
-        productContainer.innerHTML = `
-            <div class="md:grid md:grid-cols-2 gap-8">
-                <div class="image-gallery">
-                    ${imagesHtml}
-                </div>
-                <div>
-                    <h1 class="text-4xl font-bold text-gray-900">${product.name}</h1>
-                    <p class="text-2xl font-semibold text-indigo-600 mt-2">$${product.price.toFixed(2)}</p>
-                    <div class="mt-4">
-                        <p class="text-gray-700 font-medium">Description :</p>
-                        <p class="text-gray-600">${product.description}</p>
-                    </div>
-                    <div class="mt-4">
-                         <button class="bg-indigo-600 text-white py-3 px-6 rounded-md hover:bg-indigo-700 transition duration-150 font-semibold w-full">
-                            Acheter via JEOAH'S
-                        </button>
-                    </div>
-                    
-                    ${comparisonContainer ? '<div id="comparisonLinks" class="mt-8"></div>' : ''}
-                </div>
-            </div>
-        `;
-        
-        // 3. Afficher les liens de comparaison si un Affilié est présent
-        if (affiliateId && comparisonContainer) {
-            await displayComparisonLinks(affiliateId, comparisonContainer);
-        }
-
-
-    } catch (error) {
-        console.error("Erreur lors du chargement des détails du produit:", error);
-        productContainer.innerHTML = `<div class="text-center py-10 text-red-500">Erreur critique de chargement.</div>`;
-    }
-}
-
-
-/**
- * Récupère les liens d'affiliation génériques de l'Affilié et les affiche.
- */
-async function displayComparisonLinks(affiliateId, container) {
-    try {
-        const affiliateDoc = await doc(window.db, "users", affiliateId);
-        const affiliateSnapshot = await getDoc(affiliateDoc);
-        
-        if (!affiliateSnapshot.exists() || !affiliateSnapshot.data().affiliateLinks) {
-            container.innerHTML = `<p class="text-sm text-gray-500 mt-4">Pas de liens de comparaison disponibles pour cet affilié.</p>`;
-            return;
-        }
-
-        const links = affiliateSnapshot.data().affiliateLinks;
-        let comparisonHtml = `<h3 class="text-xl font-semibold mb-3 border-b pb-2">Comparer les prix chez nos partenaires</h3>`;
-        let linksFound = false;
-        
-        // Mapping simple pour l'affichage (utilisez le lien générique de l'Affilié)
-        const linkMap = {
-            amazon: { name: "Amazon", color: "bg-yellow-600" },
-            temu: { name: "Temu", color: "bg-blue-600" },
-            aliexpress: { name: "AliExpress", color: "bg-red-600" },
-            ebay: { name: "eBay", color: "bg-purple-600" }
-            // Ajoutez custom1 et custom2 si nécessaire
-        };
-
-        for (const [key, details] of Object.entries(linkMap)) {
-            const url = links[key];
-            if (url) {
-                // Redirection vers le lien générique de l'Affilié (pour le moment)
-                comparisonHtml += `
-                    <a href="${url}" target="_blank" class="${details.color} text-white py-3 px-6 rounded-md hover:opacity-90 transition duration-150 font-semibold block mt-2 text-center">
-                        Voir le produit sur ${details.name} (Lien Affilié)
-                    </a>
-                `;
-                linksFound = true;
-            }
-        }
-        
-        if (linksFound) {
-            container.innerHTML = comparisonHtml;
-        } else {
-             container.innerHTML = `<p class="text-sm text-gray-500 mt-4">Aucun lien d'affiliation externe trouvé pour ce partenaire.</p>`;
-        }
-
-
-    } catch (error) {
-        console.error("Erreur lors du chargement des liens de comparaison:", error);
-    }// --- E. Logique d'Affichage des Produits Affiliés (produits-affiliés.html) ---
+    
+    // --- E. Logique d'Affichage des Produits Affiliés (produits-affiliés.html) ---
     if (path.includes('produits-affiliés.html')) {
         displayAffiliateProducts();
     }
@@ -601,7 +681,6 @@ async function displayComparisonLinks(affiliateId, container) {
     if (path.includes('produit.html')) {
         displayProductDetails();
     }
-}// ... (le bloc que vous venez d'ajouter)
     
     // --- G. Logique IA (Démo - Simplifiée) ---
     const aiDemoButton = document.getElementById('ai-demo-button');
@@ -610,4 +689,4 @@ async function displayComparisonLinks(affiliateId, container) {
             showNotification("La démo IA sera disponible après l'intégration des Cloud Functions!", 'info');
         });
     }
-}); // <-- Fin du DOMContentLoaded. RIEN après cette ligne, sauf si c'est pour l'export.
+});

@@ -43,6 +43,11 @@
     <div id="notification-box" class="p-4 rounded-lg shadow-xl text-white font-medium"></div>
 
     <div class="w-full max-w-md bg-white rounded-xl shadow-2xl p-8 space-y-8">
+        
+        <div class="text-center mb-6">
+            <img src="../assets/logo.png" alt="Logo JEOAH'S Market Place" class="h-12 mx-auto">
+        </div>
+
         <header class="text-center">
             <h1 class="text-3xl font-extrabold text-dark-text">Créer votre compte</h1>
             <p class="mt-2 text-sm text-gray-500">Rejoignez JEOAH'S et laissez Ney automatiser vos ventes.</p>
@@ -95,7 +100,6 @@
                         <span class="text-xs text-gray-500">Faites la promotion de produits et générez une commission de 10%.</span>
                     </div>
                 </label>
-
                 </fieldset>
 
             <div class="pt-4 border-t border-gray-100 space-y-4">
@@ -128,7 +132,11 @@
                 </div>
             </div>
             <div class="pt-4 border-t border-gray-100">
-                </div>
+                <button type="button" id="ai-demo-button"
+                        class="w-full text-center py-2 text-sm font-medium text-primary-blue border border-primary-blue rounded-lg hover:bg-primary-blue hover:text-white transition duration-200">
+                    Voir un échantillon du travail de Ney
+                </button>
+            </div>
             
             <div class="flex items-start">
                 <div class="flex items-center h-5">
@@ -145,7 +153,12 @@
             </button>
         </form>
         
-        </div>
+        <p class="mt-4 text-center text-sm text-gray-600">
+            Déjà un compte ? 
+            <a href="login.html" class="font-semibold text-primary-blue hover:text-blue-700 transition">Connectez-vous</a>
+        </p>
+
+    </div>
 
     <script>
         document.getElementById('togglePassword').addEventListener('click', function (e) {

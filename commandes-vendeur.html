@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Commandes - JEOAH'S Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <div id="notification-box" class="fixed top-4 right-4 z-50"></div>
+    
+    <div class="container mx-auto p-4 sm:p-8">
+        <header class="mb-8 border-b pb-4">
+            <h1 class="text-3xl font-bold text-gray-800">Mes Commandes Client</h1>
+            <p class="text-gray-600">Gérez le statut, l'expédition et les détails de vos ventes.</p>
+        </header>
+
+        <div class="bg-white p-4 rounded-xl shadow-md mb-6 flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-indigo-700">Liste des Commandes</h2>
+            </div>
+
+        <div id="ordersListContainer" class="space-y-4">
+            <p class="text-center py-10 text-gray-500" id="ordersLoadingMessage">Chargement de vos commandes...</p>
+            </div>
+
+        <div id="emptyOrdersMessage" class="text-center py-20 border-2 border-dashed border-gray-200 rounded-lg hidden">
+            <p class="text-gray-600 mb-4">Vous n'avez aucune nouvelle commande pour l'instant.</p>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Ajout de arrayUnion pour simplifier les mises à jour futures
+        import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, setDoc, query, where, getDocs, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        
+        // VOS CLÉS FIREBASE ICI
+        const firebaseConfig = { /* ... */ }; 
+
+        const app = initializeApp(firebaseConfig);
+
+        window.app = app;
+        window.auth = getAuth(app);
+        window.db = getFirestore(app);
+        window.storage = getStorage(app); 
+        
+        // Rendre les fonctions Firestore importantes disponibles dans le scope global pour app.js
+        window.doc = doc; 
+        window.getDoc = getDoc;
+        window.updateDoc = updateDoc;
+        window.deleteDoc = deleteDoc;
+        window.collection = collection;
+        window.setDoc = setDoc;
+        window.query = query;
+        window.where = where;
+        window.getDocs = getDocs;
+        window.arrayUnion = arrayUnion; // Rendu disponible pour les mises à jour futures
+    </script>
+    
+    <script type="module" src="app.js"></script>
+</body>
+</html>

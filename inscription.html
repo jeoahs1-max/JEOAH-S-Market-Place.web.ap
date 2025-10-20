@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription - JEOAH'S Market Place</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
     <script>
         tailwind.config = {
             theme: {
@@ -13,8 +15,8 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        'primary-blue': '#1D4ED8', // Bleu pour l'action principale
-                        'accent-orange': '#F97316', // Orange pour l'accent/IA
+                        'primary-blue': '#1D4ED8',
+                        'accent-orange': '#F97316',
                         'gray-bg': '#F3F4F6',
                         'dark-text': '#1F2937',
                     }
@@ -24,20 +26,15 @@
     </script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
-        /* Style pour les messages de notification */
         #notification-box {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 1000;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.3s ease-out;
-            min-width: 300px;
+            position: fixed; top: 1rem; right: 1rem; z-index: 1000; opacity: 0;
+            transform: translateY(-20px); transition: all 0.3s ease-out; min-width: 300px;
         }
-        .show {
-            opacity: 1 !important;
-            transform: translateY(0) !important;
+        .show { opacity: 1 !important; transform: translateY(0) !important; }
+        .password-container { position: relative; }
+        .password-toggle {
+            position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
+            cursor: pointer; color: #9CA3AF; /* gray-400 */
         }
     </style>
 </head>
@@ -52,59 +49,86 @@
         </header>
 
         <form id="registerForm" class="space-y-6">
+            
+            <div>
+                <label for="full_name" class="block text-sm font-medium text-gray-700">Nom Complet</label>
+                <input type="text" id="full_name" name="full_name" required autocomplete="name"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+            </div>
+
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700">Adresse Email</label>
                 <input type="email" id="email" name="email" required autocomplete="email"
                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
             </div>
 
-            <div>
+            <div class="password-container">
                 <label for="password" class="block text-sm font-medium text-gray-700">Mot de Passe</label>
                 <input type="password" id="password" name="password" required autocomplete="new-password" minlength="6"
-                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition pr-10">
+                <i id="togglePassword" class="fas fa-eye password-toggle"></i>
                 <p class="mt-1 text-xs text-gray-500">Minimum 6 caractères.</p>
             </div>
 
-            <div>
+            <div class="password-container">
                 <label for="confirm_password" class="block text-sm font-medium text-gray-700">Confirmer le Mot de Passe</label>
                 <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password"
-                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition pr-10">
+                <i id="toggleConfirmPassword" class="fas fa-eye password-toggle"></i>
             </div>
 
             <fieldset class="space-y-4 pt-2">
                 <legend class="text-sm font-semibold text-dark-text">Quel rôle vous correspond le mieux ?</legend>
                 
                 <label for="role-vendeur" class="flex items-center p-3 border border-gray-200 rounded-lg transition duration-150 hover:bg-gray-50 cursor-pointer">
-                    <input id="role-vendeur" name="role" type="checkbox" value="vendeur" class="h-4 w-4 text-primary-blue border-gray-300 focus:ring-primary-blue rounded">
+                    <input id="role-vendeur" name="role" type="radio" value="vendeur" class="h-4 w-4 text-primary-blue border-gray-300 focus:ring-primary-blue rounded">
                     <div class="ml-3 flex flex-col">
                         <span class="text-sm font-medium text-gray-700">Détaillant (Vendeur)</span>
-                        <span class="text-xs text-gray-500">Vendez vos produits, utilisez Ney pour les descriptions.</span>
+                        <span class="text-xs text-gray-500">Vendez vos produits et utilisez Ney pour l'automatisation.</span>
                     </div>
                 </label>
 
                 <label for="role-affilie" class="flex items-center p-3 border border-gray-200 rounded-lg transition duration-150 hover:bg-gray-50 cursor-pointer">
-                    <input id="role-affilie" name="role" type="checkbox" value="affilie" class="h-4 w-4 text-primary-blue border-gray-300 focus:ring-primary-blue rounded">
+                    <input id="role-affilie" name="role" type="radio" value="affilie" class="h-4 w-4 text-primary-blue border-gray-300 focus:ring-primary-blue rounded">
                     <div class="ml-3 flex flex-col">
                         <span class="text-sm font-medium text-gray-700">Affilié</span>
-                        <span class="text-xs text-gray-500">Faites la promotion de produits, gagnez 10% de commission.</span>
+                        <span class="text-xs text-gray-500">Faites la promotion de produits et générez une commission de 10%.</span>
                     </div>
                 </label>
-            </fieldset>
 
-            <div class="pt-4 border-t border-gray-100">
-                <button type="button" id="ai-demo-button"
-                        class="w-full py-2 px-4 rounded-lg text-sm font-medium text-white bg-accent-orange hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-orange transition duration-200 flex items-center justify-center space-x-2">
-                    <span class="text-xl">✨</span>
-                    <span>Voir un échantillon du travail de Ney</span>
-                </button>
-                <div id="ai-result-box" class="mt-4 p-4 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 hidden">
-                    <p id="ai-output-text" class="whitespace-pre-wrap"></p>
-                    <div id="ai-output-loading" class="text-center text-gray-500 hidden mt-2">
-                        <div class="animate-pulse font-semibold">Ney crée votre contenu... (utilise l'API Gemini)</div>
-                    </div>
-                    <div id="ai-output-citations" class="text-xs mt-3 border-t pt-2 border-gray-200 hidden"></div>
+                </fieldset>
+
+            <div class="pt-4 border-t border-gray-100 space-y-4">
+                <legend class="text-sm font-semibold text-dark-text">Vos 5 liens sociaux (Optionnel)</legend>
+
+                <div>
+                    <label for="social_link_1" class="block text-xs font-medium text-gray-500">Lien Social Principal (Ex: Instagram)</label>
+                    <input type="url" id="social_link_1" name="social_link_1" placeholder="https://" autocomplete="url"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition text-sm">
+                </div>
+                <div>
+                    <label for="social_link_2" class="block text-xs font-medium text-gray-500">Deuxième Lien Social (Optionnel)</label>
+                    <input type="url" id="social_link_2" name="social_link_2" placeholder="https://" autocomplete="url"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition text-sm">
+                </div>
+                <div>
+                    <label for="social_link_3" class="block text-xs font-medium text-gray-500">Troisième Lien Social (Optionnel)</label>
+                    <input type="url" id="social_link_3" name="social_link_3" placeholder="https://" autocomplete="url"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition text-sm">
+                </div>
+                <div>
+                    <label for="social_link_4" class="block text-xs font-medium text-gray-500">Quatrième Lien Social (Optionnel)</label>
+                    <input type="url" id="social_link_4" name="social_link_4" placeholder="https://" autocomplete="url"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition text-sm">
+                </div>
+                <div>
+                    <label for="social_link_5" class="block text-xs font-medium text-gray-500">Cinquième Lien Social (Optionnel)</label>
+                    <input type="url" id="social_link_5" name="social_link_5" placeholder="https://" autocomplete="url"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition text-sm">
                 </div>
             </div>
+            <div class="pt-4 border-t border-gray-100">
+                </div>
             
             <div class="flex items-start">
                 <div class="flex items-center h-5">
@@ -117,60 +141,26 @@
 
             <button type="submit" id="submit-button"
                     class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-primary-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue transition duration-200">
-                S'inscrire (15 jours d'essai gratuit)
+                S'inscrire (15 jours offerts aux 25 premiers)
             </button>
         </form>
         
-        <p class="text-center text-sm text-gray-600">
-            Déjà un compte ? 
-            <a href="index.html" class="font-medium text-accent-orange hover:text-orange-600 transition">Connectez-vous ici</a>
-        </p>
+        </div>
 
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // IMPORTANT : Ces variables sont injectées par l'environnement Canvas.
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        if (Object.keys(firebaseConfig).length === 0) {
-            console.error("Erreur: La configuration Firebase est manquante. Vérifiez l'environnement.");
-        }
-
-        // Initialisation globale
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Tentative d'authentification initiale (pour les futurs appels Firestore)
-        async function initializeAuth() {
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                console.log("Authentification Firebase initiale réussie.");
-            } catch (error) {
-                console.error("Erreur d'authentification Firebase initiale:", error);
-            }
-        }
-
-        initializeAuth();
-
-        // Rendre les objets globaux disponibles dans app.js
-        window.firebaseConfig = firebaseConfig;
-        window.app = app;
-        window.auth = auth;
-        window.db = db;
-        window.appId = appId;
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function (e) {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+        document.getElementById('toggleConfirmPassword').addEventListener('click', function (e) {
+            const confirmPasswordInput = document.getElementById('confirm_password');
+            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPasswordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
     </script>
-
-    <script type="module" src="app.js"></script>
-</body>
+    
+    </body>
 </html>

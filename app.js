@@ -249,7 +249,86 @@ async function saveNewProduct(form) {
         submitButton.textContent = "Sauvegarder le Produit";
     }
 }
+// -----------------------------------------------------------------
+// 5. LOGIQUE D'AFFICHAGE DES PRODUITS (Vendeur Dashboard)
+// -----------------------------------------------------------------
 
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
+/**
+ * Récupère et affiche les produits du vendeur connecté.
+ */
+function displayVendorProducts() {
+    const productsContainer = document.getElementById('productsList');
+    if (!productsContainer) return; // Quitte si le conteneur n'est pas sur cette page
+
+    productsContainer.innerHTML = '<div class="text-center py-10 text-gray-500">Chargement de vos produits...</div>';
+    
+    // Attendre que l'état d'authentification soit résolu
+    onAuthStateChanged(window.auth, async (user) => {
+        if (!user || !window.db) {
+            productsContainer.innerHTML = '<div class="text-center py-10 text-red-500">Veuillez vous connecter pour voir vos produits.</div>';
+            return;
+        }
+
+        const vendorId = user.uid;
+        
+        try {
+            // 1. Requête Firestore: Chercher les produits où vendorId correspond à l'UID de l'utilisateur
+            const productsRef = collection(window.db, "products");
+            const q = query(productsRef, where("vendorId", "==", vendorId));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                productsContainer.innerHTML = `
+                    <div class="text-center py-20 border-2 border-dashed border-gray-200 rounded-lg">
+                        <p class="text-gray-600 mb-4">Vous n'avez pas encore ajouté de produits.</p>
+                        <a href="configuration-du-vendeur.html" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition">Ajouter votre premier produit</a>
+                    </div>
+                `;
+                return;
+            }
+
+            productsContainer.innerHTML = ''; // Nettoyer le message de chargement
+            
+            // 2. Génération du HTML
+            querySnapshot.forEach((doc) => {
+                const product = doc.data();
+                
+                const commission = (product.price * (product.affiliateCommissionPercent / 100)).toFixed(2);
+                const netProfit = (product.price - commission - product.cost).toFixed(2);
+
+                const productHtml = `
+                    <div class="flex items-center bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-100">
+                        <img src="${product.imageUrls[0] || 'placeholder.png'}" alt="${product.name}" class="w-16 h-16 object-cover rounded mr-4">
+                        
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-semibold text-gray-800">${product.name}</h3>
+                            <p class="text-sm text-gray-500">Catégorie: ${product.category}</p>
+                        </div>
+
+                        <div class="text-right mx-4 hidden sm:block">
+                            <p class="font-medium text-indigo-600">Prix: $${product.price.toFixed(2)}</p>
+                            <p class="text-sm text-green-600">Profit net estimé: $${netProfit}</p>
+                        </div>
+                        
+                        <div class="text-right">
+                            <p class="font-bold text-gray-800">${product.stock} en Stock</p>
+                            <a href="#" class="text-sm text-blue-500 hover:underline">Modifier</a>
+                        </div>
+                    </div>
+                `;
+                productsContainer.innerHTML += productHtml;
+            });
+
+        } catch (error) {
+            console.error("Erreur lors de la récupération des produits:", error);
+            productsContainer.innerHTML = `<div class="text-center py-10 text-red-500">Erreur: Impossible de charger les produits.</div>`;
+        }
+    });
+}
 
 // -----------------------------------------------------------------
 // 5. LISTENERS D'ÉVÉNEMENTS (Logique Principale)

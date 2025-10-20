@@ -3,95 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription - JEOAH'S</title>
-    <link rel="stylesheet" href="styles.min.css">
-    
-    <style>
-        /* Style pour la chatbox IA */
-        .ia-chat-box {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background-color: #007bff;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
+    <title>Inscription - JEOAH'S Market Place</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#1D4ED8', // Bleu pour l'action principale
+                        'accent-orange': '#F97316', // Orange pour l'accent/IA
+                        'gray-bg': '#F3F4F6',
+                        'dark-text': '#1F2937',
+                    }
+                }
+            }
         }
-        .ia-chat-box img {
-            width: 35px;
-            height: 35px;
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+        /* Style pour les messages de notification */
+        #notification-box {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease-out;
+            min-width: 300px;
+        }
+        .show {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
         }
     </style>
 </head>
-<body>
-    <header>
-        <nav>
-            <span style="font-size: 1.8rem; font-weight: bold; color: #032C4F;">JEOAH'S</span>
-            <div class="menu">
-                <a href="index.html">Home</a>
-                <a href="plans.html">Plans</a>
-                <a href="faq.html">Aide</a>
-                <a href="contact.html">Contact</a>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="notification-box" class="p-4 rounded-lg shadow-xl text-white font-medium"></div>
+
+    <div class="w-full max-w-md bg-white rounded-xl shadow-2xl p-8 space-y-8">
+        <header class="text-center">
+            <h1 class="text-3xl font-extrabold text-dark-text">Créer votre compte</h1>
+            <p class="mt-2 text-sm text-gray-500">Rejoignez JEOAH'S et laissez Ney automatiser vos ventes.</p>
+        </header>
+
+        <form id="registerForm" class="space-y-6">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Adresse Email</label>
+                <input type="email" id="email" name="email" required autocomplete="email"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
             </div>
-            <a href="inscription.html" class="btn active">S'inscrire</a>
-        </nav>
-    </header>
 
-    <main class="dashboard-content" style="background: #ffffff; min-height: 80vh;">
-        <h1 style="text-align: center;">Rejoignez JEOAH'S Market Place</h1>
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Mot de Passe</label>
+                <input type="password" id="password" name="password" required autocomplete="new-password" minlength="6"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                <p class="mt-1 text-xs text-gray-500">Minimum 6 caractères.</p>
+            </div>
+
+            <div>
+                <label for="confirm_password" class="block text-sm font-medium text-gray-700">Confirmer le Mot de Passe</label>
+                <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+            </div>
+
+            <fieldset class="space-y-4 pt-2">
+                <legend class="text-sm font-semibold text-dark-text">Quel rôle vous correspond le mieux ?</legend>
+                
+                <label for="role-vendeur" class="flex items-center p-3 border border-gray-200 rounded-lg transition duration-150 hover:bg-gray-50 cursor-pointer">
+                    <input id="role-vendeur" name="role" type="checkbox" value="vendeur" class="h-4 w-4 text-primary-blue border-gray-300 focus:ring-primary-blue rounded">
+                    <div class="ml-3 flex flex-col">
+                        <span class="text-sm font-medium text-gray-700">Détaillant (Vendeur)</span>
+                        <span class="text-xs text-gray-500">Vendez vos produits, utilisez Ney pour les descriptions.</span>
+                    </div>
+                </label>
+
+                <label for="role-affilie" class="flex items-center p-3 border border-gray-200 rounded-lg transition duration-150 hover:bg-gray-50 cursor-pointer">
+                    <input id="role-affilie" name="role" type="checkbox" value="affilie" class="h-4 w-4 text-primary-blue border-gray-300 focus:ring-primary-blue rounded">
+                    <div class="ml-3 flex flex-col">
+                        <span class="text-sm font-medium text-gray-700">Affilié</span>
+                        <span class="text-xs text-gray-500">Faites la promotion de produits, gagnez 10% de commission.</span>
+                    </div>
+                </label>
+                </fieldset>
+
+            <div class="pt-4 border-t border-gray-100">
+                <button type="button" id="ai-demo-button"
+                        class="w-full py-2 px-4 rounded-lg text-sm font-medium text-white bg-accent-orange hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-orange transition duration-200 flex items-center justify-center space-x-2">
+                    <span class="text-xl">✨</span>
+                    <span>Voir un échantillon du travail de Ney</span>
+                </button>
+                <div id="ai-result-box" class="mt-4 p-4 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-700 hidden">
+                    <p id="ai-output-text" class="whitespace-pre-wrap"></p>
+                    <div id="ai-output-loading" class="text-center text-gray-500 hidden mt-2">
+                        <div class="animate-pulse font-semibold">Ney crée votre contenu... (utilise l'API Gemini)</div>
+                    </div>
+                    <div id="ai-output-citations" class="text-xs mt-3 border-t pt-2 border-gray-200 hidden"></div>
+                </div>
+            </div>
+            
+            <div class="flex items-start">
+                <div class="flex items-center h-5">
+                    <input id="terms" name="terms" type="checkbox" required class="h-4 w-4 text-primary-blue border-gray-300 rounded focus:ring-primary-blue">
+                </div>
+                <div class="ml-3 text-sm">
+                    <label for="terms" class="font-medium text-gray-700">J'accepte les <a href="terms.html" class="text-primary-blue hover:text-blue-700 font-semibold transition" target="_blank">Conditions Générales</a> et la politique de confidentialité.</label>
+                </div>
+            </div>
+
+            <button type="submit" id="submit-button"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-primary-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue transition duration-200">
+                S'inscrire (15 jours d'essai gratuit)
+            </button>
+        </form>
         
-        <div class="social-setup-container" style="max-width: 500px; margin-top: 20px;">
-            <p style="color: #666; margin-bottom: 25px;">Créez votre compte en tant que **Détaillant** ou **Affilié**.</p>
-            
-            <form id="registerForm">
-                
-                <div class="social-input-group">
-                    <label for="nom" style="width: 100px; text-align: left;">Nom Complet :</label>
-                    <input type="text" id="nom" placeholder="Votre nom" required>
-                </div>
-                <div class="social-input-group">
-                    <label for="email" style="width: 100px; text-align: left;">Email :</label>
-                    <input type="email" id="email" placeholder="Votre email" required>
-                </div>
-                <div class="social-input-group">
-                    <label for="password" style="width: 100px; text-align: left;">Mot de passe :</label>
-                    <input type="password" id="password" required>
-                </div>
-                <div class="social-input-group">
-                    <label for="confirm_password" style="width: 100px; text-align: left;">Confirmer Mot de passe :</label>
-                    <input type="password" id="confirm_password" required>
-                </div>
-                <div class="social-input-group" style="justify-content: space-between;">
-                    <label for="role" style="width: 100px; text-align: left;">Rôle :</label>
-                    <select id="role" style="flex-grow: 1; padding: 10px; border-radius: 5px;">
-                        <option value="acheteur">Acheteur (Gratuit - $0/mois)</option>
-                        <option value="vendeur">Détaillant (Vendeur)</option>
-                        <option value="affilie">Affilié</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">Créer Mon Compte (15 Jours Gratuits)</button>
-            </form>
-            
-            <p style="font-size: 0.9em; margin-top: 20px;">En cliquant sur "Créer Mon Compte", vous acceptez nos 
-                <a href="terms.html">Conditions générales</a>.</p>
-        </div>
-    </main>
+        <p class="text-center text-sm text-gray-600">
+            Déjà un compte ? 
+            <a href="index.html" class="font-medium text-accent-orange hover:text-orange-600 transition">Connectez-vous ici</a>
+        </p>
 
-    <div class="ia-chat-box" onclick="alert('Bienvenue ! Je suis Ney, l\'Assistant IA de JEOAH\'S. Je suis disponible pour répondre à vos questions 24/7. Le chat sera activé dès le lancement de la version Beta !');">
-        <img src="assets/icon-ai.png" alt="Chat IA">
     </div>
 
-    <footer>
-        <p>© 2025 JEOAH’S Market Place</p>
-    </footer>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <script src="app.js"></script>
+        // IMPORTANT : Ces variables sont injectées par l'environnement Canvas.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        if (Object.keys(firebaseConfig).length === 0) {
+            console.error("Erreur: La configuration Firebase est manquante. Vérifiez l'environnement.");
+        }
+
+        // Initialisation globale
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Tentative d'authentification initiale (pour les futurs appels Firestore)
+        async function initializeAuth() {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                console.log("Authentification Firebase initiale réussie.");
+            } catch (error) {
+                console.error("Erreur d'authentification Firebase initiale:", error);
+            }
+        }
+
+        initializeAuth();
+
+        // Rendre les objets globaux disponibles dans app.js
+        window.firebaseConfig = firebaseConfig;
+        window.app = app;
+        window.auth = auth;
+        window.db = db;
+        window.appId = appId;
+    </script>
+
+    <script type="module" src="app.js"></script>
 </body>
-</html>
+</html>                

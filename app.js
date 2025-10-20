@@ -7,13 +7,8 @@
 // dans inscription.html et sont disponibles via window.auth et window.db.
 
 // -----------------------------------------------------------------
-// 1. Dépendances Firebase (importées dans inscription.html)
+// 1. Dépendances Firebase
 // -----------------------------------------------------------------
-
-// Les fonctions createUserWithEmailAndPassword et setDoc sont nécessaires.
-// NOTE: Nous supposons que vous avez accès à l'API Admin ou à une Cloud Function
-// pour un enregistrement sécurisé dans Firestore, mais pour ce code client, nous utilisons
-// la méthode standard.
 
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { doc, setDoc, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -31,9 +26,15 @@ import { doc, setDoc, collection, getDocs, query, where, limit } from "https://w
 function showNotification(message, type) {
     const box = document.getElementById('notification-box');
     
+    // Vérifie si la boîte de notification existe avant de continuer
+    if (!box) {
+        console.error(`Notification Box not found. Message: ${message}, Type: ${type}`);
+        return;
+    }
+    
     // Réinitialiser les classes
-    box.className = 'p-4 rounded-lg shadow-xl text-white font-medium';
-    box.classList.add('show');
+    box.className = 'p-4 rounded-lg shadow-xl text-white font-medium fixed top-4 right-4 z-50';
+    box.classList.add('show'); // Assurez-vous d'avoir le CSS pour cette classe
 
     // Définir les styles en fonction du type
     if (type === 'success') {
@@ -48,8 +49,12 @@ function showNotification(message, type) {
 
     // Masquer après 5 secondes
     setTimeout(() => {
-        box.classList.remove('show');
+        // Enlève la classe 'show' ou masque l'élément
+        box.style.display = 'none'; 
     }, 5000);
+    
+    // S'assurer qu'elle est visible au départ
+    box.style.display = 'block';
 }
 
 
@@ -60,7 +65,15 @@ function showNotification(message, type) {
  * @returns {string} L'ID personnalisé.
  */
 function generateCustomId(rolePrefix, uid) {
-    //// --- 4. FONCTIONS DE SAUVEGARDE DE L'ONBOARDING ---
+    // Utilise une partie de l'UID pour garantir l'unicité
+    const uniquePart = uid.substring(0, 8).toUpperCase(); 
+    return `${rolePrefix}${uniquePart}`;
+}
+
+
+// -----------------------------------------------------------------
+// 3. FONCTIONS DE SAUVEGARDE DE L'ONBOARDING
+// -----------------------------------------------------------------
 
 /**
  * Sauvegarde les liens sociaux (Vendeur, Affilié, Acheteur) dans Firestore.
@@ -79,15 +92,15 @@ async function saveSocialLinks(form, nextUrl) {
     
     // Récupération des 5 liens sociaux
     for (let i = 1; i <= 5; i++) {
-        const link = form[`social_link_${i}`].value.trim();
+        const link = form[`social_link_${i}`] ? form[`social_link_${i}`].value.trim() : '';
         if (link) links.push(link);
     }
     
     try {
         const userRef = doc(window.db, "users", uid);
         await setDoc(userRef, { 
-            socials: links, // Mise à jour du champ 'socials'
-            onboardingComplete: true // Marquer l'onboarding comme terminé
+            socials: links, 
+            onboardingComplete: true
         }, { merge: true });
 
         showNotification("Configuration sociale sauvegardée avec succès!", 'success');
@@ -128,7 +141,7 @@ async function saveAffiliateLinks(form) {
         const userRef = doc(window.db, "users", uid);
         await setDoc(userRef, { 
             affiliateLinks: links 
-        }, { merge: true }); // 'merge: true' garde les autres champs intacts
+        }, { merge: true });
         
         showNotification("Liens d'affiliation sauvegardés avec succès!", 'success');
         
@@ -140,14 +153,11 @@ async function saveAffiliateLinks(form) {
     } catch (error) {
         showNotification(`Erreur lors de la sauvegarde des liens: ${error.message}`, 'error');
     }
-} Utilise une partie de l'UID pour garantir l'unicité
-    const uniquePart = uid.substring(0, 8).toUpperCase(); 
-    return `${rolePrefix}${uniquePart}`;
 }
 
 
 // -----------------------------------------------------------------
-// 3. Logique d'Inscription (Événement du Formulaire)
+// 4. Logique d'Inscription (Événement du Formulaire)
 // -----------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -172,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedRole = formData.get('role');
         const role = selectedRole || 'acheteur'; 
 
-        // Récupérer les liens sociaux
+        // Récupérer les liens sociaux (si l'utilisateur les a remplis sur la page d'inscription)
         const socialLinks = [];
         for (let i = 1; i <= 5; i++) {
             const link = formData.get(`social_link_${i}`);
@@ -195,23 +205,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const uid = user.uid;
 
             // 2. Détermination de l'ID, du Plan et du Statut d'Essai
-            let rolePrefix = 'JHSMPa'; // Acheteur par défaut
+            let rolePrefix = 'JHSMPa'; 
             if (role === 'vendeur') rolePrefix = 'JHSMPv';
             if (role === 'affilie') rolePrefix = 'JHSMPA';
 
             const customId = generateCustomId(rolePrefix, uid);
-            const referralLink = `${window.location.origin}/inscription.html?ref=${customId}`; // Lien de parrainage
+            const referralLink = `${window.location.origin}/inscription.html?ref=${customId}`; 
             
-            // Logique d'essai gratuit pour les 25 premiers (doit être sécurisé côté serveur à terme)
-            // Pour l'instant, on simule la vérification (à améliorer avec une Cloud Function)
-            let isTrial = false;
-            let trialEnds = null;
-            
-            // Simplification: En attendant la Cloud Function pour compter les 25 premiers, 
-            // nous mettons tout le monde en essai pour ce test initial.
-            isTrial = true; 
+            // Logique d'essai gratuit
+            let isTrial = true; 
             const now = new Date();
-            trialEnds = new Date(now.setDate(now.getDate() + 15));
+            const trialEnds = new Date(now.setDate(now.getDate() + 15));
 
 
             // 3. Enregistrement des données dans Firestore (collection 'users')
@@ -224,8 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 socials: socialLinks,
                 isTrial: isTrial,
                 trialEnds: trialEnds,
-                // IMPORTANT: À terme, votre propre UID Admin doit être marqué ici
-                isAdmin: (email === "jeoahs1@gmail.com"), // À personnaliser
+                isAdmin: (email === "jeoahs1@gmail.com"), 
                 createdAt: new Date()
             });
 
@@ -234,17 +237,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let redirectUrl;
             if (role === 'vendeur') {
-                // Redirection Vendeur: setup social -> dashboard
                 redirectUrl = 'fournisseur-step-social.html'; 
             } else if (role === 'affilie') {
-                // Redirection Affilié: setup liens affiliation -> setup social
                 redirectUrl = 'liens-d-affiliation.html';
             } else {
-                // Redirection Acheteur (ou autre)
                 redirectUrl = 'index.html'; 
             }
             
-            // Attendre un court instant avant de rediriger
             setTimeout(() => {
                 window.location.href = redirectUrl;
             }, 2000);
@@ -269,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // -----------------------------------------------------------------
-    // 4. Logique IA (Démo - Simplifiée)
+    // 5. Logique IA (Démo - Simplifiée)
     // -----------------------------------------------------------------
 
     const aiDemoButton = document.getElementById('ai-demo-button');
@@ -278,8 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification("La démo IA sera disponible après l'intégration des Cloud Functions!", 'info');
         });
     }
-});// -----------------------------------------------------------------
-// 5. Logique des Formulaires d'Onboarding (Post-Inscription)
+});
+
+
+// -----------------------------------------------------------------
+// 6. Logique des Formulaires d'Onboarding (Post-Inscription)
 // -----------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {

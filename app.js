@@ -1,84 +1,201 @@
-console.log('JEOAHS v2');
-// --- JEOAH'S Market Place : Logique de Contrôle et de Sécurité (Géré par Ney) ---
+// =================================================================
+// src/public/app.js - Logique Principale du Frontend
+// Connecte l'inscription à Firebase (Auth & Firestore)
+// =================================================================
 
-// 1. Initialisation de l'IA Ney
-const NEY_ASSISTANT_EMAIL = 'ney-assistant@jeoahs.com';
-console.log(`[Ney] Assistant IA actif. Prêt à surveiller la plateforme.`);
+// Les objets Firebase (app, auth, db) sont importés depuis la balise <script type="module">
+// dans inscription.html et sont disponibles via window.auth et window.db.
 
-// 2. Fonction de Simulation de Sécurité des Cartes (Préparation)
-function secureTransaction(data) {
-    console.log(`[Ney] Début du scan de sécurité pour la transaction...`);
-    // FUTURE : Intégration de l'API Stripe/PayPal pour tokenisation et chiffrement PCI
-    if (data && data.cardNumber) {
-        // Dans l'avenir, cela ne stockera rien. C'est juste un placeholder.
-        console.log(`[Ney] Simulation : Transaction sécurisée. Carte chiffrée.`);
-        return true; 
+// -----------------------------------------------------------------
+// 1. Dépendances Firebase (importées dans inscription.html)
+// -----------------------------------------------------------------
+
+// Les fonctions createUserWithEmailAndPassword et setDoc sont nécessaires.
+// NOTE: Nous supposons que vous avez accès à l'API Admin ou à une Cloud Function
+// pour un enregistrement sécurisé dans Firestore, mais pour ce code client, nous utilisons
+// la méthode standard.
+
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { doc, setDoc, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
+// -----------------------------------------------------------------
+// 2. Fonctions Utilitaire de l'Interface
+// -----------------------------------------------------------------
+
+/**
+ * Affiche une notification professionnelle à l'utilisateur.
+ * @param {string} message - Le texte à afficher.
+ * @param {string} type - 'success', 'error', ou 'info'.
+ */
+function showNotification(message, type) {
+    const box = document.getElementById('notification-box');
+    
+    // Réinitialiser les classes
+    box.className = 'p-4 rounded-lg shadow-xl text-white font-medium';
+    box.classList.add('show');
+
+    // Définir les styles en fonction du type
+    if (type === 'success') {
+        box.classList.add('bg-green-500');
+    } else if (type === 'error') {
+        box.classList.add('bg-red-600');
+    } else {
+        box.classList.add('bg-blue-500');
     }
-    console.warn(`[Ney] Alerte de Sécurité : Données de transaction manquantes ou invalides.`);
-    return false;
+
+    box.textContent = message;
+
+    // Masquer après 5 secondes
+    setTimeout(() => {
+        box.classList.remove('show');
+    }, 5000);
 }
 
-// 3. Logique de Contrôle des Retards (Contrôle Vendeur Strict)
-function checkVendorDeliveryStatus(vendorId, lateDeliveriesCount) {
-    const MAX_LATE_DELIVERIES = 3;
-    const LATE_THRESHOLD_DAYS = 7;
 
-    console.log(`[Ney] Surveillance des livraisons pour le Vendeur ${vendorId}.`);
+/**
+ * Génère un identifiant unique (Ex: JHSMPv12345).
+ * @param {string} rolePrefix - 'JHSMPv', 'JHSMPA', ou 'JHSMPa'.
+ * @param {string} uid - L'UID Firebase (utilisé pour garantir l'unicité).
+ * @returns {string} L'ID personnalisé.
+ */
+function generateCustomId(rolePrefix, uid) {
+    // Utilise une partie de l'UID pour garantir l'unicité
+    const uniquePart = uid.substring(0, 8).toUpperCase(); 
+    return `${rolePrefix}${uniquePart}`;
+}
 
-    // FUTURE : Cette logique serait dans le Backend (Firebase Functions)
-    if (lateDeliveriesCount >= MAX_LATE_DELIVERIES) {
-        console.error(`[Ney] ALERTE ROUGE : Le Vendeur ${vendorId} a dépassé ${MAX_LATE_DELIVERIES} retards consécutifs (> ${LATE_THRESHOLD_DAYS} jours).`);
+
+// -----------------------------------------------------------------
+// 3. Logique d'Inscription (Événement du Formulaire)
+// -----------------------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+    const registerForm = document.getElementById('registerForm');
+    if (!registerForm) return;
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        // Simuler le bannissement
-        // FUTURE : Mettre à jour la base de données (Firebase Firestore) pour désactiver le compte.
-        alert(`ALERTE SYSTÈME : Vendeur ${vendorId} Banni. Qualité de service non conforme.`); 
-        return 'BANNED';
+        // Désactiver le bouton pour éviter les soumissions multiples
+        const submitButton = document.getElementById('submit-button');
+        submitButton.disabled = true;
+        submitButton.textContent = "Inscription en cours...";
+
+        const formData = new FormData(registerForm);
+        const email = formData.get('email');
+        const password = formData.get('password');
+        const confirmPassword = formData.get('confirm_password');
+        const fullName = formData.get('full_name');
+        
+        // Le rôle peut être null si rien n'est sélectionné (par défaut 'acheteur')
+        const selectedRole = formData.get('role');
+        const role = selectedRole || 'acheteur'; 
+
+        // Récupérer les liens sociaux
+        const socialLinks = [];
+        for (let i = 1; i <= 5; i++) {
+            const link = formData.get(`social_link_${i}`);
+            if (link) socialLinks.push(link);
+        }
+
+        // Vérification de base
+        if (password !== confirmPassword) {
+            showNotification("Les mots de passe ne correspondent pas.", 'error');
+            submitButton.disabled = false;
+            submitButton.textContent = "S'inscrire (15 jours offerts aux 25 premiers)";
+            return;
+        }
+
+        // --- Début du Processus d'Inscription ---
+        try {
+            // 1. Création de l'utilisateur dans Firebase Authentication
+            const userCredential = await createUserWithEmailAndPassword(window.auth, email, password);
+            const user = userCredential.user;
+            const uid = user.uid;
+
+            // 2. Détermination de l'ID, du Plan et du Statut d'Essai
+            let rolePrefix = 'JHSMPa'; // Acheteur par défaut
+            if (role === 'vendeur') rolePrefix = 'JHSMPv';
+            if (role === 'affilie') rolePrefix = 'JHSMPA';
+
+            const customId = generateCustomId(rolePrefix, uid);
+            const referralLink = `${window.location.origin}/inscription.html?ref=${customId}`; // Lien de parrainage
+            
+            // Logique d'essai gratuit pour les 25 premiers (doit être sécurisé côté serveur à terme)
+            // Pour l'instant, on simule la vérification (à améliorer avec une Cloud Function)
+            let isTrial = false;
+            let trialEnds = null;
+            
+            // Simplification: En attendant la Cloud Function pour compter les 25 premiers, 
+            // nous mettons tout le monde en essai pour ce test initial.
+            isTrial = true; 
+            const now = new Date();
+            trialEnds = new Date(now.setDate(now.getDate() + 15));
+
+
+            // 3. Enregistrement des données dans Firestore (collection 'users')
+            await setDoc(doc(window.db, "users", uid), {
+                fullName: fullName,
+                email: email,
+                role: role,
+                customId: customId,
+                referralLink: referralLink,
+                socials: socialLinks,
+                isTrial: isTrial,
+                trialEnds: trialEnds,
+                // IMPORTANT: À terme, votre propre UID Admin doit être marqué ici
+                isAdmin: (email === "votre.email.admin@exemple.com"), // À personnaliser
+                createdAt: new Date()
+            });
+
+            // 4. Redirection après Succès
+            showNotification(`Bienvenue sur JEOAH'S, ${fullName}! Votre compte ${role} est créé.`, 'success');
+            
+            let redirectUrl;
+            if (role === 'vendeur') {
+                // Redirection Vendeur: setup social -> dashboard
+                redirectUrl = 'fournisseur-step-social.html'; 
+            } else if (role === 'affilie') {
+                // Redirection Affilié: setup liens affiliation -> setup social
+                redirectUrl = 'liens-d-affiliation.html';
+            } else {
+                // Redirection Acheteur (ou autre)
+                redirectUrl = 'index.html'; 
+            }
+            
+            // Attendre un court instant avant de rediriger
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 2000);
+
+
+        } catch (error) {
+            console.error("Erreur d'inscription:", error);
+            let errorMessage = "Une erreur inconnue est survenue.";
+
+            if (error.code === 'auth/email-already-in-use') {
+                errorMessage = "Cet email est déjà utilisé. Veuillez vous connecter.";
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = "L'adresse email n'est pas valide.";
+            } else if (error.code === 'auth/weak-password') {
+                errorMessage = "Le mot de passe est trop faible (6 caractères minimum).";
+            }
+            
+            showNotification(`Erreur: ${errorMessage}`, 'error');
+            submitButton.disabled = false;
+            submitButton.textContent = "S'inscrire (15 jours offerts aux 25 premiers)";
+        }
+    });
+
+    // -----------------------------------------------------------------
+    // 4. Logique IA (Démo - Simplifiée)
+    // -----------------------------------------------------------------
+
+    const aiDemoButton = document.getElementById('ai-demo-button');
+    if (aiDemoButton) {
+        aiDemoButton.addEventListener('click', () => {
+            showNotification("La démo IA sera disponible après l'intégration des Cloud Functions!", 'info');
+        });
     }
-    
-    // FUTURE : Envoyer un rapport de livraison quotidien à l'Administrateur
-    sendDailyReportToAdmin(vendorId, lateDeliveriesCount); 
-    return 'OK';
-}
-
-// 4. Rapport Journalier (Simulation pour l'Administrateur)
-function sendDailyReportToAdmin(vendorId, lateCount) {
-    // FUTURE : Logique d'envoi d'email ou de notification push à l'Admin 'Utilisateur de cet site'
-    const report = {
-        date: new Date().toISOString().split('T')[0],
-        totalNewUsers: Math.floor(Math.random() * 50),
-        pendingWithdrawals: Math.floor(Math.random() * 10),
-        vendorStatusCheck: `Vendeur ${vendorId} : ${lateCount} retards enregistrés.`,
-        systemStatus: 'Optimal',
-        // Le rapport journalier sera plus détaillé dans l'implémentation finale
-    };
-    
-    console.info(`[Ney] Rapport Journalier créé pour l'Administrateur.`);
-    // alert(`Rapport Journalier de Ney disponible dans le tableau de bord Admin !`); // Décommenter si vous voulez tester.
-    
-    return report;
-}
-
-// 5. Simulation du Contrôle des Frais de Retrait (Basé sur le Plan)
-function calculateWithdrawalFees(amount, userPlan, paymentMethod) {
-    // Les frais dépendent du plan et de la méthode de paiement (comme vous l'avez demandé)
-    let baseFee = 0.05; // 5% de base
-    
-    if (userPlan === 'Premium') {
-        baseFee = 0.02; // Frais réduits pour Premium (2%)
-    } else if (paymentMethod === 'MonCash') {
-        baseFee += 0.01; // Frais supplémentaires pour MonCash (Exemple)
-    }
-
-    const feeAmount = amount * baseFee;
-    const finalAmount = amount - feeAmount;
-
-    console.log(`[Ney] Retrait de ${amount} USD. Frais (${(baseFee * 100).toFixed(2)}%) : ${feeAmount.toFixed(2)} USD. Montant final : ${finalAmount.toFixed(2)} USD.`);
-    return { fee: feeAmount.toFixed(2), final: finalAmount.toFixed(2) };
-}
-
-
-// --- Lancement des contrôles pour l'exemple (Décommenter pour tester) ---
-// checkVendorDeliveryStatus('V-456', 2); // OK
-// checkVendorDeliveryStatus('V-789', 3); // BANNI
-// calculateWithdrawalFees(100, 'Standard', 'PayPal'); 
-// calculateWithdrawalFees(100, 'Premium', 'MonCash');
+});

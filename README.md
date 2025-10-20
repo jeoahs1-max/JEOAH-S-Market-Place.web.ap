@@ -1,15 +1,17 @@
-JEOAHS-Market-Place/
-│
-├── /assets/                # Images, logos, icônes
-├── /src/                   # Fichiers sources (frontend + backend)
-├── /ai/                    # Modules IA (texte, visuel, tendances)
-├── /database/              # Données utilisateurs et produits
-├── /config/                # Clés API, connexions, paiements
-├── /public/                # Pages accessibles au public
-│   ├── index.html
-│   ├── faq.html
-│   ├── pricing.html
-│   └── support.html
-│
-├── README.md               # Documentation principale
-└── LICENSE.txt             # Droits et propriété du projet
+JEOAH'S Market Place - Plateforme d'Automatisation E-commerce par IA🚀 Vue d'ensemble du ProjetJEOAH'S Market Place est une plateforme de commerce électronique conçue pour maximiser l'efficacité des Détaillants et des Affiliés grâce à l'intégration d'un puissant Assistant d'Intelligence Artificielle (IA), nommé Ney.L'objectif principal est de fournir des outils automatisés (création de contenu, planification de publication) pour permettre aux utilisateurs de vendre plus en travaillant moins, tout en offrant une structure financière avantageuse (0% de frais de commission sur les ventes).🎯 Fonctionnalités Clés1. Gestion des RôlesAcheteur : Navigation et achat sur la Market Place.Détaillant (Vendeur) : Vente de produits avec outils d'automatisation IA pour les descriptions et les visuels.Affilié : Promotion de produits via des liens uniques avec commission de 10%, outils IA pour le copywriting social.2. Automatisation IA (Ney)Contenu : Génération de descriptions de produits optimisées et de textes publicitaires (copywriting).Visuels : Création de visuels promotionnels simples pour les réseaux sociaux.Planification : Suggestion et automatisation des heures de publication optimales.3. Modèle Financier Avantageux0% de commission sur les ventes pour les abonnés.Frais basés sur un abonnement unique (Mensuel, Trimestriel, Semestriel, Annuel) après un essai de 15 jours gratuits.Programme de parrainage pour obtenir des réductions d'abonnement.📁 Structure du RépertoireLe projet suit une architecture modulaire pour séparer les responsabilités du Frontend, du Backend et des services IA.JEOAHS-Market-Place/ 
+├── assets/         # Images, logos, icônes, mockups (e.g., logo.png, icon-ai.png)
+├── src/            # Fichiers sources principaux
+│   ├── /ai/        # Modules IA (texte, visuel, tendances - Future implémentation)
+│   ├── /database/  # Configuration Firebase/Firestore (Schémas de données)
+│   ├── /config/    # Clés API, connexions, paramètres de paiement
+│   └── /public/    # Fichiers Frontend déployables (HTML, CSS, JS)
+│       ├── index.html
+│       ├── plans.html (Ancien pricing.html)
+│       ├── faq.html
+│       ├── contact.html (Ancien support.html)
+│       ├── inscription.html
+│       ├── vendor-setup.html
+│       └── affiliate-setup.html
+├── README.md       # Ce document
+└── LICENSE.txt     # Fichier de licence
+🛠️ Technologies UtiliséesFrontend : HTML5, CSS3 (approche mobile-first), JavaScript (ES6+).Backend & Base de Données (Étape 2) : Google Firebase (Firestore pour la base de données, Authentication pour la gestion des utilisateurs, Cloud Functions pour la logique serveur/paiements).IA (Ney) : Utilisera le service Google Gemini (via l'API) pour la génération de contenu et l'analyse de données.▶️ Prochaines Étapes de DéveloppementMaintenant que le Frontend (V6.0.1) est stable et que la documentation est en place, l'objectif principal est l'intégration du Backend.Étape 2 : Intégration Firebase & AuthentificationMise en place de la connexion Firebase.Remplacement de la simulation dans inscription.html par la création réelle de compte (Email/Mot de passe).Enregistrement du rôle (vendeur, affilie, acheteur) et du statut d'essai dans Firestore.Redirection conditionnelle sécurisée après connexion/inscription.📞 SupportPour toute question ou assistance technique, veuillez contacter notre support à support@jeoahs.com ou utilisez l'Assistant IA (Ney) sur la Market Place (lorsque le chat sera activé).© 2025 JEOAH’S Market Place.

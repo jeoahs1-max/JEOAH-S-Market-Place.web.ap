@@ -3,154 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajouter/Modifier un Produit - JEOAH'S</title>
+    <title>Ajouter un Produit - JEOAH'S Marketplace</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], },
-                    colors: {
-                        'primary-blue': '#1D4ED8',
-                        'accent-orange': '#F97316',
-                        'gray-bg': '#F3F4F6',
-                        'dark-text': '#1F2937',
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+        /* Styles pour la notification */
+        #notification-box {
+            display: none;
+            /* Positionnement professionnel en haut à droite */
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 50;
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-dark-text min-h-screen p-4 md:p-8">
+<body class="bg-gray-50 min-h-screen">
 
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl p-6 md:p-10 space-y-8">
-        
-        <header class="border-b pb-4 mb-4">
-            <h1 class="text-3xl font-extrabold text-primary-blue">
-                <i class="fas fa-box mr-2"></i> Ajouter un Nouveau Produit
-            </h1>
-            <p class="mt-1 text-sm text-gray-500">Remplissez les informations ci-dessous pour mettre votre produit en vente.</p>
+    <div id="notification-box" class="p-4 rounded-lg shadow-xl text-white font-medium"></div>
+    
+    <div class="container mx-auto p-4 sm:p-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Ajouter un Nouveau Produit</h1>
+            <p class="text-gray-500">Remplissez les détails pour mettre votre article en vente sur JEOAH'S.</p>
         </header>
 
-        <form id="productForm" class="space-y-6">
+        <form id="productForm" class="bg-white p-6 rounded-xl shadow-lg space-y-6">
             
-            <div class="p-6 border border-gray-100 rounded-lg shadow-sm space-y-4">
-                <h2 class="text-xl font-semibold text-dark-text mb-4">Détails du Produit</h2>
+            <div>
+                <h2 class="text-xl font-semibold mb-3 border-b pb-2">Informations de base</h2>
                 
-                <div>
-                    <label for="product_name" class="block text-sm font-medium text-gray-700">Nom du Produit <span class="text-red-500">*</span></label>
-                    <input type="text" id="product_name" name="product_name" required
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
-                </div>
+                <label for="product_name" class="block text-sm font-medium text-gray-700">Nom du Produit</label>
+                <input type="text" id="product_name" name="product_name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 border">
+            </div>
 
-                <div>
-                    <label for="product_description" class="block text-sm font-medium text-gray-700">Description Détaillée <span class="text-red-500">*</span></label>
-                    <textarea id="product_description" name="product_description" rows="4" required
-                              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition"></textarea>
-                </div>
+            <div>
+                <label for="product_description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea id="product_description" name="product_description" rows="4" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 border"></textarea>
+            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="product_category" class="block text-sm font-medium text-gray-700">Catégorie <span class="text-red-500">*</span></label>
-                        <select id="product_category" name="product_category" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
-                            <option value="">Sélectionner une catégorie</option>
-                            <option value="electronique">Électronique</option>
-                            <option value="mode">Mode & Vêtements</option>
-                            <option value="maison">Maison & Jardin</option>
-                            </select>
-                    </div>
-                    <div>
-                        <label for="product_stock" class="block text-sm font-medium text-gray-700">Quantité en Stock <span class="text-red-500">*</span></label>
-                        <input type="number" id="product_stock" name="product_stock" required min="0" value="1"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="product_category" class="block text-sm font-medium text-gray-700">Catégorie</label>
+                    <select id="product_category" name="product_category" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 border">
+                        <option value="">Sélectionner une catégorie</option>
+                        <option value="mode">Mode & Vêtements</option>
+                        <option value="technologie">Technologie & Gadgets</option>
+                        <option value="maison">Maison & Décoration</option>
+                        </select>
+                </div>
+                <div>
+                    <label for="product_stock" class="block text-sm font-medium text-gray-700">Stock Initial (Quantité)</label>
+                    <input type="number" id="product_stock" name="product_stock" min="1" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 border">
                 </div>
             </div>
 
-            <div class="p-6 border border-gray-100 rounded-lg shadow-sm space-y-4">
-                <h2 class="text-xl font-semibold text-dark-text mb-4">Tarification et Affiliation</h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="selling_price" class="block text-sm font-medium text-gray-700">Prix de Vente (USD) <span class="text-red-500">*</span></label>
-                        <input type="number" id="selling_price" name="selling_price" required min="0.01" step="0.01" placeholder="10.00"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
-                    </div>
-                    <div>
-                        <label for="product_cost" class="block text-sm font-medium text-gray-700">Coût (USD, pour votre suivi)</label>
-                        <input type="number" id="product_cost" name="product_cost" min="0" step="0.01" placeholder="5.00"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
-                    </div>
-                    <div>
-                        <label for="affiliate_commission" class="block text-sm font-medium text-gray-700">Commission Affilié (%) <span class="text-red-500">*</span></label>
-                        <input type="number" id="affiliate_commission" name="affiliate_commission" required min="1" max="100" placeholder="10"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
-                        <p class="mt-1 text-xs text-gray-500">Pourcentage du prix de vente (ex: 10%).</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-6 border border-gray-100 rounded-lg shadow-sm space-y-4">
-                <h2 class="text-xl font-semibold text-dark-text mb-4">Images du Produit</h2>
-
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 hover:bg-gray-100 transition duration-200 cursor-pointer">
-                    <input type="file" id="product_images" name="product_images" accept="image/*" multiple class="hidden">
-                    <label for="product_images" class="cursor-pointer flex flex-col items-center justify-center">
-                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
-                        <p class="text-sm font-medium text-gray-700">Glisser-déposer vos images ici, ou cliquez pour sélectionner (Max 5)</p>
-                        <p class="text-xs text-gray-500 mt-1">JPEG, PNG ou GIF. Taille max 2MB par image.</p>
-                    </label>
-                </div>
+            <div>
+                <h2 class="text-xl font-semibold mb-3 border-b pb-2">Tarification et Affiliation</h2>
                 
-                <div id="image_preview" class="flex flex-wrap gap-4 mt-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="product_cost" class="block text-sm font-medium text-gray-700">Coût du Produit (pour vous)</label>
+                        <input type="number" id="product_cost" name="product_cost" step="0.01" min="0" value="0.00" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 border">
                     </div>
+                    <div>
+                        <label for="selling_price" class="block text-sm font-medium text-gray-700">Prix de Vente (Client)</label>
+                        <input type="number" id="selling_price" name="selling_price" step="0.01" min="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 border">
+                    </div>
+                    <div>
+                        <label for="affiliate_commission" class="block text-sm font-medium text-gray-700">Commission Affilié (%)</label>
+                        <input type="number" id="affiliate_commission" name="affiliate_commission" min="0" max="100" value="10" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 border">
+                    </div>
+                </div>
             </div>
 
-            <div class="flex justify-between pt-6 border-t mt-6">
-                <a href="produits-vendeurs.html" class="flex items-center space-x-2 px-6 py-3 border border-gray-300 rounded-lg shadow-sm text-lg font-medium text-gray-700 bg-white hover:bg-gray-100 transition duration-200">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Annuler</span>
-                </a>
-                <button type="submit" 
-                        class="flex items-center space-x-2 px-8 py-3 border border-transparent rounded-lg shadow-lg text-lg font-medium text-white bg-accent-orange hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-orange transition duration-200">
-                    <i class="fas fa-save"></i>
-                    <span>Sauvegarder le Produit</span>
+            <div>
+                <h2 class="text-xl font-semibold mb-3 border-b pb-2">Images du Produit</h2>
+                <label for="product_images" class="block text-sm font-medium text-gray-700">Télécharger les images (Max 5)</label>
+                <input type="file" id="product_images" name="product_images" multiple accept="image/*" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3">
+                <p class="text-xs text-gray-500 mt-1">Première image utilisée comme vignette.</p>
+            </div>
+
+
+            <div class="pt-6">
+                <button type="submit" id="submit-button" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 transition duration-150 ease-in-out font-semibold">
+                    Sauvegarder le Produit
                 </button>
             </div>
-            
         </form>
 
     </div>
-    
-    <script>
-        document.getElementById('product_images').addEventListener('change', function(event) {
-            const preview = document.getElementById('image_preview');
-            preview.innerHTML = '';
-            
-            Array.from(event.target.files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.classList.add('w-20', 'h-20', 'object-cover', 'rounded-lg', 'shadow');
-                    preview.appendChild(img);
-                };
-                reader.readAsDataURL(file);
-            });
-        });
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         
-        document.getElementById('productForm').addEventListener('submit', function(e) {
-             e.preventDefault();
-             alert('Produit sauvegardé ! (Fonctionnalité Backend à implémenter)');
-             window.location.href = 'produits-vendeurs.html';
-        });
+        // =======================================================
+        // ATTENTION : REMPLACER CES VALEURS PAR VOS CLÉS RÉELLES
+        // =======================================================
+        const firebaseConfig = { 
+            apiKey: "VOTRE_API_KEY",
+            authDomain: "VOTRE_AUTH_DOMAIN",
+            projectId: "VOTRE_PROJECT_ID",
+            storageBucket: "VOTRE_STORAGE_BUCKET", 
+            messagingSenderId: "VOTRE_MESSAGING_SENDER_ID",
+            appId: "VOTRE_APP_ID"
+        }; 
+
+        const app = initializeApp(firebaseConfig);
+
+        // Rendre les services accessibles globalement (NÉCESSAIRE pour app.js)
+        window.app = app;
+        window.auth = getAuth(app);
+        window.db = getFirestore(app);
+        window.storage = getStorage(app);
     </script>
     
+    <script type="module" src="app.js"></script>
+
 </body>
 </html>

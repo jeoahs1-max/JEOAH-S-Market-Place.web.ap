@@ -1,17 +1,14 @@
 // =================================================================
 // src/public/app.js - Logique Principale du Frontend
-// Connecte l'inscription à Firebase (Auth & Firestore)
+// Code COMPLET pour l'authentification, l'onboarding et la gestion des produits.
 // =================================================================
 
-// Les objets Firebase (app, auth, db) sont importés depuis la balise <script type="module">
-// dans inscription.html et sont disponibles via window.auth et window.db.
-
 // -----------------------------------------------------------------
-// 1. Dépendances Firebase
+// 1. Dépendances Firebase (Imports)
 // -----------------------------------------------------------------
-
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { doc, setDoc, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { doc, setDoc, collection, getDocs, query, where, limit, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
 
 // -----------------------------------------------------------------
@@ -26,15 +23,14 @@ import { doc, setDoc, collection, getDocs, query, where, limit } from "https://w
 function showNotification(message, type) {
     const box = document.getElementById('notification-box');
     
-    // Vérifie si la boîte de notification existe avant de continuer
     if (!box) {
         console.error(`Notification Box not found. Message: ${message}, Type: ${type}`);
         return;
     }
     
-    // Réinitialiser les classes
+    // Position et style par défaut
     box.className = 'p-4 rounded-lg shadow-xl text-white font-medium fixed top-4 right-4 z-50';
-    box.classList.add('show'); // Assurez-vous d'avoir le CSS pour cette classe
+    box.style.display = 'block';
 
     // Définir les styles en fonction du type
     if (type === 'success') {
@@ -49,12 +45,8 @@ function showNotification(message, type) {
 
     // Masquer après 5 secondes
     setTimeout(() => {
-        // Enlève la classe 'show' ou masque l'élément
         box.style.display = 'none'; 
     }, 5000);
-    
-    // S'assurer qu'elle est visible au départ
-    box.style.display = 'block';
 }
 
 
@@ -65,7 +57,6 @@ function showNotification(message, type) {
  * @returns {string} L'ID personnalisé.
  */
 function generateCustomId(rolePrefix, uid) {
-    // Utilise une partie de l'UID pour garantir l'unicité
     const uniquePart = uid.substring(0, 8).toUpperCase(); 
     return `${rolePrefix}${uniquePart}`;
 }
@@ -77,8 +68,6 @@ function generateCustomId(rolePrefix, uid) {
 
 /**
  * Sauvegarde les liens sociaux (Vendeur, Affilié, Acheteur) dans Firestore.
- * @param {HTMLFormElement} form - Le formulaire d'entrée des liens sociaux.
- * @param {string} nextUrl - L'URL de redirection après la sauvegarde.
  */
 async function saveSocialLinks(form, nextUrl) {
     if (!window.auth.currentUser) {
@@ -90,7 +79,6 @@ async function saveSocialLinks(form, nextUrl) {
     const uid = window.auth.currentUser.uid;
     const links = [];
     
-    // Récupération des 5 liens sociaux
     for (let i = 1; i <= 5; i++) {
         const link = form[`social_link_${i}`] ? form[`social_link_${i}`].value.trim() : '';
         if (link) links.push(link);
@@ -116,8 +104,6 @@ async function saveSocialLinks(form, nextUrl) {
 
 /**
  * Sauvegarde les liens d'affiliation externes dans le document utilisateur Firestore.
- * Utilisé uniquement par l'Affilié sur liens-d-affiliation.html.
- * @param {HTMLFormElement} form - Le formulaire d'entrée des liens d'affiliation.
  */
 async function saveAffiliateLinks(form) {
     if (!window.auth.currentUser) {
@@ -127,7 +113,6 @@ async function saveAffiliateLinks(form) {
     
     const uid = window.auth.currentUser.uid;
     
-    // Récupération des liens spécifiques à l'affiliation
     const links = {
         amazon: form.amazon_link.value.trim() || null,
         temu: form.temu_link.value.trim() || null,
@@ -145,7 +130,6 @@ async function saveAffiliateLinks(form) {
         
         showNotification("Liens d'affiliation sauvegardés avec succès!", 'success');
         
-        // Redirection vers l'étape suivante: setup social pour l'Affilié
         setTimeout(() => {
             window.location.href = 'affilié-social.html';
         }, 500);
@@ -157,131 +141,118 @@ async function saveAffiliateLinks(form) {
 
 
 // -----------------------------------------------------------------
-// 4. Logique d'Inscription (Événement du Formulaire)
+// 4. LOGIQUE DE GESTION DES PRODUITS (Vendeur)
 // -----------------------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', () => {
-    const registerForm = document.getElementById('registerForm');
-    if (!registerForm) return;
-
-    registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        // Désactiver le bouton pour éviter les soumissions multiples
-        const submitButton = document.getElementById('submit-button');
-        submitButton.disabled = true;
-        submitButton.textContent = "Inscription en cours...";
-
-        const formData = new FormData(registerForm);
-        const email = formData.get('email');
-        const password = formData.get('password');
-        const confirmPassword = formData.get('confirm_password');
-        const fullName = formData.get('full_name');
-        
-        // Le rôle peut être null si rien n'est sélectionné (par défaut 'acheteur')
-        const selectedRole = formData.get('role');
-        const role = selectedRole || 'acheteur'; 
-
-        // Récupérer les liens sociaux (si l'utilisateur les a remplis sur la page d'inscription)
-        const socialLinks = [];
-        for (let i = 1; i <= 5; i++) {
-            const link = formData.get(`social_link_${i}`);
-            if (link) socialLinks.push(link);
-        }
-
-        // Vérification de base
-        if (password !== confirmPassword) {
-            showNotification("Les mots de passe ne correspondent pas.", 'error');
-            submitButton.disabled = false;
-            submitButton.textContent = "S'inscrire (15 jours offerts aux 25 premiers)";
-            return;
-        }
-
-        // --- Début du Processus d'Inscription ---
-        try {
-            // 1. Création de l'utilisateur dans Firebase Authentication
-            const userCredential = await createUserWithEmailAndPassword(window.auth, email, password);
-            const user = userCredential.user;
-            const uid = user.uid;
-
-            // 2. Détermination de l'ID, du Plan et du Statut d'Essai
-            let rolePrefix = 'JHSMPa'; 
-            if (role === 'vendeur') rolePrefix = 'JHSMPv';
-            if (role === 'affilie') rolePrefix = 'JHSMPA';
-
-            const customId = generateCustomId(rolePrefix, uid);
-            const referralLink = `${window.location.origin}/inscription.html?ref=${customId}`; 
-            
-            // Logique d'essai gratuit
-            let isTrial = true; 
-            const now = new Date();
-            const trialEnds = new Date(now.setDate(now.getDate() + 15));
-
-
-            // 3. Enregistrement des données dans Firestore (collection 'users')
-            await setDoc(doc(window.db, "users", uid), {
-                fullName: fullName,
-                email: email,
-                role: role,
-                customId: customId,
-                referralLink: referralLink,
-                socials: socialLinks,
-                isTrial: isTrial,
-                trialEnds: trialEnds,
-                isAdmin: (email === "jeoahs1@gmail.com"), 
-                createdAt: new Date()
-            });
-
-            // 4. Redirection après Succès
-            showNotification(`Bienvenue sur JEOAH'S, ${fullName}! Votre compte ${role} est créé.`, 'success');
-            
-            let redirectUrl;
-            if (role === 'vendeur') {
-                redirectUrl = 'fournisseur-step-social.html'; 
-            } else if (role === 'affilie') {
-                redirectUrl = 'liens-d-affiliation.html';
-            } else {
-                redirectUrl = 'index.html'; 
-            }
-            
-            setTimeout(() => {
-                window.location.href = redirectUrl;
-            }, 2000);
-
-
-        } catch (error) {
-            console.error("Erreur d'inscription:", error);
-            let errorMessage = "Une erreur inconnue est survenue.";
-
-            if (error.code === 'auth/email-already-in-use') {
-                errorMessage = "Cet email est déjà utilisé. Veuillez vous connecter.";
-            } else if (error.code === 'auth/invalid-email') {
-                errorMessage = "L'adresse email n'est pas valide.";
-            } else if (error.code === 'auth/weak-password') {
-                errorMessage = "Le mot de passe est trop faible (6 caractères minimum).";
-            }
-            
-            showNotification(`Erreur: ${errorMessage}`, 'error');
-            submitButton.disabled = false;
-            submitButton.textContent = "S'inscrire (15 jours offerts aux 25 premiers)";
-        }
-    });
-
-    // -----------------------------------------------------------------
-    // 5. Logique IA (Démo - Simplifiée)
-    // -----------------------------------------------------------------
-
-    const aiDemoButton = document.getElementById('ai-demo-button');
-    if (aiDemoButton) {
-        aiDemoButton.addEventListener('click', () => {
-            showNotification("La démo IA sera disponible après l'intégration des Cloud Functions!", 'info');
-        });
+/**
+ * Télécharge toutes les images du produit dans Firebase Storage.
+ */
+async function uploadProductImages(files, productId, vendorId) {
+    // Si 'window.app' et 'window.storage' sont initialisés sur la page HTML, c'est mieux.
+    if (!window.storage && window.app) {
+        window.storage = getStorage(window.app);
     }
-});
+
+    if (!window.storage) {
+         throw new Error("Firebase Storage non initialisé. Vérifiez votre page HTML.");
+    }
+    
+    const uploadPromises = [];
+    const imageUrls = [];
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const storageRef = ref(window.storage, `products/${vendorId}/${productId}/${file.name}`);
+        
+        const uploadPromise = uploadBytes(storageRef, file).then(async (snapshot) => {
+            const url = await getDownloadURL(snapshot.ref);
+            imageUrls.push(url);
+        });
+        
+        uploadPromises.push(uploadPromise);
+    }
+
+    await Promise.all(uploadPromises);
+    
+    return imageUrls;
+}
+
+
+/**
+ * Gère l'ajout d'un nouveau produit (Storage et Firestore).
+ */
+async function saveNewProduct(form) {
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "Sauvegarde en cours...";
+    
+    if (!window.auth.currentUser) {
+        showNotification("Session expirée. Veuillez vous reconnecter.", 'error');
+        submitButton.disabled = false;
+        submitButton.textContent = "Sauvegarder le Produit";
+        return;
+    }
+    
+    const vendorId = window.auth.currentUser.uid;
+    const imagesInput = document.getElementById('product_images');
+    const images = imagesInput.files;
+
+    if (images.length === 0) {
+        showNotification("Veuillez télécharger au moins une image de produit.", 'error');
+        submitButton.disabled = false;
+        submitButton.textContent = "Sauvegarder le Produit";
+        return;
+    }
+    
+    try {
+        // 1. Créer d'abord un document vide pour obtenir un ID de Produit unique
+        const productRef = doc(collection(window.db, "products"));
+        const productId = productRef.id;
+
+        // 2. Télécharger les images
+        const imageUrls = await uploadProductImages(images, productId, vendorId);
+
+        // 3. Récupérer les autres données du formulaire
+        const productData = {
+            id: productId,
+            vendorId: vendorId,
+            name: form.product_name.value.trim(),
+            description: form.product_description.value.trim(),
+            category: form.product_category.value,
+            stock: parseInt(form.product_stock.value, 10),
+            
+            price: parseFloat(form.selling_price.value),
+            cost: parseFloat(form.product_cost.value) || 0,
+            affiliateCommissionPercent: parseFloat(form.affiliate_commission.value),
+            
+            imageUrls: imageUrls, 
+            
+            status: 'active',
+            createdAt: new Date(),
+            lastUpdated: new Date()
+        };
+
+        // 4. Enregistrer les données complètes du produit dans Firestore
+        await setDoc(productRef, productData);
+        
+        showNotification("Produit enregistré et images téléchargées avec succès !", 'success');
+
+        // 5. Redirection
+        setTimeout(() => {
+            window.location.href = 'produits-vendeurs.html';
+        }, 1500);
+
+    } catch (error) {
+        console.error("Erreur lors de l'ajout du produit:", error);
+        showNotification(`Erreur critique : Impossible d'enregistrer le produit. ${error.message}`, 'error');
+        submitButton.disabled = false;
+        submitButton.textContent = "Sauvegarder le Produit";
+    }
+}
 
 
 // -----------------------------------------------------------------
-// 6. Logique des Formulaires d'Onboarding (Post-Inscription)
+// 5. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
 // -----------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -290,83 +261,136 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const path = window.location.pathname;
 
-    // --- A. Logique Affilié: Liens Externes (liens-d-affiliation.html) ---
+    // --- A. Logique d'Inscription (registerForm) ---
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = true;
+            submitButton.textContent = "Inscription en cours...";
+
+            const formData = new FormData(registerForm);
+            const email = formData.get('email');
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirm_password');
+            const fullName = formData.get('full_name');
+            const role = formData.get('role') || 'acheteur'; 
+
+            if (password !== confirmPassword) {
+                showNotification("Les mots de passe ne correspondent pas.", 'error');
+                submitButton.disabled = false;
+                submitButton.textContent = "S'inscrire (15 jours offerts aux 25 premiers)";
+                return;
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(window.auth, email, password);
+                const user = userCredential.user;
+                const uid = user.uid;
+
+                let rolePrefix = (role === 'vendeur') ? 'JHSMPv' : (role === 'affilie') ? 'JHSMPA' : 'JHSMPa';
+                const customId = generateCustomId(rolePrefix, uid);
+                const referralLink = `${window.location.origin}/inscription.html?ref=${customId}`; 
+                
+                const now = new Date();
+                const trialEnds = new Date(now.setDate(now.getDate() + 15));
+
+
+                await setDoc(doc(window.db, "users", uid), {
+                    fullName: fullName,
+                    email: email,
+                    role: role,
+                    customId: customId,
+                    referralLink: referralLink,
+                    socials: [], // Laisser vide, rempli lors de l'onboarding
+                    affiliateLinks: {}, // Laisser vide
+                    isTrial: true,
+                    trialEnds: trialEnds,
+                    isAdmin: (email === "jeoahs1@gmail.com"), 
+                    createdAt: new Date()
+                });
+
+                showNotification(`Bienvenue sur JEOAH'S, ${fullName}! Votre compte ${role} est créé.`, 'success');
+                
+                let redirectUrl;
+                if (role === 'vendeur') {
+                    redirectUrl = 'fournisseur-step-social.html'; 
+                } else if (role === 'affilie') {
+                    redirectUrl = 'liens-d-affiliation.html';
+                } else {
+                    redirectUrl = 'index.html'; 
+                }
+                
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 2000);
+
+
+            } catch (error) {
+                let errorMessage = "Une erreur inconnue est survenue.";
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = "Cet email est déjà utilisé. Veuillez vous connecter.";
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = "Le mot de passe est trop faible (6 caractères minimum).";
+                }
+                
+                showNotification(`Erreur: ${errorMessage}`, 'error');
+                submitButton.disabled = false;
+                submitButton.textContent = "S'inscrire (15 jours offerts aux 25 premiers)";
+            }
+        });
+    }
+
+    // --- B. Logique d'Onboarding (gestion des formulaires post-inscription) ---
     if (path.includes('liens-d-affiliation.html')) {
         const form = document.getElementById('affiliateLinksForm');
+        if (form) form.addEventListener('submit', (e) => { e.preventDefault(); saveAffiliateLinks(form); });
         const skipButton = document.getElementById('skipButton');
-
-        if (form) {
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await saveAffiliateLinks(form);
-            });
-        }
-        
-        if (skipButton) {
-             skipButton.addEventListener('click', () => {
-                // Pas de sauvegarde, redirection vers l'étape suivante (affilié-social)
-                window.location.href = 'affilié-social.html';
-            });
-        }
+        if (skipButton) skipButton.addEventListener('click', () => { window.location.href = 'affilié-social.html'; });
     }
     
-    // --- B. Logique Social Vendeur (fournisseur-step-social.html) ---
     if (path.includes('fournisseur-step-social.html')) {
         const form = document.getElementById('supplierSocialForm');
+        const nextUrl = 'produits-vendeurs.html';
+        if (form) form.addEventListener('submit', (e) => { e.preventDefault(); saveSocialLinks(form, nextUrl); });
         const skipButton = document.getElementById('skipButton');
-        const nextUrl = 'produits-vendeurs.html'; // Dashboard Vendeur
-        
+        if (skipButton) skipButton.addEventListener('click', () => { window.location.href = nextUrl; });
+    }
+
+    if (path.includes('affilié-social.html')) {
+        const form = document.getElementById('affiliateSocialForm');
+        const nextUrl = 'produits-affiliés.html';
+        if (form) form.addEventListener('submit', (e) => { e.preventDefault(); saveSocialLinks(form, nextUrl); });
+        const skipButton = document.getElementById('skipButton');
+        if (skipButton) skipButton.addEventListener('click', () => { window.location.href = nextUrl; });
+    }
+    
+    if (path.includes('acheteur-social-setup.html')) {
+        const form = document.getElementById('buyerSocialForm');
+        const nextUrl = 'index.html';
+        if (form) form.addEventListener('submit', (e) => { e.preventDefault(); saveSocialLinks(form, nextUrl); });
+        const skipButton = document.getElementById('skipButton');
+        if (skipButton) skipButton.addEventListener('click', () => { window.location.href = nextUrl; });
+    }
+
+    // --- C. Logique du Formulaire d'Ajout de Produit (Vendeur) ---
+    if (path.includes('configuration-du-vendeur.html')) {
+        const form = document.getElementById('productForm');
         if (form) {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                await saveSocialLinks(form, nextUrl);
-            });
-        }
-        
-        if (skipButton) {
-             skipButton.addEventListener('click', () => {
-                window.location.href = nextUrl;
+                await saveNewProduct(form);
             });
         }
     }
 
-    // --- C. Logique Social Affilié (affilié-social.html) ---
-    if (path.includes('affilié-social.html')) {
-        const form = document.getElementById('affiliateSocialForm');
-        const skipButton = document.getElementById('skipButton');
-        const nextUrl = 'produits-affiliés.html'; // Dashboard Affilié
-        
-        if (form) {
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await saveSocialLinks(form, nextUrl);
-            });
-        }
-        
-        if (skipButton) {
-             skipButton.addEventListener('click', () => {
-                window.location.href = nextUrl;
-            });
-        }
-    }
-    
-    // --- D. Logique Social Acheteur (acheteur-social-setup.html) ---
-    if (path.includes('acheteur-social-setup.html')) {
-        const form = document.getElementById('buyerSocialForm');
-        const skipButton = document.getElementById('skipButton');
-        const nextUrl = 'index.html'; // Vitrine
-        
-        if (form) {
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await saveSocialLinks(form, nextUrl);
-            });
-        }
-        
-        if (skipButton) {
-             skipButton.addEventListener('click', () => {
-                window.location.href = nextUrl;
-            });
-        }
+    // --- D. Logique IA (Démo - Simplifiée) ---
+    const aiDemoButton = document.getElementById('ai-demo-button');
+    if (aiDemoButton) {
+        aiDemoButton.addEventListener('click', () => {
+            showNotification("La démo IA sera disponible après l'intégration des Cloud Functions!", 'info');
+        });
     }
 });

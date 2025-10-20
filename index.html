@@ -1,138 +1,163 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JEOAH'S Market Place</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.min.css">
-  <link rel="icon" type="image/png" href="assets/icon-products.png"> 
-  <style>
-    /* Style pour la bande de notification */
-    .launch-bar {
-      background-color: #FDC830; /* Jaune/Orange de votre marque */
-      color: #032C4F; /* Bleu foncé de votre marque */
-      text-align: center;
-      padding: 10px 0;
-      font-weight: bold;
-      font-size: 1.1rem;
-    }
-    .launch-bar a {
-      color: #032C4F;
-      text-decoration: underline;
-      margin-left: 10px;
-    }
-    /* Style pour la chatbox IA (Ajouté) */
-    .ia-chat-box {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 60px;
-        height: 60px;
-        background-color: #007bff;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-    }
-    .ia-chat-box img {
-        width: 35px;
-        height: 35px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEOAH'S Market Place - Le marché Mondial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], },
+                    colors: {
+                        'primary-blue': '#1D4ED8',
+                        'accent-orange': '#F97316',
+                        'gray-bg': '#F3F4F6',
+                        'dark-text': '#1F2937',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+    </style>
 </head>
-<body>
-  <div class="launch-bar">
-      🚀 **PRÉ-LANCEMENT** : Les inscriptions sont ouvertes ! Accédez à l'Assistant IA 24/7.
-      <a href="inscription.html">Commencer maintenant →</a>
-  </div>
+<body class="bg-gray-50 text-dark-text min-h-screen flex flex-col">
 
-  <header>
-    <nav>
-        <span style="font-size: 1.8rem; font-weight: bold; color: #032C4F;">JEOAH'S</span>     
-        <div class="menu">
-            <a href="index.html">Home</a>
-            <a href="plans.html">Plans</a>
-            <a href="faq.html">Aide</a>
-            <a href="contact.html">Contact</a>
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            
+            <a href="index.html" class="text-3xl font-bold text-primary-blue">JEOAH'S <span class="text-accent-orange">MP</span></a>
+            
+            <div class="hidden md:flex flex-1 max-w-xl mx-8">
+                <input type="text" placeholder="Rechercher des produits ou des vendeurs..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-primary-blue transition">
+                <button class="bg-primary-blue text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition duration-200">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            
+            <nav class="flex items-center space-x-4">
+                <a href="inscription.html" class="text-gray-700 hover:text-primary-blue transition duration-200 hidden sm:block">
+                    <i class="fas fa-user-plus mr-1"></i> Inscription
+                </a>
+                <a href="connexion.html" class="text-gray-700 hover:text-primary-blue transition duration-200 hidden sm:block">
+                    <i class="fas fa-sign-in-alt mr-1"></i> Connexion
+                </a>
+                <a href="#" class="relative text-gray-700 hover:text-accent-orange transition duration-200">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                </a>
+            </nav>
         </div>
-        <a href="inscription.html" class="btn">Get Started</a>
-    </nav>
-  </header>
-
-  <main>
-    <section class="hero">
-        <div class="hero-text">
-            <h1>JEOAH'S Market Place</h1>
-            <p>La meilleure plateforme pour acheter et vendre des produits de vos détaillants préférés.</p>
-            <a href="inscription.html" class="btn btn-primary">Commencer</a>
-        </div>
-        <div class="hero-image">
-                        <img src="assets/mobile-phone-design.png" alt="Illustration de l'application mobile" style="max-width: 450px;"> 
-        </div>
-    </section>
-
-    <section class="features">
         
-        <div class="feature-item">
-                        <img src="assets/icon-products.png" alt="Icône produits">
-            <div>
-                <h3>Produits Centralisés</h3>
-                <p>Trouvez des produits de tous vos détaillants favoris en une seule place.</p>
+        <div class="bg-primary-blue hidden md:block">
+            <nav class="container mx-auto px-4 py-2 text-white flex space-x-8 text-sm font-medium">
+                <a href="#" class="hover:text-accent-orange transition">Électronique</a>
+                <a href="#" class="hover:text-accent-orange transition">Mode</a>
+                <a href="#" class="hover:text-accent-orange transition">Maison</a>
+                <a href="#" class="hover:text-accent-orange transition">Beauté</a>
+                <a href="#" class="hover:text-accent-orange transition">Services</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex-1">
+        
+        <div class="bg-primary-blue text-white p-8 rounded-xl shadow-lg mb-10 text-center">
+            <h2 class="text-4xl font-extrabold mb-2">Bienvenue sur JEOAH'S Market Place</h2>
+            <p class="text-xl font-light">La plateforme qui connecte l'Afrique et le monde avec les produits locaux et globaux.</p>
+        </div>
+
+        <section class="mb-10">
+            <h3 class="text-2xl font-bold text-dark-text mb-6 border-b pb-2">Produits Populaires</h3>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                
+                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 overflow-hidden">
+                    <div class="h-40 bg-gray-200 flex items-center justify-center text-gray-500">
+                        <i class="fas fa-image text-4xl"></i>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-semibold text-lg truncate">Nom du Produit #1</h4>
+                        <p class="text-sm text-gray-500 mt-1">Catégorie</p>
+                        <div class="flex justify-between items-center mt-3">
+                            <span class="text-xl font-bold text-accent-orange">$ 15.99</span>
+                            <button class="text-primary-blue hover:text-blue-700">
+                                <i class="fas fa-cart-plus text-2xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition duration-300 overflow-hidden">
+                    <div class="h-40 bg-gray-200 flex items-center justify-center text-gray-500">
+                        <i class="fas fa-image text-4xl"></i>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-semibold text-lg truncate">Produit Local Artisanat</h4>
+                        <p class="text-sm text-gray-500 mt-1">Faits Main</p>
+                        <div class="flex justify-between items-center mt-3">
+                            <span class="text-xl font-bold text-accent-orange">$ 45.00</span>
+                            <button class="text-primary-blue hover:text-blue-700">
+                                <i class="fas fa-cart-plus text-2xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                </div>
+        </section>
+        
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-auto">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div>
+                    <h5 class="text-lg font-bold mb-3">JEOAH'S</h5>
+                    <p class="text-sm text-gray-400">La place de marché pour tous.</p>
+                </div>
+                
+                <div>
+                    <h5 class="text-lg font-bold mb-3">Aide</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">FAQ</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Statut des Commandes</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h5 class="text-lg font-bold mb-3">Légal</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="Politique-de-confidentialite.html" class="text-gray-400 hover:text-white transition">Confidentialité</a></li>
+                        <li><a href="Termes-et-conditions.html" class="text-gray-400 hover:text-white transition">Termes & Conditions</a></li>
+                        <li><a href="Politique-de-remboursement.html" class="text-gray-400 hover:text-white transition">Remboursement</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h5 class="text-lg font-bold mb-3">Suivez-nous</h5>
+                    <div class="flex space-x-4 text-xl">
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="feature-item">
-                        <img src="assets/icon-ai.png" alt="Icône IA">
-            <div>
-                <h3>Alimenté par l'IA</h3>
-                <p>Soyez mis à jour automatiquement avec les nouvelles offres et les produits tendances.</p>
+        <div class="bg-gray-900 py-3">
+            <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+                &copy; 2025 JEOAH'S Market Place. Tous droits réservés.
             </div>
         </div>
-        
-        <div class="feature-item">
-                        <img src="assets/icon-paiements.png" alt="Icône paiements">
-            <div>
-                <h3>Paiements Faciles</h3>
-                <p>Payez avec Google Pay, Alipay, PayPal, et plus encore.</p>
-            </div>
-        </div>
-        
-        <div class="feature-item">
-                        <img src="assets/icon-globe.png" alt="Icône monde">
-            <div>
-                <h3>Accès Global</h3>
-                <p>Achetez auprès de détaillants du monde entier.</p>
-            </div>
-        </div>
-        
-    </section>
-  </main>
-
-  <div class="ia-chat-box" onclick="alert('Bienvenue ! Je suis Ney, l\'Assistant IA de JEOAH\'S. Je suis disponible pour répondre à vos questions 24/7. Le chat sera activé dès le lancement de la version Beta !');">
-      <img src="assets/icon-ai.png" alt="Chat IA">
-  </div>
-
-  <footer>
-    <p>Suivez-nous sur nos réseaux pour les mises à jour et les Lives :</p>
-    <div class="social-icons">
-        <a href="https://www.tiktok.com/@jeoahs1" target="_blank" title="TikTok JEOAH'S"><img src="assets/icon-tiktok.png" alt="TikTok"></a>
-        <a href="https://www.facebook.com/share/17DnLVek27/" target="_blank" title="Facebook JEOAH'S"><img src="assets/icon-facebook.png" alt="Facebook"></a>
-        <a href="https://www.instagram.com/jeoahsmarketplace?igsh=b2ZvbW5yOXI1eDlo" target="_blank" title="Instagram JEOAH'S"><img src="assets/icon-instagram.png" alt="Instagram"></a>
-        <a href="https://www.youtube.com/@jeoahs1" target="_blank" title="YouTube JEOAH'S"><img src="assets/icon-youtube.png" alt="YouTube"></a>
-        
-        <a href="#twitter" target="_blank" title="Twitter/X"><img src="assets/icon-twitter.png" alt="Twitter"></a>
-        <a href="#snapchat" target="_blank" title="Snapchat"><img src="assets/icon-snapchat.png" alt="Snapchat"></a>
-        <a href="#reddit" target="_blank" title="Reddit"><img src="assets/icon-reddit.png" alt="Reddit"></a>
-        <a href="#telegram" target="_blank" title="Telegram"><img src="assets/icon-telegram.png" alt="Telegram"></a>
-        <a href="#quora" target="_blank" title="Quora"><img src="assets/icon-quora.png" alt="Quora"></a>
-    </div>
-    <p style="margin-top: 15px;">© 2025 JEOAH’S Market Place • Contact : jeoahs1@gmail.com</p>
-  </footer>
-
-  <script src="app.js"></script>
+    </footer>
+    
 </body>
 </html>

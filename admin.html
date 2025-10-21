@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <p style="font-size: 0.9em; color: green; font-weight: bold;">[COMPTE ADMIN] Exemption d'abonnement totale par le système Ney.</p>
+    <title>JEOAH'S - Dashboard Administrateur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .admin-login-container {
             max-width: 400px;
@@ -15,60 +16,122 @@
             text-align: center;
         }
         .admin-dashboard-content {
-            padding: 30px;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .product-card {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        .product-card h3 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #032C4F;
         }
     </style>
 </head>
-<body>
-    <header style="background: #032C4F; color: #fff; padding: 1rem;">
-        <img src="assets/logo.png" alt="JEOAH'S Logo" class="logo">
-    </header>
+<body class="bg-gray-50">
 
-    <main>
+    <nav class="bg-white shadow-md sticky top-0 z-10">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="index.html" class="text-2xl font-bold text-indigo-600">JEOAH'S Marketplace</a>
+                </div>
+                <div id="main-nav" class="flex items-center">
+                    <div id="role-links" class="flex space-x-4">
+                        </div>
+                    <span class="border-r border-gray-300 h-6 mx-4"></span>
+                    <div id="auth-links" class="flex items-center space-x-4">
+                        <span class="text-gray-500 text-sm">Chargement...</span> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <p class="text-center py-2 text-green-700 font-bold bg-green-100">
+        [COMPTE ADMIN] Exemption d'abonnement totale par le système Ney.
+    </p>
+
+    <main class="container mx-auto">
         <div class="admin-login-container" id="adminLogin">
             <h2>Accès Administrateur</h2>
-            <p style="color: red;">Accès réservé à : Utilisateur de cet site (jeoahs1@gmail.com)</p>
-            <input type="email" placeholder="Email (jeoahs1@gmail.com)" value="jeoahs1@gmail.com" readonly style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc;">
-            <input type="password" placeholder="Mot de passe" required style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
-            <button class="btn btn-primary" style="width: 100%;">Se Connecter</button>
-        <div class="admin-dashboard-content" id="adminContent" style="display: none;">
-            <h1>Bienvenue, Utilisateur de cet site (Admin)</h1>
-            <p>Mon rôle, **Ney (IA)**, est de contrôler strictement la plateforme et de vous fournir ce rapport journalier.</p>
+            <p style="color: red; margin-bottom: 15px;">Accès réservé à : Utilisateur de cet site (jeoahs1@gmail.com)</p>
             
-            <h2 style="color: #032C4F;">Statistiques Globales & Contrôle IA</h2>
-            <div class="product-grid">
-                <div class="product-card"><h3>120</h3><p>Nouveaux Inscrits</p></div>
-                <div class="product-card"><h3>$5,500 USD</h3><p>Total Retraits en attente</p></div>
-                <div class="product-card" style="border-left: 5px solid red;"><h3>7</h3><p>Problèmes Signalés par Ney</p></div>
-            </div>
-            
-            <h2 style="color: #032C4F; margin-top: 30px;">Configuration Globale des Paiements (API Keys)</h2>
-            <p>Ceci est le compte global de JEOAH'S Market Place. Insérez les clés API de production ci-dessous pour activer les paiements et retraits.</p>
-
-            <form style="background: #fff; padding: 20px; border-radius: 8px; margin-top: 20px;">
-                <input type="text" placeholder="Clé API Google Pay" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                <input type="text" placeholder="Clé API PayPal" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                <input type="text" placeholder="Clé API Alipay" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                <input type="text" placeholder="Clé API Zelle (ou service de gateway)" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc;">
-                <input type="text" placeholder="Clé API Mon Cash / Nat Cash" style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;">
-                <p style="background: #e6f7ff; padding: 15px; border-radius: 8px; border: 1px solid #032C4F;">
-                    <span style="font-weight: bold;">Contrôle de Ney :</span> L'IA assurera le contrôle strict des retraits, l'application des frais déterminés, et la conversion des monnaies en USD.
-                </p>
-                <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Sauvegarder les Configurations Paiements</button>
+            <form id="adminLoginForm">
+                <input type="email" placeholder="Email (jeoahs1@gmail.com)" value="jeoahs1@gmail.com" readonly class="w-full p-2 mb-4 border rounded">
+                <input type="password" placeholder="Mot de passe" required id="adminPassword" class="w-full p-2 mb-4 border rounded">
+                <button type="submit" class="w-full py-2 bg-indigo-600 text-white font-bold rounded hover:bg-indigo-700 transition">Se Connecter</button>
             </form>
         </div>
+        
+        <div class="admin-dashboard-content bg-white shadow-lg rounded-lg" id="adminContent" style="display: none;">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Bienvenue, Utilisateur de cet site (Admin)</h1>
+            <p class="text-gray-600 mb-6">Mon rôle, **Ney (IA)**, est de contrôler strictement la plateforme et de vous fournir ce rapport journalier.</p>
+            
+            <h2 class="text-2xl font-semibold text-indigo-700 border-b pb-2">Statistiques Globales & Contrôle IA</h2>
+            <div class="product-grid">
+                <div class="product-card"><h3>120</h3><p>Nouveaux Inscrits (24h)</p></div>
+                <div class="product-card"><h3>$5,500 USD</h3><p>Total Retraits en attente</p></div>
+                <div class="product-card border-l-4 border-red-500"><h3>7</h3><p>Problèmes Signalés par Ney</p></div>
+                <div class="product-card border-l-4 border-green-500"><h3>$15,200</h3><p>Commissions Totales (Mois)</p></div>
+            </div>
+            
+            <h2 class="text-2xl font-semibold text-indigo-700 border-b pb-2 mt-8">Configuration Globale des Paiements (API Keys)</h2>
+            <p class="text-gray-600 mt-4">Ceci est le compte global de JEOAH'S Market Place. Insérez les clés API de production ci-dessous pour activer les paiements et retraits.</p>
+
+            <form class="p-6 border rounded-lg bg-gray-50 mt-4">
+                <input type="text" placeholder="Clé API Google Pay" class="w-full p-2 mb-3 border rounded">
+                <input type="text" placeholder="Clé API PayPal" class="w-full p-2 mb-3 border rounded">
+                <input type="text" placeholder="Clé API Alipay" class="w-full p-2 mb-3 border rounded">
+                <input type="text" placeholder="Clé API Zelle (ou service de gateway)" class="w-full p-2 mb-3 border rounded">
+                <input type="text" placeholder="Clé API Mon Cash / Nat Cash" class="w-full p-2 mb-3 border rounded">
+                
+                <p class="bg-blue-100 p-4 rounded-lg border border-indigo-400 text-indigo-800 text-sm">
+                    <span class="font-bold">Contrôle de Ney :</span> L'IA assurera le contrôle strict des retraits, l'application des frais déterminés, et la conversion des monnaies en USD.
+                </p>
+                <button type="button" class="w-full py-2 bg-green-600 text-white font-bold rounded hover:bg-green-700 transition mt-4">Sauvegarder les Configurations Paiements</button>
+            </form>
+            
+            <button onclick="logoutAdmin()" class="mt-6 py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600 transition">Déconnexion Admin</button>
+        </div>
+    </main>
+
+    <script src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+    
     <script>
-        // Simulation pour l'exemple. Remplacer par Firebase Auth.
-        document.querySelector('.admin-login-container button').addEventListener('click', () => {
-            document.getElementById('adminLogin').style.display = 'none';
-            document.getElementById('adminContent').style.display = 'block';
-            alert('Connexion Admin simulée réussie !');
+        // Logique de simulation d'Admin
+        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('adminPassword').value;
+            // Dans un vrai projet, on vérifierait un rôle 'admin' dans Firebase. 
+            // Ici, nous simulons la connexion pour l'interface de démo.
+            if (password === 'admin123') { // Mot de passe de démo
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                alert('Connexion Admin simulée réussie ! Accès au contrôle global.');
+            } else {
+                alert('Mot de passe incorrect.');
+            }
         });
+        
+        function logoutAdmin() {
+            document.getElementById('adminLogin').style.display = 'block';
+            document.getElementById('adminContent').style.display = 'none';
+            alert('Déconnexion Admin.');
+        }
     </script>
 </body>
-            Ce commit intègre l'élément de navigation principal (navbar) dans tous les fichiers HTML de l'application, rendant ainsi le flux utilisateur cohérent et navigable.
-
-Mises à jour:
-* Fichiers HTML: La structure HTML de la barre de navigation a été ajoutée en haut du <body> de toutes les pages (index.html, vitrine.html, register.html, produits-vendeurs.html, etc.).
-* app.js: La Section 13 (updateNavBar) utilise désormais les IDs #role-links et #auth-links pour afficher dynamiquement les liens 'Déconnexion', 'Mes Produits', 'Dashboard Affilié', 'Panier', 'Connexion', etc., en fonction de l'état d'authentification et du rôle de l'utilisateur.
 </html>

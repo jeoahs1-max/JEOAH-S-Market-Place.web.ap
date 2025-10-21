@@ -3,74 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription - JEOAH'S</title>
+    <title>JEOAH'S Marketplace - Inscription</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-50 min-h-screen flex flex-col">
 
-    <nav class="bg-white shadow-md sticky top-0 z-10">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex-shrink-0">
-                    <a href="index.html" class="text-2xl font-bold text-indigo-600">JEOAH'S Marketplace</a>
-                </div>
-                <div id="main-nav" class="flex items-center">
-                    <div id="role-links" class="flex space-x-4">
-                        </div>
-                    <span class="border-r border-gray-300 h-6 mx-4"></span>
-                    <div id="auth-links" class="flex items-center space-x-4">
-                        <span class="text-gray-500 text-sm">Chargement...</span> 
-                    </div>
-                </div>
-            </div>
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="index.html" class="text-2xl font-bold text-indigo-600">JEOAH'S Marketplace</a>
+            <a href="login.html" class="text-gray-700 hover:text-indigo-600">Connexion</a>
         </div>
     </nav>
-    <main class="flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl mt-8">
-            <h1 class="text-3xl font-bold text-center text-gray-900">Rejoindre JEOAH'S</h1>
-            <p class="mt-2 text-center text-gray-600">Choisissez votre rôle et commencez l'aventure.</p>
-            
-            <div id="notificationContainer" class="mt-4"></div>
 
-            <form id="registerForm" class="mt-8 space-y-6">
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl">
+            <h2 class="text-3xl font-bold text-gray-900 text-center mb-6">Créer un Compte</h2>
+            
+            <div id="notificationContainer" class="mb-4"></div>
+
+            <form id="registrationForm" class="space-y-6">
                 
                 <div>
-                    <label for="firstName" class="block text-sm font-medium text-gray-700">Prénom</label>
-                    <input id="firstName" name="firstName" type="text" required class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm">
+                    <label for="fullName" class="block text-sm font-medium text-gray-700">Nom Complet</label>
+                    <input id="fullName" name="fullName" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 </div>
-                
+
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">Adresse Email</label>
-                    <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm">
+                    <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Mot de Passe (Min 6 caractères)</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <input id="password" name="password" type="password" autocomplete="new-password" required class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" onclick="togglePasswordVisibility('password')">
+                            <i id="eye-password" class="fas fa-eye text-gray-400 hover:text-indigo-600"></i>
+                        </div>
+                    </div>
                 </div>
                 
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
-                    <input id="password" name="password" type="password" autocomplete="new-password" required class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm">
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmer le Mot de Passe</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" onclick="togglePasswordVisibility('confirmPassword')">
+                            <i id="eye-confirmPassword" class="fas fa-eye text-gray-400 hover:text-indigo-600"></i>
+                        </div>
+                    </div>
                 </div>
-                
+
                 <div>
                     <label for="role" class="block text-sm font-medium text-gray-700">Je suis...</label>
-                    <select id="role" name="role" required class="mt-1 block w-full p-3 border border-gray-300 bg-white rounded-lg shadow-sm">
-                        <option value="buyer">Acheteur (Utilisateur)</option>
-                        <option value="affiliate">Affilié (Promoteur)</option>
-                        <option value="vendor">Vendeur (Fournisseur)</option>
+                    <select id="role" name="role" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option value="acheteur">Acheteur/Utilisateur</option>
+                        <option value="vendeur">Vendeur (Propose des produits)</option>
+                        <option value="affilié">Affilié (Fait la promotion des produits)</option>
                     </select>
                 </div>
-                
-                <button type="submit" class="w-full py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition">
-                    S'inscrire
-                </button>
+
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                        S'inscrire
+                    </button>
+                </div>
             </form>
-            
+
             <div class="mt-6 text-center">
-                <p class="text-sm text-gray-600">Déjà un compte? 
-                    <a href="login.html" class="font-medium text-indigo-600 hover:text-indigo-500">Connectez-vous</a>
+                <p class="text-sm text-gray-600">
+                    Déjà un compte? 
+                    <a href="login.html" class="font-medium text-indigo-600 hover:text-indigo-500">Connectez-vous ici</a>
                 </p>
             </div>
         </div>
     </main>
 
+    <footer class="bg-gray-800 text-white py-4 mt-auto">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-sm text-gray-400">&copy; 2024 JEOAH'S Marketplace. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Fonction pour basculer la visibilité du mot de passe
+        function togglePasswordVisibility(fieldId) {
+            const field = document.getElementById(fieldId);
+            const eye = document.getElementById('eye-' + fieldId);
+            if (field.type === 'password') {
+                field.type = 'text';
+                eye.classList.remove('fa-eye');
+                eye.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                eye.classList.remove('fa-eye-slash');
+                eye.classList.add('fa-eye');
+            }
+        }
+    </script>
     <script src="firebase-config.js"></script>
     <script type="module" src="app.js"></script>
 </body>

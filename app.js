@@ -329,7 +329,8 @@ function displayVendorProducts() {
 // -----------------------------------------------------------------
 
 /**
- * Récupère et affiche TOUS les produits de la marketplace pour l'Affilié.
+ * Récupère et affiche TOUS les produits de la marketplace (Vitrine Publique).
+ * Si un Affilié est connecté, il voit en plus l'option de "Copier le Lien".
  */
 function displayAffiliateProducts() {
     const productsContainer = document.getElementById('affiliateProductsList');
@@ -337,22 +338,19 @@ function displayAffiliateProducts() {
 
     productsContainer.innerHTML = '<div class="text-center py-10 text-gray-500">Chargement de tous les produits disponibles...</div>';
     
-    onAuthStateChanged(window.auth, async (user) => {
-        if (!user || !window.db) {
-            productsContainer.innerHTML = '<div class="text-center py-10 text-red-500">Veuillez vous connecter pour voir les produits.</div>';
-            return;
-        }
+    // Déterminer l'ID de l'Affilié s'il est connecté, sinon c'est null (pour le lien de tracking)
+    const currentUser = window.auth.currentUser;
+    const affiliateId = currentUser ? currentUser.uid : null; 
 
-        const affiliateId = user.uid; 
-        
+    const loadProducts = async () => {
         try {
             const productsRef = collection(window.db, "products");
-            const querySnapshot = await getDocs(productsRef);
+            const querySnapshot = await getDocs(productsRef); // Requête publique
 
             if (querySnapshot.empty) {
                 productsContainer.innerHTML = `
                     <div class="text-center py-20 border-2 border-dashed border-gray-200 rounded-lg">
-                        <p class="text-gray-600 mb-4">Aucun produit n'est disponible pour l'affiliation pour l'instant.</p>
+                        <p class="text-gray-600 mb-4">Aucun produit n'est disponible pour l'instant.</p>
                     </div>
                 `;
                 return;
@@ -365,7 +363,30 @@ function displayAffiliateProducts() {
                 
                 const commissionAmount = (product.price * (product.affiliateCommissionPercent / 100)).toFixed(2);
                 
-                const affiliateLink = `${window.location.origin}/produit.html?id=${product.id}&affiliate=${affiliateId}`;
+                // Si l'utilisateur est connecté et est un Affilié, on génère son lien de tracking unique.
+                const trackingLink = affiliateId 
+                    ? `${window.location.origin}/produit.html?id=${product.id}&affiliate=${affiliateId}` 
+                    : `${window.location.origin}/produit.html?id=${product.id}`; // Lien public pour l'Acheteur non-tracé
+
+                let linkButtonHtml = '';
+                if (affiliateId && currentUser.role === 'affiliate') { // S'assurer que seul l'affilié a le bouton de copie
+                    linkButtonHtml = `
+                        <button 
+                            onclick="navigator.clipboard.writeText('${trackingLink}'); showNotification('Lien copié !', 'success');"
+                            class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition font-medium text-sm"
+                        >
+                            Copier Lien Affilié
+                        </button>
+                    `;
+                } else {
+                    // C'est la vitrine publique pour un Acheteur ou Vendeur non connecté/connecté
+                    linkButtonHtml = `
+                        <a href="${trackingLink}" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition font-medium text-sm">
+                            Voir le Produit
+                        </a>
+                    `;
+                }
+
 
                 const productHtml = `
                     <div class="bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-100 flex items-center">
@@ -373,16 +394,11 @@ function displayAffiliateProducts() {
                         
                         <div class="flex-grow">
                             <h3 class="text-lg font-semibold text-gray-800">${product.name}</h3>
-                            <p class="text-sm text-gray-500">Prix: $${product.price.toFixed(2)} - Commission: ${product.affiliateCommissionPercent}% ($${commissionAmount})</p>
+                            <p class="text-sm text-gray-500">Prix: $${product.price.toFixed(2)} - Commission Affilié: ${product.affiliateCommissionPercent}% ($${commissionAmount})</p>
                         </div>
                         
                         <div class="text-right">
-                            <button 
-                                onclick="navigator.clipboard.writeText('${affiliateLink}'); showNotification('Lien copié !', 'success');"
-                                class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition font-medium text-sm"
-                            >
-                                Copier le Lien
-                            </button>
+                            ${linkButtonHtml}
                         </div>
                     </div>
                 `;
@@ -390,13 +406,18 @@ function displayAffiliateProducts() {
             });
 
         } catch (error) {
-            console.error("Erreur lors de la récupération des produits affiliés:", error);
+            console.error("Erreur lors de la récupération des produits affiliés (vitrine):", error);
             productsContainer.innerHTML = `<div class="text-center py-10 text-red-500">Erreur: Impossible de charger les produits.</div>`;
         }
+    };
+    
+    // On écoute le changement d'état (pour mettre à jour le bouton Affilié) et on charge les produits
+    onAuthStateChanged(window.auth, () => {
+        loadProducts();
     });
+    
+    loadProducts();
 }
-
-
 // -----------------------------------------------------------------
 // 7. LOGIQUE D'AFFICHAGE DES DÉTAILS DU PRODUIT (produit.html)
 // -----------------------------------------------------------------
@@ -729,7 +750,7 @@ async function addItemToCart(productId, affiliateId = null) {
         const existingItemIndex = cart.findIndex(item => item.id === productId);
 
         if (existingItemIndex !== -1) {
-            if (cart[existingItemIndex].quantity < product.stock) { // Limité par le stock du vendeur
+            if (cart[existingItemIndex].quantity < product.stock) { 
                  cart[existingItemIndex].quantity += 1;
                  showNotification(`Quantité de ${product.name} augmentée.`, 'info');
             } else {
@@ -737,19 +758,17 @@ async function addItemToCart(productId, affiliateId = null) {
             }
            
         } else {
-            // Vérification initiale du stock
             if (product.stock < 1) {
                  showNotification(`Produit en rupture de stock.`, 'error');
                  return;
             }
-            // Ajouter un nouvel article
             cart.push({
                 id: productId,
                 name: product.name,
                 price: product.price,
                 image: product.imageUrls[0] || 'placeholder.png',
                 vendorId: product.vendorId,
-                affiliateId: affiliateId, // Enregistrer l'affilié pour la commission
+                affiliateId: affiliateId, 
                 quantity: 1
             });
             showNotification(`${product.name} ajouté au panier !`, 'success');
@@ -780,13 +799,12 @@ function updateCartItem(productId, quantityChange, removeAll = false) {
         cart = cart.filter(item => item.id !== productId);
         showNotification("Article retiré du panier.", 'info');
     } else {
-        // Dans une application réelle, une vérification du stock en temps réel serait ici
         cart[itemIndex].quantity += quantityChange;
         showNotification("Quantité ajustée.", 'info');
     }
 
     saveCart(cart);
-    displayCartContents(); // Recharger l'affichage
+    displayCartContents(); 
 }
 
 
@@ -809,7 +827,7 @@ function displayCartContents() {
         container.innerHTML = `
             <div class="text-center py-20">
                 <p class="text-gray-600 mb-4 text-lg">Votre panier est vide.</p>
-                <a href="index.html" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition">Commencer vos achats</a>
+                <a href="vitrine.html" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition">Commencer vos achats</a>
             </div>
         `;
         subtotalDisplay.textContent = '$0.00';
@@ -851,8 +869,19 @@ function displayCartContents() {
     container.innerHTML = itemsHtml;
     
     subtotalDisplay.textContent = `$${subtotal.toFixed(2)}`;
-    const total = subtotal; 
-    totalDisplay.textContent = `$${total.toFixed(2)}`;
+    
+    // Calcul des frais de plateforme de 3%
+    const totalPlatformFee = subtotal * 0.03;
+    const totalAmountPaid = subtotal + totalPlatformFee; 
+    
+    totalDisplay.textContent = `$${totalAmountPaid.toFixed(2)}`;
+    
+    // Mettre à jour les frais de livraison pour afficher les frais JHS
+    const shippingDisplay = document.getElementById('shippingDisplay');
+    if (shippingDisplay) {
+         shippingDisplay.textContent = `$${totalPlatformFee.toFixed(2)} (Frais Plateforme JHS)`;
+    }
+    
     if(checkoutButton) checkoutButton.disabled = false;
 
     window.updateCartItem = updateCartItem; 
@@ -860,12 +889,11 @@ function displayCartContents() {
 
 
 /**
- * Crée le document de commande dans Firestore et traite les calculs financiers.
+ * Crée le document de commande dans Firestore et traite les calculs financiers (Correction 3% JEOAH'S).
  */
 async function createOrder() {
     if (!window.auth.currentUser) {
         showNotification("Veuillez vous connecter pour finaliser votre achat.", 'error');
-        // Dans une vraie application, on insérerait une étape de connexion ici.
         return;
     }
 
@@ -884,14 +912,14 @@ async function createOrder() {
     }
     
     try {
-        // --- 1. Calculs Financiers Globaux et Création de l'Article de Commande ---
-        let subtotal = 0;
+        // --- 1. Calculs Financiers Globaux et Préparation de la Commande ---
+        let subtotal = 0; 
         let totalAffiliateCommission = 0;
-        let totalPlatformFee = 0; // Ajouté pour le total des frais JEOAH'S
+        let totalPlatformFee = 0; 
+        const PLATFORM_FEE_RATE = 0.03; 
         
         const orderItems = {}; 
         
-        // Pour des raisons de sécurité et de précision, nous chargeons tous les produits du panier
         const productPromises = cart.map(item => getDoc(doc(window.db, "products", item.id)));
         const productSnapshots = await Promise.all(productPromises);
 
@@ -899,30 +927,26 @@ async function createOrder() {
             const item = cart[i];
             const productSnapshot = productSnapshots[i];
 
-            if (!productSnapshot.exists()) {
-                showNotification(`Erreur: Produit ${item.name} non trouvé dans la base de données.`, 'error');
-                continue;
-            }
+            if (!productSnapshot.exists()) continue;
             
             const product = productSnapshot.data();
             const itemPrice = item.price;
             const itemQuantity = item.quantity;
-            const itemTotal = itemPrice * itemQuantity;
+            const itemTotal = itemPrice * itemQuantity; 
             
             subtotal += itemTotal;
             
             const affiliateCommissionRate = product.affiliateCommissionPercent / 100; 
-            const PLATFORM_FEE_RATE = 0.03; // Commission JEOAH'S fixe: 3%
             
             const affiliateCommission = itemTotal * affiliateCommissionRate;
-            const platformFee = itemTotal * PLATFORM_FEE_RATE;
+            const platformFee = itemTotal * PLATFORM_FEE_RATE; 
             
-            const vendorRevenue = itemTotal - affiliateCommission - platformFee;
+            // REVENU VENDEUR: Prix Total - Commission Affilié (Les 3% sont payés par l'Acheteur)
+            const vendorRevenue = itemTotal - affiliateCommission;
             
             totalAffiliateCommission += affiliateCommission;
-            totalPlatformFee += platformFee; // Accumuler le total des frais JEOAH'S
+            totalPlatformFee += platformFee; 
 
-            // Initialisation du tableau pour le vendeur si nécessaire
             if (!orderItems[item.vendorId]) {
                  orderItems[item.vendorId] = [];
             }
@@ -936,22 +960,19 @@ async function createOrder() {
                 
                 affiliateId: item.affiliateId || null, 
                 affiliateCommission: affiliateCommission.toFixed(2), 
-                platformFee: platformFee.toFixed(2),
-                vendorRevenue: vendorRevenue.toFixed(2),
+                platformFee: platformFee.toFixed(2), 
+                vendorRevenue: vendorRevenue.toFixed(2), 
             });
-            
-            // NOTE: Une mise à jour du stock (product.stock -= itemQuantity) serait nécessaire ici. 
-            // Nous le laissons de côté pour le moment pour simplifier le flux de commande.
         }
         
-        const total = subtotal; 
+        const totalAmountPaid = subtotal + totalPlatformFee; 
         
         // --- 2. Création du Document de Commande Principal ---
         const orderData = {
             buyerId: buyerId,
             orderDate: new Date(),
             status: 'Pending Payment', 
-            totalAmount: total.toFixed(2),
+            totalAmount: totalAmountPaid.toFixed(2), 
             subtotal: subtotal.toFixed(2),
             
             totalPlatformFee: totalPlatformFee.toFixed(2), 
@@ -964,9 +985,9 @@ async function createOrder() {
         
         // --- 3. Nettoyage et Confirmation ---
         localStorage.removeItem('jeoahs_cart'); 
-        showNotification(`Commande #${orderRef.id} créée avec succès! (Simulé: En attente de traitement par le vendeur)`, 'success');
+        showNotification(`Commande #${orderRef.id} créée. Total payé (incl. frais JHS): $${totalAmountPaid.toFixed(2)}`, 'success');
         
-        displayCartContents(); // Pour vider l'affichage du panier
+        displayCartContents(); 
         
         setTimeout(() => {
             window.location.href = 'index.html'; 
@@ -982,10 +1003,150 @@ async function createOrder() {
         }
     }
 }
-
-
 // -----------------------------------------------------------------
-// 10. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
+// 10. LOGIQUE DE GESTION DES COMMANDES (Vendeur)
+// -----------------------------------------------------------------
+
+/**
+ * Récupère et affiche les commandes en attente pour le Vendeur connecté.
+ */
+function displayVendorOrders() {
+    const ordersContainer = document.getElementById('vendorOrdersList');
+    const loadingMessage = ordersContainer ? ordersContainer.querySelector('div') : null;
+    
+    if (!ordersContainer) return;
+
+    onAuthStateChanged(window.auth, async (user) => {
+        if (!user || !window.db) {
+            ordersContainer.innerHTML = '<div class="text-center py-10 text-red-500">Veuillez vous connecter pour voir vos commandes.</div>';
+            return;
+        }
+
+        const vendorId = user.uid;
+        
+        try {
+            const ordersRef = collection(window.db, "orders");
+            const querySnapshot = await getDocs(ordersRef);
+
+            let vendorOrdersHtml = '';
+            let orderCount = 0;
+
+            querySnapshot.forEach((doc) => {
+                const order = doc.data();
+                const orderId = doc.id;
+                
+                if (order.itemsByVendor && order.itemsByVendor[vendorId]) {
+                    orderCount++;
+                    const vendorItems = order.itemsByVendor[vendorId];
+                    let totalVendorRevenue = 0;
+                    
+                    const itemsHtml = vendorItems.map(item => {
+                        totalVendorRevenue += parseFloat(item.vendorRevenue);
+                        return `
+                             <li class="flex justify-between text-sm text-gray-600">
+                                <span>${item.quantity} x ${item.name}</span>
+                                <span class="font-medium">$${(item.price * item.quantity).toFixed(2)}</span>
+                            </li>
+                        `;
+                    }).join('');
+
+                    vendorOrdersHtml += `
+                        <div class="bg-gray-50 p-4 rounded-xl shadow-md border-t-4 border-indigo-500 mb-4">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-800">Commande #${orderId.substring(0, 8)}...</h3>
+                                    <p class="text-sm text-gray-500">Passée le: ${order.orderDate.toDate().toLocaleDateString('fr-FR')}</p>
+                                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${getStatusColor(order.status)}">${order.status}</span>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-2xl font-extrabold text-green-700">$${totalVendorRevenue.toFixed(2)}</p>
+                                    <p class="text-sm text-gray-500">Votre revenu net estimé</p>
+                                </div>
+                            </div>
+
+                            <ul class="border-t pt-3 mb-4 space-y-1">
+                                ${itemsHtml}
+                            </ul>
+
+                            <div class="border-t pt-4 flex justify-between items-center">
+                                <select onchange="updateOrderStatus('${orderId}', this.value)" class="p-2 border rounded-md text-sm">
+                                    <option value="${order.status}">${order.status} (Actuel)</option>
+                                    <option value="Processing">En Traitement</option>
+                                    <option value="Shipped">Expédiée</option>
+                                    <option value="Delivered">Livrée</option>
+                                </select>
+                                <button onclick="viewOrderDetails('${orderId}')" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Voir Détails</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (orderCount > 0) {
+                ordersContainer.innerHTML = vendorOrdersHtml;
+            } else {
+                ordersContainer.innerHTML = `
+                    <div class="text-center py-20 border-2 border-dashed border-gray-200 rounded-lg">
+                        <p class="text-gray-600 mb-4">Vous n'avez aucune nouvelle commande pour l'instant.</p>
+                    </div>
+                `;
+            }
+
+        } catch (error) {
+            console.error("Erreur lors de la récupération des commandes:", error);
+            ordersContainer.innerHTML = `<div class="text-center py-10 text-red-500">Erreur: Impossible de charger les commandes.</div>`;
+        }
+    });
+}
+
+/**
+ * Change la couleur du badge de statut.
+ */
+function getStatusColor(status) {
+    switch(status) {
+        case 'Pending Payment': return 'bg-yellow-100 text-yellow-800';
+        case 'Processing': return 'bg-blue-100 text-blue-800';
+        case 'Shipped': return 'bg-indigo-100 text-indigo-800';
+        case 'Delivered': return 'bg-green-100 text-green-800';
+        default: return 'bg-gray-100 text-gray-800';
+    }
+}
+
+/**
+ * Met à jour le statut d'une commande dans Firestore.
+ */
+async function updateOrderStatus(orderId, newStatus) {
+    if (!window.db || !window.auth.currentUser) {
+         showNotification("Veuillez vous reconnecter.", 'error');
+         return;
+    }
+    try {
+        const orderRef = doc(window.db, "orders", orderId);
+        
+        await updateDoc(orderRef, {
+            status: newStatus,
+            lastStatusUpdate: new Date()
+        });
+        
+        showNotification(`Statut de la commande #${orderId.substring(0, 8)} mis à jour à "${newStatus}".`, 'success');
+        
+        displayVendorOrders(); 
+
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour du statut:", error);
+        showNotification("Erreur lors de la mise à jour du statut.", 'error');
+    }
+}
+
+
+/**
+ * Simule l'affichage de détails supplémentaires (pour l'exemple).
+ */
+function viewOrderDetails(orderId) {
+    showNotification(`Affichage des détails pour la commande #${orderId.substring(0, 8)}. (Non implémenté)`, 'info');
+            }
+// -----------------------------------------------------------------
+// 11. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
 // -----------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {

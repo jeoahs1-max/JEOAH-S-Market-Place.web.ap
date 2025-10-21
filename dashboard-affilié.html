@@ -3,94 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Affilié - JEOAH'S Marketplace</title>
+    <title>Dashboard Affilié - JEOAH'S</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-    <div id="notification-box" class="fixed top-4 right-4 z-50"></div>
-    
-    <div class="container mx-auto p-4 sm:p-8">
-        <div id="affiliateAdviceContainer" class="mb-8">
-        </div>
-        <header class="mb-8 border-b pb-4">
-            <h1 class="text-3xl font-bold text-gray-800">Votre Performance d'Affilié</h1>
-            <p class="text-gray-600">Suivez vos ventes, commissions et statistiques de liens.</p>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500">
-                <p class="text-sm font-medium text-gray-500">Commissions Totales (Net)</p>
-                <p id="totalCommission" class="text-4xl font-extrabold text-green-700 mt-1">$0.00</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-indigo-500">
-                <p class="text-sm font-medium text-gray-500">Nombre de Ventes</p>
-                <p id="totalSales" class="text-4xl font-extrabold text-indigo-700 mt-1">0</p>
-            </div>
-             <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-yellow-500">
-                <p class="text-sm font-medium text-gray-500">Clics Trackés (Simulés)</p>
-                <p id="totalClicks" class="text-4xl font-extrabold text-yellow-700 mt-1">0</p>
-            </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-lg">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Détail de vos Ventes Réalisées</h2>
-            <div id="affiliateSalesList" class="space-y-4">
-                 <p class="text-center py-10 text-gray-500">Chargement de vos données...</p>
-            </div>
-        </div>
-        
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, setDoc, query, where, getDocs, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
-        
-        // VOS CLÉS FIREBASE ICI
-        const firebaseConfig = { /* ... */ }; 
-
-        const app = initializeApp(firebaseConfig);
-
-        window.app = app;
-        window.auth = getAuth(app);
-        window.db = getFirestore(app);
-        window.storage = getStorage(app); 
-        
-        // Rendre les fonctions Firestore importantes disponibles dans le scope global pour app.js
-        window.doc = doc; 
-        window.getDoc = getDoc;
-        window.updateDoc = updateDoc;
-        window.deleteDoc = deleteDoc;
-        window.collection = collection;
-        window.setDoc = setDoc;
-        window.query = query;
-        window.where = where;
-        window.getDocs = getDocs;
-        window.arrayUnion = arrayUnion;
-    </script>
-    
-    <script type="module" src="app.js"></script>
-</body>
     <nav class="bg-white shadow-md sticky top-0 z-10">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-            <div class="flex-shrink-0">
-                <a href="index.html" class="text-2xl font-bold text-indigo-600">JEOAH'S Marketplace</a>
-            </div>
-            
-            <div id="main-nav" class="flex items-center">
-                <div id="role-links" class="flex space-x-4">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="index.html" class="text-2xl font-bold text-indigo-600">JEOAH'S Marketplace</a>
+                </div>
+                <div id="main-nav" class="flex items-center">
+                    <div id="role-links" class="flex space-x-4">
+                        </div>
+                    <span class="border-r border-gray-300 h-6 mx-4"></span>
+                    <div id="auth-links" class="flex items-center space-x-4">
+                        <span class="text-gray-500 text-sm">Chargement...</span> 
                     </div>
-
-                <span class="border-r border-gray-300 h-6 mx-4"></span>
-
-                <div id="auth-links" class="flex items-center space-x-4">
-                    <span class="text-gray-500 text-sm">Chargement...</span> 
                 </div>
             </div>
         </div>
-    </div>
-</nav>
+    </nav>
+    <main class="container mx-auto p-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-6">Mon Tableau de Bord Affilié</h1>
+        
+        <div id="notificationContainer"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <p class="text-sm font-medium text-gray-500">Commissions Totales</p>
+                <p class="text-3xl font-bold text-green-600 mt-1" id="totalCommissions">$0.00</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <p class="text-sm font-medium text-gray-500">Ventes Générées</p>
+                <p class="text-3xl font-bold text-indigo-600 mt-1" id="totalSales">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <p class="text-sm font-medium text-gray-500">Clics Trackés</p>
+                <p class="text-3xl font-bold text-yellow-600 mt-1" id="totalClicks">0</p>
+            </div>
+        </div>
+        
+        <div id="affiliateAdviceContainer" class="mb-8">
+            </div>
+
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Historique des Transactions (Commissions)</h2>
+        
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <div id="affiliateTransactionsList" class="space-y-4">
+                <p class="text-center py-10 text-gray-500">Aucune transaction de commission trouvée...</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+    <script>
+        // Les fonctions displayAffiliateDashboard() et displayAffiliateTrendAnalysis() sont déclenchées dans app.js
+    </script>
+</body>
 </html>

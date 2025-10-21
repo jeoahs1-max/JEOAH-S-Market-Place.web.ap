@@ -1,53 +1,5 @@
-import { auth, db } from './firebase-config.js';
-import { 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    onAuthStateChanged, 
-    signOut 
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import { 
-    doc, 
-    setDoc, 
-    getDoc, 
-    collection, 
-    query, 
-    where, 
-    getDocs, 
-    addDoc, 
-    updateDoc, 
-    deleteDoc 
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-
 // =========================================================================
-// SECTION 0: Utilitaires et Notifications
-// =========================================================================
-
-function displayNotification(message, type = 'success') {
-    const container = document.getElementById('notificationContainer');
-    if (!container) return;
-
-    const div = document.createElement('div');
-    div.className = `p-4 mb-4 text-sm rounded-lg ${
-        type === 'success' ? 'bg-green-100 text-green-800' : 
-        type === 'error' ? 'bg-red-100 text-red-800' : 
-        'bg-blue-100 text-blue-800'
-    }`;
-    div.textContent = message;
-    container.appendChild(div);
-
-    setTimeout(() => {
-        div.remove();
-    }, 5000);
-}
-
-// Fonction pour formatter le prix en USD
-function formatPrice(amount) {
-    if (typeof amount !== 'number') return '--';
-    return amount.toFixed(2) + ' USD';
-}
-
-// =========================================================================
-// SECTION 1: Enregistrement et Rôles (register.html)
+// SECTION 1: Enregistrement et Rôles (register.html) - CORRIGÉE
 // =========================================================================
 
 const registrationForm = document.getElementById('registrationForm');
@@ -56,8 +8,16 @@ if (registrationForm) {
         e.preventDefault();
         const email = registrationForm.email.value;
         const password = registrationForm.password.value;
+        // J'ajoute l'accès au champ de confirmation
+        const confirmPassword = registrationForm.confirmPassword ? registrationForm.confirmPassword.value : password; 
         const fullName = registrationForm.fullName.value;
         const role = registrationForm.role.value;
+
+        // VERIFICATION AJOUTÉE: Les mots de passe doivent correspondre
+        if (password !== confirmPassword) {
+            displayNotification("Les mots de passe ne correspondent pas.", 'error');
+            return;
+        }
 
         if (password.length < 6) {
             displayNotification("Le mot de passe doit contenir au moins 6 caractères.", 'error');
@@ -93,7 +53,6 @@ if (registrationForm) {
         }
     });
 }
-
 // =========================================================================
 // SECTION 2: Connexion (login.html)
 // =========================================================================

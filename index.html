@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JEOAH'S Marketplace - Accueil</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.min.css"> 
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen flex flex-col">
 
     <nav class="bg-white shadow-md sticky top-0 z-10">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -25,7 +26,8 @@
             </div>
         </div>
     </nav>
-    <main class="container mx-auto p-8">
+
+    <main class="container mx-auto p-8 flex-grow">
         <div class="text-center py-20 bg-white rounded-xl shadow-lg">
             <h1 class="text-5xl font-extrabold text-gray-900">Bienvenue sur JEOAH'S</h1>
             <p class="mt-4 text-xl text-gray-600">La marketplace qui vous récompense pour partager.</p>
@@ -38,9 +40,27 @@
                 </a>
             </div>
         </div>
+
+        <div class="mt-12 text-center">
+            <button id="installAppButton" class="bg-green-600 text-white py-3 px-8 text-lg font-semibold rounded-lg hover:bg-green-700 transition shadow-lg hidden">
+                Installer l'Application (PWA)
+            </button>
+        </div>
     </main>
+
+    <footer class="bg-gray-800 text-white py-8 mt-auto">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex justify-center space-x-8 mb-4">
+                <a href="support.html" class="hover:text-indigo-400">Support</a>
+                <a href="faq.html" class="hover:text-indigo-400">FAQ</a>
+                <a href="terms.html" class="hover:text-indigo-400">Termes & Conditions</a>
+            </div>
+            <p class="text-sm text-gray-400">&copy; 2024 JEOAH'S Marketplace. Tous droits réservés.</p>
+        </div>
+    </footer>
 
     <script src="firebase-config.js"></script>
     <script type="module" src="app.js"></script>
+    <script src="pwa-install.js"></script> 
 </body>
 </html>

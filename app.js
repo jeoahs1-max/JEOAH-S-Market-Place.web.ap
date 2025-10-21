@@ -1228,10 +1228,71 @@ async function triggerAutomaticAd(userId, product) {
         console.error("Erreur lors de la simulation de publicité:", error);
     }
 }
+// -----------------------------------------------------------------
+// 12. BONUS IA & ANALYSE DE TENDANCES (Simulation)
+// -----------------------------------------------------------------
 
+/**
+ * Simule une analyse des tendances du marché pour donner des conseils aux Affiliés.
+ * Cela vise à déterminer "quand publier" et "qui publier".
+ */
+function displayAffiliateTrendAnalysis() {
+    const adviceContainer = document.getElementById('affiliateAdviceContainer');
+    if (!adviceContainer) return;
+
+    // --- Simulation de Tendances ---
+    const trends = [
+        { product: "Le produit A (Vendeur X)", trend: "UP", advice: "Très forte demande après le live de JEOAH'S hier. Publiez maintenant sur TikTok (vidéo courte).", commissionRisk: "Low" },
+        { product: "Le service B (Vendeur Y)", trend: "DOWN", advice: "La demande est stable mais basse. Concentrez-vous sur Quora ou Reddit pour des questions spécifiques.", commissionRisk: "Medium" },
+        { product: "Le gadget Z (Vendeur W)", trend: "SPIKE", advice: "Explosion soudaine dans la catégorie 'Tech écolo' ! Publiez immédiatement sur Instagram et X. Le prix pourrait augmenter demain.", commissionRisk: "Low" }
+    ];
+
+    const randomTrend = trends[Math.floor(Math.random() * trends.length)];
+    const timeOfDay = new Date().getHours();
+    
+    let timeAdvice = '';
+    if (timeOfDay >= 8 && timeOfDay <= 11) {
+        timeAdvice = "C'est l'heure idéale pour les publications professionnelles (LinkedIn, X).";
+    } else if (timeOfDay >= 18 && timeOfDay <= 21) {
+        timeAdvice = "C'est le pic d'audience pour les réseaux sociaux (TikTok, FB, IG).";
+    } else {
+        timeAdvice = "L'activité est modérée. Les plateformes de discussion (Reddit, Quora) fonctionnent bien.";
+    }
+
+    const adviceHtml = `
+        <div class="p-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg shadow-inner mb-6">
+            <h2 class="text-xl font-bold text-yellow-800 mb-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Conseil IA de Tendance du Moment
+            </h2>
+            <p class="text-lg font-semibold text-gray-800 mb-3">Produit Chaud : ${randomTrend.product}</p>
+            <p class="mb-1">Statut de la tendance : <span class="font-bold text-green-600">${randomTrend.trend}</span></p>
+            <p class="mb-3 font-medium">${randomTrend.advice}</p>
+            <p class="text-sm text-gray-600 border-t pt-2 mt-2">Moment de publication actuel : **${timeAdvice}**</p>
+        </div>
+    `;
+
+    adviceContainer.innerHTML = adviceHtml;
+
+    // Simulation de l'information sur les produits en solde
+    const salesInfo = `
+        <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-lg text-sm mb-4">
+            <p class="font-bold text-red-800">Opportunité !</p>
+            <p class="text-red-700">Le produit "Kit de démarrage Vendeur" (ID: XYZ) est en solde temporaire. Votre commission passe à 15% au lieu de 10% pour les 48 prochaines heures.</p>
+        </div>
+    `;
+     adviceContainer.innerHTML += salesInfo;
+}
 
 // -----------------------------------------------------------------
-// 12. LOGIQUE DE NAVIGATION (Barre de Navigation Adaptative - Démo)
+// 13. LOGIQUE DE NAVIGATION (Barre de Navigation Adaptative - Démo)
+// ... (Reste du code de la fonction updateNavBar) ...
+// -----------------------------------------------------------------
+
+// -----------------------------------------------------------------
+// 13. LOGIQUE DE NAVIGATION (Barre de Navigation Adaptative - Démo)
 // -----------------------------------------------------------------
 
 /**
@@ -1294,7 +1355,7 @@ function updateNavBar() {
 
 
 // -----------------------------------------------------------------
-// 13. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
+// 14. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
 // -----------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1332,6 +1393,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (path.includes('affilié-social.html')) {
         const form = document.getElementById('affiliateSocialForm');
         const nextUrl = 'dashboard-affilié.html'; // Redirection vers le dashboard affilié
+     // --- J. Logique de Gestion du Dashboard Affilié (dashboard-affilié.html) ---
+    if (path.includes('dashboard-affilié.html')) {
+        displayAffiliateDashboard();
+        // NOUVEAU: Appel à la logique IA
+        displayAffiliateTrendAnalysis(); 
+    }
         if (form) form.addEventListener('submit', (e) => { e.preventDefault(); saveSocialLinks(form, nextUrl); });
         const skipButton = document.getElementById('skipButton');
         if (skipButton) skipButton.addEventListener('click', () => { window.location.href = nextUrl; });

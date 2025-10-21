@@ -3,63 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Commandes - JEOAH'S Marketplace</title>
+    <title>Mes Commandes - JEOAH'S Vendeur</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-    <div id="notification-box" class="fixed top-4 right-4 z-50"></div>
-    
-    <div class="container mx-auto p-4 sm:p-8">
-        <header class="mb-8 border-b pb-4">
-            <h1 class="text-3xl font-bold text-gray-800">Mes Commandes Client</h1>
-            <p class="text-gray-600">Gérez le statut, l'expédition et les détails de vos ventes.</p>
-        </header>
-
-        <div class="bg-white p-4 rounded-xl shadow-md mb-6 flex justify-between items-center">
-            <h2 class="text-xl font-semibold text-indigo-700">Liste des Commandes</h2>
+    <nav class="bg-white shadow-md sticky top-0 z-10">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="index.html" class="text-2xl font-bold text-indigo-600">JEOAH'S Marketplace</a>
+                </div>
+                <div id="main-nav" class="flex items-center">
+                    <div id="role-links" class="flex space-x-4">
+                        </div>
+                    <span class="border-r border-gray-300 h-6 mx-4"></span>
+                    <div id="auth-links" class="flex items-center space-x-4">
+                        <span class="text-gray-500 text-sm">Chargement...</span> 
+                    </div>
+                </div>
             </div>
-
-        <div id="ordersListContainer" class="space-y-4">
-            <p class="text-center py-10 text-gray-500" id="ordersLoadingMessage">Chargement de vos commandes...</p>
-            </div>
-
-        <div id="emptyOrdersMessage" class="text-center py-20 border-2 border-dashed border-gray-200 rounded-lg hidden">
-            <p class="text-gray-600 mb-4">Vous n'avez aucune nouvelle commande pour l'instant.</p>
         </div>
+    </nav>
+    <main class="container mx-auto p-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-6">Tableau de Bord des Commandes</h1>
+        <p class="text-gray-600 mb-8">Gérez vos commandes et suivez vos revenus.</p>
 
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // Ajout de arrayUnion pour simplifier les mises à jour futures
-        import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, setDoc, query, where, getDocs, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        <div id="notificationContainer"></div>
         
-        // VOS CLÉS FIREBASE ICI
-        const firebaseConfig = { /* ... */ }; 
-
-        const app = initializeApp(firebaseConfig);
-
-        window.app = app;
-        window.auth = getAuth(app);
-        window.db = getFirestore(app);
-        window.storage = getStorage(app); 
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <p class="text-sm font-medium text-gray-500">Revenu Net Estimé</p>
+                <p class="text-3xl font-bold text-green-600 mt-1" id="totalNetRevenue">$0.00</p>
+                <p class="text-xs text-gray-400">Après déduction des frais JEOAH'S (3%)</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <p class="text-sm font-medium text-gray-500">Commandes en Attente</p>
+                <p class="text-3xl font-bold text-yellow-600 mt-1" id="pendingOrdersCount">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <p class="text-sm font-medium text-gray-500">Commandes Terminées</p>
+                <p class="text-3xl font-bold text-indigo-600 mt-1" id="completedOrdersCount">0</p>
+            </div>
+        </div>
         
-        // Rendre les fonctions Firestore importantes disponibles dans le scope global pour app.js
-        window.doc = doc; 
-        window.getDoc = getDoc;
-        window.updateDoc = updateDoc;
-        window.deleteDoc = deleteDoc;
-        window.collection = collection;
-        window.setDoc = setDoc;
-        window.query = query;
-        window.where = where;
-        window.getDocs = getDocs;
-        window.arrayUnion = arrayUnion; // Rendu disponible pour les mises à jour futures
-    </script>
-    
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Liste Détaillée des Commandes</h2>
+        
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <div id="vendorOrdersList" class="space-y-4">
+                <p class="text-center py-10 text-gray-500">Aucune commande trouvée ou en cours de chargement...</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="firebase-config.js"></script>
     <script type="module" src="app.js"></script>
+    <script>
+        // La fonction displayVendorOrders() est déclenchée au DOMContentLoaded dans app.js
+    </script>
 </body>
 </html>

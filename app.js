@@ -1146,7 +1146,85 @@ function viewOrderDetails(orderId) {
     showNotification(`Affichage des détails pour la commande #${orderId.substring(0, 8)}. (Non implémenté)`, 'info');
             }
 // -----------------------------------------------------------------
-// 11. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
+// 11. LOGIQUE DE GESTION DU DASHBOARD AFFILIÉ
+// -----------------------------------------------------------------
+
+/**
+ * Calcule et affiche les statistiques de ventes et de commissions pour l'Affilié connecté.
+ */
+function displayAffiliateDashboard() {
+    const affiliateSalesList = document.getElementById('affiliateSalesList');
+    if (!affiliateSalesList) return;
+
+    // S'assurer que l'utilisateur est connecté
+    onAuthStateChanged(window.auth, async (user) => {
+        if (!user || !window.db) {
+            affiliateSalesList.innerHTML = '<div class="text-center py-10 text-red-500">Veuillez vous connecter pour voir votre dashboard.</div>';
+            return;
+        }
+
+        const affiliateId = user.uid;
+        let totalCommission = 0;
+        let totalSalesCount = 0;
+        let salesHtml = '';
+
+        try {
+            const ordersRef = collection(window.db, "orders");
+            // Requête générale pour l'exemple. Dans une application réelle, on filtrerait mieux.
+            const querySnapshot = await getDocs(ordersRef);
+
+            querySnapshot.forEach((doc) => {
+                const order = doc.data();
+                const orderId = doc.id;
+
+                // Parcourir les articles de commande regroupés par Vendeur
+                for (const vendorId in order.itemsByVendor) {
+                    const vendorItems = order.itemsByVendor[vendorId];
+                    
+                    vendorItems.forEach(item => {
+                        // Vérifier si cet article a été parrainé par l'Affilié connecté
+                        if (item.affiliateId === affiliateId) {
+                            const commission = parseFloat(item.affiliateCommission);
+                            
+                            totalCommission += commission;
+                            totalSalesCount++;
+
+                            salesHtml += `
+                                <div class="bg-gray-50 p-4 rounded-lg shadow-sm flex justify-between items-center border-l-4 border-green-400">
+                                    <div>
+                                        <p class="font-semibold text-gray-800">${item.name} (${item.quantity}x)</p>
+                                        <p class="text-sm text-gray-500">Vendeur: ${vendorId.substring(0, 8)}...</p>
+                                        <p class="text-xs text-gray-400">Commande ID: ${orderId.substring(0, 8)}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-2xl font-bold text-green-600">+$${commission.toFixed(2)}</p>
+                                        <p class="text-sm text-gray-500">Statut: ${order.status}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+            });
+
+            // Mise à jour de l'interface
+            document.getElementById('totalCommission').textContent = `$${totalCommission.toFixed(2)}`;
+            document.getElementById('totalSales').textContent = totalSalesCount;
+            document.getElementById('affiliateSalesList').innerHTML = salesHtml || `<p class="text-center py-10 text-gray-500">Aucune vente enregistrée pour vous pour l'instant.</p>`;
+            
+            // Simulation des Clics (car le tracking n'est pas codé dans Firestore)
+            const simulatedClicks = totalSalesCount * 25 + Math.floor(Math.random() * 50);
+            document.getElementById('totalClicks').textContent = simulatedClicks;
+
+
+        } catch (error) {
+            console.error("Erreur lors de la récupération du dashboard affilié:", error);
+            affiliateSalesList.innerHTML = `<div class="text-center py-10 text-red-500">Erreur: Impossible de charger vos statistiques.</div>`;
+        }
+    });
+}
+// -----------------------------------------------------------------
+// 12. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
 // -----------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {

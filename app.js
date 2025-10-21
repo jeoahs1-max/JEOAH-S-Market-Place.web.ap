@@ -1,266 +1,279 @@
-// =================================================================
-// src/public/app.js - Logique Principale du Frontend
-// Code COMPLET pour l'authentification, l'onboarding, la gestion des produits
-// Vendeur et Affilié, l'affichage des détails de produit, le panier et la commande.
-// =================================================================
-
-// -----------------------------------------------------------------
-// 1. Dépendances Firebase (Imports)
-// -----------------------------------------------------------------
-import { createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-// Nouveaux imports: updateDoc, deleteDoc, addDoc
-import { doc, setDoc, collection, getDocs, query, where, limit, addDoc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+ 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
+// L'initialisation de Firebase est supposée avoir été faite dans firebase-config.js ou directement dans les fichiers HTML
+// Nous utilisons window.auth, window.db, window.storage qui sont initialisés dans les fichiers HTML pour plus de simplicité.
 
 // -----------------------------------------------------------------
-// 2. Fonctions Utilitaire de l'Interface
+// 1. UTILS & NOTIFICATIONS
 // -----------------------------------------------------------------
 
 /**
- * Affiche une notification professionnelle à l'utilisateur.
- * @param {string} message - Le texte à afficher.
- * @param {string} type - 'success', 'error', ou 'info'.
+ * Affiche une notification temporaire à l'utilisateur.
+ * @param {string} message - Le message à afficher.
+ * @param {string} type - 'success', 'error', 'info', 'warning'.
+ * @param {number} duration - Durée d'affichage en ms (default 5000).
  */
-function showNotification(message, type) {
-    const box = document.getElementById('notification-box');
-    
-    if (!box) {
-        console.error(`Notification Box not found. Message: ${message}, Type: ${type}`);
+function showNotification(message, type = 'info', duration = 5000) {
+    const container = document.getElementById('notification-box') || document.getElementById('notificationContainer');
+    if (!container) {
+        console.warn(`Notification: ${type.toUpperCase()}: ${message}`);
         return;
     }
-    
-    // Position et style par défaut
-    box.className = 'p-4 rounded-lg shadow-xl text-white font-medium fixed top-4 right-4 z-50';
-    box.style.display = 'block';
 
-    // Définir les styles en fonction du type
-    if (type === 'success') {
-        box.classList.add('bg-green-500');
-    } else if (type === 'error') {
-        box.classList.add('bg-red-600');
-    } else {
-        box.classList.add('bg-blue-500');
-    }
+    const color = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-yellow-500'
+    }[type] || 'bg-gray-500';
 
-    box.textContent = message;
+    const notification = document.createElement('div');
+    notification.className = `p-3 rounded-lg text-white shadow-lg mb-2 ${color} transition transform ease-out duration-300`;
+    notification.innerHTML = message;
 
-    // Masquer après 5 secondes
+    container.appendChild(notification);
+
     setTimeout(() => {
-        box.style.display = 'none'; 
-    }, 5000);
+        notification.classList.add('opacity-0');
+        notification.addEventListener('transitionend', () => notification.remove());
+    }, duration);
 }
-
-
-/**
- * Génère un identifiant unique (Ex: JHSMPv12345).
- * @param {string} rolePrefix - 'JHSMPv', 'JHSMPA', ou 'JHSMPa'.
- * @param {string} uid - L'UID Firebase (utilisé pour garantir l'unicité).
- * @returns {string} L'ID personnalisé.
- */
-function generateCustomId(rolePrefix, uid) {
-    const uniquePart = uid.substring(0, 8).toUpperCase(); 
-    return `${rolePrefix}${uniquePart}`;
-}
-
 
 // -----------------------------------------------------------------
-// 3. FONCTIONS DE SAUVEGARDE DE L'ONBOARDING
+// 2. LOGIQUE D'AUTHENTIFICATION & REDIRECTION
 // -----------------------------------------------------------------
 
 /**
- * Sauvegarde les liens sociaux (Vendeur, Affilié, Acheteur) dans Firestore.
+ * Gère l'inscription d'un nouvel utilisateur et son rôle.
  */
-async function saveSocialLinks(form, nextUrl) {
-    if (!window.auth.currentUser) {
-        showNotification("Session expirée. Veuillez vous reconnecter.", 'error');
-        setTimeout(() => { window.location.href = 'connexion.html'; }, 1500);
-        return;
-    }
-    
-    const uid = window.auth.currentUser.uid;
-    const links = [];
-    
-    for (let i = 1; i <= 5; i++) {
-        const link = form[`social_link_${i}`] ? form[`social_link_${i}`].value.trim() : '';
-        if (link) links.push(link);
-    }
-    
+async function registerUser(form) {
+    const email = form.email.value;
+    const password = form.password.value;
+    const role = form.role.value;
+    const firstName = form.firstName.value;
+
     try {
-        const userRef = doc(window.db, "users", uid);
-        await setDoc(userRef, { 
-            socials: links, 
-            onboardingComplete: true
-        }, { merge: true });
+        const userCredential = await createUserWithEmailAndPassword(window.auth, email, password);
+        const user = userCredential.user;
 
-        showNotification("Configuration sociale sauvegardée avec succès!", 'success');
+        // Créer le document utilisateur dans Firestore
+        await setDoc(doc(window.db, "users", user.uid), {
+            uid: user.uid,
+            email: email,
+            role: role,
+            firstName: firstName,
+            createdAt: new Date(),
+            subscriptionPlan: 'trial_basic' // Plan par défaut
+        });
+
+        showNotification("Inscription réussie ! Redirection...", 'success');
         
-        setTimeout(() => {
-            window.location.href = nextUrl;
-        }, 500);
+        // Redirection en fonction du rôle pour l'onboarding
+        let redirectUrl;
+        if (role === 'vendor') {
+            redirectUrl = 'fournisseur-step-social.html'; 
+        } else if (role === 'affiliate') {
+            redirectUrl = 'liens-d-affiliation.html';
+        } else { // buyer
+            redirectUrl = 'acheteur-social-setup.html';
+        }
+        
+        setTimeout(() => window.location.href = redirectUrl, 1500);
 
     } catch (error) {
-        showNotification(`Erreur de sauvegarde sociale : ${error.message}`, 'error');
+        console.error("Erreur d'inscription:", error);
+        showNotification(`Erreur d'inscription: ${error.message}`, 'error');
     }
 }
 
 /**
- * Sauvegarde les liens d'affiliation externes dans le document utilisateur Firestore.
+ * Gère la connexion et la redirection en fonction du rôle.
+ */
+async function loginUser(form) {
+    const email = form.email.value;
+    const password = form.password.value;
+
+    try {
+        const userCredential = await signInWithEmailAndPassword(window.auth, email, password);
+        const user = userCredential.user;
+
+        // Récupérer le rôle pour la redirection
+        const userDoc = await getDoc(doc(window.db, "users", user.uid));
+        const role = userDoc.exists() ? userDoc.data().role : 'buyer';
+        
+        showNotification("Connexion réussie ! Redirection...", 'success');
+
+        let redirectUrl;
+        if (role === 'vendor') {
+            redirectUrl = 'produits-vendeurs.html';
+        } else if (role === 'affiliate') {
+            redirectUrl = 'dashboard-affilié.html';
+        } else {
+            redirectUrl = 'index.html';
+        }
+        
+        setTimeout(() => window.location.href = redirectUrl, 1500);
+
+    } catch (error) {
+        console.error("Erreur de connexion:", error);
+        showNotification(`Erreur de connexion: ${error.message}`, 'error');
+    }
+}
+
+/**
+ * Déconnecte l'utilisateur.
+ */
+function logoutUser() {
+    signOut(window.auth).then(() => {
+        showNotification("Déconnexion réussie.", 'info');
+        window.location.href = 'index.html';
+    }).catch((error) => {
+        console.error("Erreur de déconnexion:", error);
+        showNotification("Erreur de déconnexion.", 'error');
+    });
+}
+
+// -----------------------------------------------------------------
+// 3. LOGIQUE D'ONBOARDING (Liens Sociaux & Affiliation)
+// -----------------------------------------------------------------
+
+/**
+ * Sauvegarde les liens d'affiliation (Affilié).
  */
 async function saveAffiliateLinks(form) {
-    if (!window.auth.currentUser) {
-        window.location.href = 'connexion.html'; 
-        return;
-    }
+    if (!window.auth.currentUser) return;
+    const userId = window.auth.currentUser.uid;
     
-    const uid = window.auth.currentUser.uid;
-    
-    const links = {
-        amazon: form.amazon_link.value.trim() || null,
-        temu: form.temu_link.value.trim() || null,
-        aliexpress: form.aliexpress_link.value.trim() || null,
-        ebay: form.ebay_link.value.trim() || null,
-        custom1: form.custom_link_1.value.trim() || null,
-        custom2: form.custom_link_2.value.trim() || null,
-    };
-
     try {
-        const userRef = doc(window.db, "users", uid);
-        await setDoc(userRef, { 
-            affiliateLinks: links 
-        }, { merge: true });
-        
-        showNotification("Liens d'affiliation sauvegardés avec succès!", 'success');
-        
-        setTimeout(() => {
-            window.location.href = 'affilié-social.html';
-        }, 500);
-
+        await updateDoc(doc(window.db, "users", userId), {
+            affiliateLinkPersonalized: form.affiliateLinkPersonalized.value,
+            affiliateCode: form.affiliateCode.value,
+            // Simuler l'enregistrement sur le serveur JEOAH'S
+            jeoahsServerId: userId 
+        });
+        showNotification("Liens d'affiliation enregistrés.", 'success');
+        window.location.href = 'affilié-social.html';
     } catch (error) {
-        showNotification(`Erreur lors de la sauvegarde des liens: ${error.message}`, 'error');
+        showNotification(`Erreur: ${error.message}`, 'error');
     }
 }
 
+/**
+ * Sauvegarde les liens sociaux pour tous les rôles.
+ */
+async function saveSocialLinks(form, nextUrl) {
+    if (!window.auth.currentUser) return;
+    const userId = window.auth.currentUser.uid;
+
+    try {
+        await updateDoc(doc(window.db, "users", userId), {
+            socialLinks: {
+                facebook: form.facebook.value,
+                instagram: form.instagram.value,
+                tiktok: form.tiktok.value,
+                youtube: form.youtube.value
+            }
+        });
+        showNotification("Liens sociaux enregistrés.", 'success');
+        setTimeout(() => window.location.href = nextUrl, 500);
+    } catch (error) {
+        showNotification(`Erreur: ${error.message}`, 'error');
+    }
+}
 
 // -----------------------------------------------------------------
-// 4. LOGIQUE DE GESTION DES PRODUITS (Vendeur - Côté Création)
+// 4. LOGIQUE D'AJOUT DE PRODUIT (Vendeur)
 // -----------------------------------------------------------------
 
 /**
- * Télécharge toutes les images du produit dans Firebase Storage.
+ * Télécharge les images sur Firebase Storage.
  */
-async function uploadProductImages(files, productId, vendorId) {
-    if (!window.storage) {
-         throw new Error("Firebase Storage non initialisé. Vérifiez votre page HTML.");
-    }
-    
-    const uploadPromises = [];
+async function uploadImages(files, vendorId, productId = null) {
     const imageUrls = [];
+    for (const file of files) {
+        const path = productId 
+            ? `products/${vendorId}/${productId}/${file.name}`
+            : `products/${vendorId}/temp/${file.name}_${new Date().getTime()}`; // Utiliser temp si pas d'ID encore
 
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const storageRef = ref(window.storage, `products/${vendorId}/${productId}/${file.name}`);
-        
-        const uploadPromise = uploadBytes(storageRef, file).then(async (snapshot) => {
-            const url = await getDownloadURL(snapshot.ref);
-            imageUrls.push(url);
-        });
-        
-        uploadPromises.push(uploadPromise);
+        const imageRef = ref(window.storage, path);
+        await uploadBytes(imageRef, file);
+        const url = await getDownloadURL(imageRef);
+        imageUrls.push(url);
     }
-
-    await Promise.all(uploadPromises);
-    
     return imageUrls;
 }
 
-
 /**
- * Gère l'ajout d'un nouveau produit (Storage et Firestore).
+ * Enregistre un nouveau produit dans Firestore et gère les images.
  */
 async function saveNewProduct(form) {
-    const submitButton = form.querySelector('button[type="submit"]');
-    submitButton.disabled = true;
-    submitButton.textContent = "Sauvegarde en cours...";
-    
-    if (!window.auth.currentUser) {
-        showNotification("Session expirée. Veuillez vous reconnecter.", 'error');
-        submitButton.disabled = false;
-        submitButton.textContent = "Sauvegarder le Produit";
+    if (!window.auth.currentUser || window.auth.currentUser.role === 'buyer') {
+        showNotification("Accès refusé.", 'error');
         return;
     }
     
     const vendorId = window.auth.currentUser.uid;
-    const imagesInput = document.getElementById('product_images');
-    const images = imagesInput.files;
-
-    if (images.length === 0) {
-        showNotification("Veuillez télécharger au moins une image de produit.", 'error');
-        submitButton.disabled = false;
-        submitButton.textContent = "Sauvegarder le Produit";
-        return;
+    const files = form.images.files;
+    
+    // Désactiver le bouton et montrer le chargement
+    const button = form.querySelector('button[type="submit"]');
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Chargement...";
     }
     
     try {
-        // 1. Créer d'abord un document vide pour obtenir un ID de Produit unique
-        const productRef = doc(collection(window.db, "products"));
-        const productId = productRef.id;
-
-        // 2. Télécharger les images
-        const imageUrls = await uploadProductImages(images, productId, vendorId);
-
-        // 3. Récupérer les autres données du formulaire
+        // Étape 1: Créer d'abord un document pour obtenir un ID temporaire (non nécessaire ici car on utilise addDoc)
+        // Mais nous allons le faire en une seule étape
+        
+        const imageUrls = await uploadImages(files, vendorId); 
+        
         const productData = {
-            id: productId,
             vendorId: vendorId,
-            name: form.product_name.value.trim(),
-            description: form.product_description.value.trim(),
-            category: form.product_category.value,
-            stock: parseInt(form.product_stock.value, 10),
-            
-            price: parseFloat(form.selling_price.value),
-            cost: parseFloat(form.product_cost.value) || 0,
-            affiliateCommissionPercent: parseFloat(form.affiliate_commission.value),
-            
-            imageUrls: imageUrls, 
-            
-            status: 'active',
+            name: form.name.value,
+            description: form.description.value,
+            price: parseFloat(form.price.value),
+            category: form.category.value,
+            affiliateCommissionPercent: parseInt(form.affiliateCommission.value),
+            stock: parseInt(form.stock.value),
             createdAt: new Date(),
-            lastUpdated: new Date()
+            imageUrls: imageUrls
         };
 
-        // 4. Enregistrer les données complètes du produit dans Firestore
-        await setDoc(productRef, productData);
+        const productRef = await addDoc(collection(window.db, "products"), productData);
         
-        showNotification("Produit enregistré et images téléchargées avec succès !", 'success');
-
-        // 5. Redirection
-        setTimeout(() => {
-            window.location.href = 'produits-vendeurs.html';
-        }, 1500);
+        showNotification("Produit enregistré avec succès !", 'success');
+        
+        // >>> Déclenchement de la pub automatique après succès <<<
+        await triggerAutomaticAd(vendorId, productData); 
+        
+        window.location.href = 'produits-vendeurs.html';
 
     } catch (error) {
-        console.error("Erreur lors de l'ajout du produit:", error);
-        showNotification(`Erreur critique : Impossible d'enregistrer le produit. ${error.message}`, 'error');
-        submitButton.disabled = false;
-        submitButton.textContent = "Sauvegarder le Produit";
+        console.error("Erreur lors de l'enregistrement du produit:", error);
+        showNotification(`Erreur: ${error.message}`, 'error');
+    } finally {
+         if (button) {
+            button.disabled = false;
+            button.textContent = "Enregistrer le Produit";
+        }
     }
 }
 
-
 // -----------------------------------------------------------------
-// 5. LOGIQUE D'AFFICHAGE DES PRODUITS (Vendeur Dashboard)
+// 5. LOGIQUE DE GESTION DES PRODUITS (Vendeur)
 // -----------------------------------------------------------------
 
 /**
- * Récupère et affiche les produits du vendeur connecté.
+ * Affiche la liste des produits du vendeur connecté.
  */
 function displayVendorProducts() {
-    const productsContainer = document.getElementById('productsList');
+    const productsContainer = document.getElementById('vendorProductsList');
     if (!productsContainer) return;
 
-    productsContainer.innerHTML = '<div class="text-center py-10 text-gray-500">Chargement de vos produits...</div>';
-    
     onAuthStateChanged(window.auth, async (user) => {
         if (!user || !window.db) {
             productsContainer.innerHTML = '<div class="text-center py-10 text-red-500">Veuillez vous connecter pour voir vos produits.</div>';
@@ -277,44 +290,43 @@ function displayVendorProducts() {
             if (querySnapshot.empty) {
                 productsContainer.innerHTML = `
                     <div class="text-center py-20 border-2 border-dashed border-gray-200 rounded-lg">
-                        <p class="text-gray-600 mb-4">Vous n'avez pas encore ajouté de produits.</p>
-                        <a href="configuration-du-vendeur.html" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition">Ajouter votre premier produit</a>
+                        <p class="text-gray-600 mb-4">Vous n'avez pas encore ajouté de produit.</p>
+                        <a href="configuration-du-vendeur.html" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition">Ajouter un produit</a>
                     </div>
                 `;
                 return;
             }
 
-            productsContainer.innerHTML = ''; 
-            
+            let productsHtml = '';
             querySnapshot.forEach((doc) => {
                 const product = doc.data();
+                const productID = doc.id;
                 
-                const commission = (product.price * (product.affiliateCommissionPercent / 100)).toFixed(2);
-                const platformFee = (product.price * 0.03).toFixed(2); // 3% de frais plateforme
-                const netProfit = (product.price - commission - product.cost - platformFee).toFixed(2); // Inclure le coût et les frais plateforme dans le calcul du profit
+                // Le prix du vendeur est Price - Affiliate Commission
+                const affiliateCommission = product.price * (product.affiliateCommissionPercent / 100);
+                const platformFee = product.price * 0.03; // Frais JEOAH'S
+                const estimatedNetProfit = (product.price - affiliateCommission).toFixed(2);
+                
+                // NOTA BENE: Les frais de 3% sont payés par l'Acheteur, donc le revenu du Vendeur n'est affecté que par la commission Affilié.
 
-                const productHtml = `
-                    <div class="flex items-center bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-100">
+                productsHtml += `
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-4 border border-gray-100 flex items-center">
                         <img src="${product.imageUrls[0] || 'placeholder.png'}" alt="${product.name}" class="w-16 h-16 object-cover rounded mr-4">
                         
                         <div class="flex-grow">
                             <h3 class="text-lg font-semibold text-gray-800">${product.name}</h3>
-                            <p class="text-sm text-gray-500">Catégorie: ${product.category}</p>
-                        </div>
-
-                        <div class="text-right mx-4 hidden sm:block">
-                            <p class="font-medium text-indigo-600">Prix: $${product.price.toFixed(2)}</p>
-                            <p class="text-sm text-green-600">Profit net estimé (après frais JHS): $${netProfit}</p>
+                            <p class="text-sm text-gray-500">Prix: $${product.price.toFixed(2)} - Commission: ${product.affiliateCommissionPercent}%</p>
+                            <p class="text-sm text-green-600 font-medium">Profit Net Estimé: $${estimatedNetProfit}</p>
                         </div>
                         
                         <div class="text-right">
-                            <p class="font-bold text-gray-800">${product.stock} en Stock</p>
-                            <a href="modifier-produit.html?id=${product.id}" class="text-sm text-blue-500 hover:underline">Modifier</a>
+                            <span class="text-sm font-semibold text-gray-700 block mb-1">Stock: ${product.stock}</span>
+                            <a href="modifier-produit.html?id=${productID}" class="bg-indigo-500 text-white py-2 px-4 rounded-md hover:bg-indigo-600 transition font-medium text-sm">Modifier</a>
                         </div>
                     </div>
                 `;
-                productsContainer.innerHTML += productHtml;
             });
+            productsContainer.innerHTML = productsHtml;
 
         } catch (error) {
             console.error("Erreur lors de la récupération des produits:", error);
@@ -323,9 +335,123 @@ function displayVendorProducts() {
     });
 }
 
+/**
+ * Enregistre les modifications d'un produit existant.
+ */
+async function saveProductChanges(form) {
+    if (!window.auth.currentUser) return;
+    
+    const productId = form.dataset.productId;
+    const productRef = doc(window.db, "products", productId);
+    
+    const button = form.querySelector('button[type="submit"]');
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Sauvegarde en cours...";
+    }
+
+    try {
+        const updatedData = {
+            name: form.name.value,
+            description: form.description.value,
+            price: parseFloat(form.price.value),
+            category: form.category.value,
+            affiliateCommissionPercent: parseInt(form.affiliateCommission.value),
+            stock: parseInt(form.stock.value),
+            updatedAt: new Date(),
+        };
+        
+        // Gérer l'upload de nouvelles images si besoin
+        if (form.images.files.length > 0) {
+            const vendorId = window.auth.currentUser.uid;
+            const newImageUrls = await uploadImages(form.images.files, vendorId, productId);
+            updatedData.imageUrls = newImageUrls; // Remplacer les anciennes URL
+        }
+        
+        const vendorId = window.auth.currentUser.uid;
+        
+        await updateDoc(productRef, updatedData);
+        
+        showNotification("Produit mis à jour avec succès !", 'success');
+        
+        // >>> Déclenchement de la pub automatique après succès <<<
+        // On récupère les données mises à jour pour la pub
+        const finalProductData = (await getDoc(productRef)).data(); 
+        await triggerAutomaticAd(vendorId, finalProductData); 
+
+        window.location.href = 'produits-vendeurs.html';
+        
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour du produit:", error);
+        showNotification(`Erreur lors de la mise à jour: ${error.message}`, 'error');
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.textContent = "Enregistrer les Modifications";
+        }
+    }
+}
+
+/**
+ * Charge les données du produit à modifier.
+ */
+async function loadProductForEdit() {
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    if (!productId) {
+        showNotification("ID du produit manquant.", 'error');
+        return;
+    }
+
+    try {
+        const productRef = doc(window.db, "products", productId);
+        const productSnap = await getDoc(productRef);
+
+        if (!productSnap.exists()) {
+            showNotification("Produit introuvable.", 'error');
+            return;
+        }
+
+        const product = productSnap.data();
+        const form = document.getElementById('editProductForm');
+
+        // Pré-remplir le formulaire
+        form.dataset.productId = productId;
+        form.name.value = product.name;
+        form.description.value = product.description;
+        form.price.value = product.price;
+        form.category.value = product.category;
+        form.affiliateCommission.value = product.affiliateCommissionPercent;
+        form.stock.value = product.stock;
+
+        // Afficher l'image actuelle (pour l'exemple)
+        const imagePreview = document.getElementById('imagePreview');
+        if (imagePreview && product.imageUrls && product.imageUrls.length > 0) {
+            imagePreview.innerHTML = `<img src="${product.imageUrls[0]}" class="w-24 h-24 object-cover rounded shadow-md" alt="Image actuelle">`;
+        }
+
+    } catch (error) {
+        console.error("Erreur lors du chargement du produit:", error);
+    }
+}
+
+/**
+ * Supprime un produit.
+ */
+async function deleteProduct(productId) {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) return;
+    
+    try {
+        await deleteDoc(doc(window.db, "products", productId));
+        showNotification("Produit supprimé avec succès.", 'success');
+        window.location.href = 'produits-vendeurs.html';
+    } catch (error) {
+        showNotification(`Erreur lors de la suppression: ${error.message}`, 'error');
+    }
+}
 
 // -----------------------------------------------------------------
-// 6. LOGIQUE D'AFFICHAGE DES PRODUITS (Affilié Dashboard)
+// 6. LOGIQUE D'AFFICHAGE DES PRODUITS (Vitrine Publique / Affilié Dashboard)
 // -----------------------------------------------------------------
 
 /**
@@ -338,10 +464,28 @@ function displayAffiliateProducts() {
 
     productsContainer.innerHTML = '<div class="text-center py-10 text-gray-500">Chargement de tous les produits disponibles...</div>';
     
-    // Déterminer l'ID de l'Affilié s'il est connecté, sinon c'est null (pour le lien de tracking)
+    // Déterminer l'ID de l'Affilié s'il est connecté
     const currentUser = window.auth.currentUser;
-    const affiliateId = currentUser ? currentUser.uid : null; 
+    let affiliateId = null;
+    let currentUserRole = null;
 
+    if (currentUser) {
+        // Charger le rôle pour s'assurer que l'utilisateur est bien un affilié
+        getDoc(doc(window.db, "users", currentUser.uid)).then(userSnap => {
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                currentUserRole = userData.role;
+                if (currentUserRole === 'affiliate') {
+                    affiliateId = currentUser.uid;
+                }
+            }
+            loadProducts();
+        }).catch(() => loadProducts()); // Charger les produits même si la récupération du rôle échoue
+
+    } else {
+        loadProducts(); // Charger pour tout le monde (vitrine publique)
+    }
+    
     const loadProducts = async () => {
         try {
             const productsRef = collection(window.db, "products");
@@ -363,13 +507,13 @@ function displayAffiliateProducts() {
                 
                 const commissionAmount = (product.price * (product.affiliateCommissionPercent / 100)).toFixed(2);
                 
-                // Si l'utilisateur est connecté et est un Affilié, on génère son lien de tracking unique.
                 const trackingLink = affiliateId 
-                    ? `${window.location.origin}/produit.html?id=${product.id}&affiliate=${affiliateId}` 
-                    : `${window.location.origin}/produit.html?id=${product.id}`; // Lien public pour l'Acheteur non-tracé
+                    ? `${window.location.origin}/produit.html?id=${doc.id}&affiliate=${affiliateId}` 
+                    : `${window.location.origin}/produit.html?id=${doc.id}`; // Lien public pour l'Acheteur non-tracé
 
                 let linkButtonHtml = '';
-                if (affiliateId && currentUser.role === 'affiliate') { // S'assurer que seul l'affilié a le bouton de copie
+                if (affiliateId) {
+                    // C'est le tableau de bord Affilié, on donne le bouton de copie
                     linkButtonHtml = `
                         <button 
                             onclick="navigator.clipboard.writeText('${trackingLink}'); showNotification('Lien copié !', 'success');"
@@ -379,7 +523,7 @@ function displayAffiliateProducts() {
                         </button>
                     `;
                 } else {
-                    // C'est la vitrine publique pour un Acheteur ou Vendeur non connecté/connecté
+                    // C'est la vitrine publique pour un Acheteur non connecté, on propose de voir le détail
                     linkButtonHtml = `
                         <a href="${trackingLink}" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition font-medium text-sm">
                             Voir le Produit
@@ -410,305 +554,77 @@ function displayAffiliateProducts() {
             productsContainer.innerHTML = `<div class="text-center py-10 text-red-500">Erreur: Impossible de charger les produits.</div>`;
         }
     };
-    
-    // On écoute le changement d'état (pour mettre à jour le bouton Affilié) et on charge les produits
-    onAuthStateChanged(window.auth, () => {
-        loadProducts();
-    });
-    
-    loadProducts();
 }
+
 // -----------------------------------------------------------------
-// 7. LOGIQUE D'AFFICHAGE DES DÉTAILS DU PRODUIT (produit.html)
+// 7. LOGIQUE D'AFFICHAGE PAGE PRODUIT (Acheteur)
 // -----------------------------------------------------------------
 
 /**
- * Récupère les liens d'affiliation génériques de l'Affilié et les affiche.
- */
-async function displayComparisonLinks(affiliateId, container) {
-    try {
-        const affiliateDoc = doc(window.db, "users", affiliateId);
-        const affiliateSnapshot = await getDoc(affiliateDoc);
-        
-        if (!affiliateSnapshot.exists() || !affiliateSnapshot.data().affiliateLinks) {
-            container.innerHTML = `<p class="text-sm text-gray-500 mt-4">Pas de liens de comparaison disponibles pour cet affilié.</p>`;
-            return;
-        }
-
-        const links = affiliateSnapshot.data().affiliateLinks;
-        let comparisonHtml = `<h3 class="text-xl font-semibold mb-3 border-b pb-2">Comparer les prix chez nos partenaires</h3>`;
-        let linksFound = false;
-        
-        const linkMap = {
-            amazon: { name: "Amazon", color: "bg-yellow-600" },
-            temu: { name: "Temu", color: "bg-blue-600" },
-            aliexpress: { name: "AliExpress", color: "bg-red-600" },
-            ebay: { name: "eBay", color: "bg-purple-600" }
-        };
-
-        for (const [key, details] of Object.entries(linkMap)) {
-            const url = links[key];
-            if (url) {
-                comparisonHtml += `
-                    <a href="${url}" target="_blank" class="${details.color} text-white py-3 px-6 rounded-md hover:opacity-90 transition duration-150 font-semibold block mt-2 text-center">
-                        Voir le produit sur ${details.name} (Lien Affilié)
-                    </a>
-                `;
-                linksFound = true;
-            }
-        }
-        
-        if (linksFound) {
-            container.innerHTML = comparisonHtml;
-        } else {
-             container.innerHTML = `<p class="text-sm text-gray-500 mt-4">Aucun lien d'affiliation externe trouvé pour ce partenaire.</p>`;
-        }
-
-
-    } catch (error) {
-        console.error("Erreur lors du chargement des liens de comparaison:", error);
-    }
-}
-
-/**
- * Affiche les détails d'un produit et les liens d'affiliation alternatifs de l'affilié.
+ * Affiche les détails d'un seul produit et gère le tracking affilié.
  */
 async function displayProductDetails() {
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('id');
-    const affiliateId = params.get('affiliate');
+    const affiliateId = params.get('affiliate'); // ID de l'affilié pour le tracking
 
-    const productContainer = document.getElementById('productDetailsContainer');
+    if (!productId) return;
     
-    if (!productId || !productContainer) {
-        if(productContainer) productContainer.innerHTML = '<div class="text-center py-10 text-red-500">Produit non trouvé.</div>';
-        return;
-    }
-
     try {
-        const productDoc = doc(window.db, "products", productId);
-        const productSnapshot = await getDoc(productDoc);
+        const productSnap = await getDoc(doc(window.db, "products", productId));
+        if (!productSnap.exists()) return;
 
-        if (!productSnapshot.exists()) {
-            productContainer.innerHTML = '<div class="text-center py-10 text-red-500">Ce produit n\'existe pas.</div>';
-            return;
-        }
-
-        const product = productSnapshot.data();
-
-        let imagesHtml = product.imageUrls.map(url => `<img src="${url}" class="w-full h-auto object-cover rounded-lg mb-2 shadow-md" alt="${product.name}">`).join('');
+        const product = productSnap.data();
+        const detailsContainer = document.getElementById('productDetailsContainer');
         
-        productContainer.innerHTML = `
-            <div class="md:grid md:grid-cols-2 gap-8">
-                <div class="image-gallery">
-                    ${imagesHtml}
-                </div>
-                <div>
-                    <h1 class="text-4xl font-bold text-gray-900">${product.name}</h1>
-                    <p class="text-2xl font-semibold text-indigo-600 mt-2">$${product.price.toFixed(2)}</p>
-                    <div class="mt-4">
-                        <p class="text-gray-700 font-medium">Description :</p>
-                        <p class="text-gray-600">${product.description}</p>
+        // Afficher les détails du produit
+        if (detailsContainer) {
+            detailsContainer.innerHTML = `
+                <div class="md:flex md:space-x-8">
+                    <div class="md:w-1/2">
+                        <img src="${product.imageUrls[0] || 'placeholder.png'}" alt="${product.name}" class="w-full h-auto object-cover rounded-lg shadow-xl">
                     </div>
-                    <div class="mt-4">
-                         <button 
-                            id="addToCartButton" 
-                            class="bg-indigo-600 text-white py-3 px-6 rounded-md hover:bg-indigo-700 transition duration-150 font-semibold w-full"
-                        >
+                    <div class="md:w-1/2 mt-6 md:mt-0">
+                        <h1 class="text-4xl font-extrabold text-gray-900">${product.name}</h1>
+                        <p class="text-gray-500 mt-2">Catégorie: ${product.category}</p>
+                        <p class="text-5xl font-bold text-indigo-600 my-4">$${product.price.toFixed(2)}</p>
+                        
+                        <p class="text-gray-700">${product.description}</p>
+                        
+                        <div class="mt-6 p-4 bg-gray-100 rounded-lg">
+                            <p class="text-sm text-gray-600">Stock disponible: ${product.stock}</p>
+                            <p class="text-sm text-green-700">Commission Affilié: ${product.affiliateCommissionPercent}%</p>
+                            ${affiliateId ? `<p class="text-sm text-blue-700 font-semibold">Vous êtes ici via: Affilié ${affiliateId.substring(0, 8)}...</p>` : ''}
+                        </div>
+                        
+                        <button id="addToCartButton" 
+                                data-product-id="${productId}" 
+                                data-affiliate-id="${affiliateId || ''}"
+                                class="w-full mt-6 py-3 bg-green-600 text-white text-xl font-bold rounded-lg hover:bg-green-700 transition">
                             Ajouter au Panier
                         </button>
                     </div>
-                    
-                    <div id="comparisonLinks" class="mt-8"></div>
                 </div>
-            </div>
-        `;
-        
-        if (affiliateId && document.getElementById('comparisonLinks')) {
-            await displayComparisonLinks(affiliateId, document.getElementById('comparisonLinks'));
-        }
-        
-        // NOUVEAU: Listener pour ajouter au panier
-        const buyButton = document.getElementById('addToCartButton');
-        if (buyButton) {
-            buyButton.addEventListener('click', () => {
-                 addItemToCart(productId, affiliateId); 
-            });
-        }
-
-
-    } catch (error) {
-        console.error("Erreur lors du chargement des détails du produit:", error);
-        productContainer.innerHTML = `<div class="text-center py-10 text-red-500">Erreur critique de chargement.</div>`;
-    }
-}
-
-
-// -----------------------------------------------------------------
-// 8. LOGIQUE DE MODIFICATION & SUPPRESSION DE PRODUIT (Vendeur)
-// -----------------------------------------------------------------
-
-/**
- * Charge les détails du produit dans le formulaire pour la modification.
- */
-async function loadProductForEdit() {
-    const params = new URLSearchParams(window.location.search);
-    const productId = params.get('id');
-    const loadingMessage = document.getElementById('loadingMessage');
-    const editForm = document.getElementById('editProductForm');
-
-    if (!productId) {
-        if(loadingMessage) loadingMessage.innerHTML = '<div class="text-red-500">ID de produit manquant.</div>';
-        return;
-    }
-    
-    if (!window.auth.currentUser) {
-        if(loadingMessage) loadingMessage.innerHTML = '<div class="text-red-500">Veuillez vous connecter.</div>';
-        return;
-    }
-
-    try {
-        const productRef = doc(window.db, "products", productId);
-        const productSnapshot = await getDoc(productRef);
-
-        if (!productSnapshot.exists()) {
-            if(loadingMessage) loadingMessage.innerHTML = '<div class="text-red-500">Produit non trouvé.</div>';
-            return;
-        }
-
-        const product = productSnapshot.data();
-        
-        if (product.vendorId !== window.auth.currentUser.uid) {
-            if(loadingMessage) loadingMessage.innerHTML = '<div class="text-red-500">Accès refusé. Vous n\'êtes pas le propriétaire de ce produit.</div>';
-            return;
-        }
-
-        document.getElementById('product_id').value = productId;
-        document.getElementById('product_name').value = product.name;
-        document.getElementById('product-title-display').textContent = `Modification de : ${product.name}`;
-        document.getElementById('product_description').value = product.description;
-        document.getElementById('product_category').value = product.category;
-        document.getElementById('selling_price').value = product.price;
-        document.getElementById('product_cost').value = product.cost;
-        document.getElementById('affiliate_commission').value = product.affiliateCommissionPercent;
-        document.getElementById('product_stock').value = product.stock;
-
-        const imagesDisplay = document.getElementById('currentImagesDisplay');
-        imagesDisplay.innerHTML = '';
-        if (product.imageUrls && product.imageUrls.length > 0) {
-            product.imageUrls.forEach(url => {
-                imagesDisplay.innerHTML += `<img src="${url}" class="w-20 h-20 object-cover rounded shadow-sm" alt="Image actuelle">`;
-            });
-        } else {
-             imagesDisplay.innerHTML = `<p class="text-sm text-gray-500">Aucune image actuelle.</p>`;
-        }
-
-        if(loadingMessage) loadingMessage.style.display = 'none';
-        if(editForm) editForm.style.display = 'block';
-
-    } catch (error) {
-        console.error("Erreur lors du chargement des données:", error);
-        if(loadingMessage) loadingMessage.innerHTML = `<div class="text-red-500">Erreur de chargement des données du produit.</div>`;
-    }
-}
-
-
-/**
- * Sauvegarde les modifications du produit dans Firestore.
- */
-async function saveProductChanges(form) {
-    const submitButton = form.querySelector('button[type="submit"]');
-    submitButton.disabled = true;
-    submitButton.textContent = "Sauvegarde en cours...";
-    
-    const productId = form.product_id.value;
-    const vendorId = window.auth.currentUser ? window.auth.currentUser.uid : null;
-
-    if (!productId || !vendorId) {
-        showNotification("Erreur: ID de produit ou session utilisateur manquant.", 'error');
-        submitButton.disabled = false;
-        submitButton.textContent = "Sauvegarder les Modifications";
-        return;
-    }
-
-    try {
-        const imagesInput = document.getElementById('product_images');
-        const newImages = imagesInput.files;
-        let imageUrlsToMerge = [];
-
-        if (newImages.length > 0) {
-            showNotification("Téléchargement des nouvelles images...", 'info');
-            imageUrlsToMerge = await uploadProductImages(newImages, productId, vendorId); 
-        }
-
-        const updatedData = {
-            name: form.product_name.value.trim(),
-            description: form.product_description.value.trim(),
-            category: form.product_category.value,
-            stock: parseInt(form.product_stock.value, 10),
+            `;
             
-            price: parseFloat(form.selling_price.value),
-            cost: parseFloat(form.product_cost.value) || 0,
-            affiliateCommissionPercent: parseFloat(form.affiliate_commission.value),
-            
-            lastUpdated: new Date()
-        };
-
-        if (imageUrlsToMerge.length > 0) {
-            const productRef = doc(window.db, "products", productId);
-            const currentSnapshot = await getDoc(productRef);
-            const currentImageUrls = currentSnapshot.data().imageUrls || [];
-            
-            updatedData.imageUrls = [...currentImageUrls, ...imageUrlsToMerge];
+            // Ajouter le listener pour l'ajout au panier
+            const addToCartButton = document.getElementById('addToCartButton');
+            if (addToCartButton) {
+                addToCartButton.addEventListener('click', () => {
+                    const id = addToCartButton.dataset.productId;
+                    const affId = addToCartButton.dataset.affiliateId || null;
+                    addItemToCart(id, affId);
+                });
+            }
         }
 
-        await updateDoc(doc(window.db, "products", productId), updatedData);
-        
-        showNotification("Produit mis à jour avec succès!", 'success');
-        
-        setTimeout(() => {
-            window.location.href = 'produits-vendeurs.html';
-        }, 1500);
-
     } catch (error) {
-        console.error("Erreur lors de la mise à jour du produit:", error);
-        showNotification(`Erreur critique : Impossible de sauvegarder les modifications. ${error.message}`, 'error');
-        submitButton.disabled = false;
-        submitButton.textContent = "Sauvegarder les Modifications";
-    }
-}
-
-
-/**
- * Supprime le produit de Firestore et redirige.
- */
-async function deleteProduct(productId) {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.")) {
-        return;
-    }
-    
-    if (!window.auth.currentUser) {
-        showNotification("Session expirée. Veuillez vous reconnecter.", 'error');
-        return;
-    }
-    
-    try {
-        await deleteDoc(doc(window.db, "products", productId));
-        
-        showNotification("Produit supprimé avec succès.", 'success');
-        
-        setTimeout(() => {
-            window.location.href = 'produits-vendeurs.html';
-        }, 1000);
-
-    } catch (error) {
-        console.error("Erreur lors de la suppression du produit:", error);
-        showNotification(`Erreur: Impossible de supprimer le produit. ${error.message}`, 'error');
+        console.error("Erreur lors de l'affichage du produit:", error);
     }
 }
 
 // -----------------------------------------------------------------
-// 9. LOGIQUE DE GESTION DU PANIER (Acheteur)
+// 8. LOGIQUE DE GESTION DU PANIER (Acheteur)
 // -----------------------------------------------------------------
 
 /**
@@ -785,9 +701,6 @@ async function addItemToCart(productId, affiliateId = null) {
 
 /**
  * Retire un produit du panier ou diminue la quantité.
- * @param {string} productId - L'ID du produit.
- * @param {number} quantityChange - La modification de quantité (-1 ou +1).
- * @param {boolean} removeAll - Si vrai, retire toutes les quantités.
  */
 function updateCartItem(productId, quantityChange, removeAll = false) {
     let cart = getCart();
@@ -1003,8 +916,10 @@ async function createOrder() {
         }
     }
 }
+
+
 // -----------------------------------------------------------------
-// 10. LOGIQUE DE GESTION DES COMMANDES (Vendeur)
+// 9. LOGIQUE DE GESTION DES COMMANDES (Vendeur)
 // -----------------------------------------------------------------
 
 /**
@@ -1012,7 +927,6 @@ async function createOrder() {
  */
 function displayVendorOrders() {
     const ordersContainer = document.getElementById('vendorOrdersList');
-    const loadingMessage = ordersContainer ? ordersContainer.querySelector('div') : null;
     
     if (!ordersContainer) return;
 
@@ -1144,9 +1058,10 @@ async function updateOrderStatus(orderId, newStatus) {
  */
 function viewOrderDetails(orderId) {
     showNotification(`Affichage des détails pour la commande #${orderId.substring(0, 8)}. (Non implémenté)`, 'info');
-            }
+}
+
 // -----------------------------------------------------------------
-// 11. LOGIQUE DE GESTION DU DASHBOARD AFFILIÉ
+// 10. LOGIQUE DE GESTION DU DASHBOARD AFFILIÉ
 // -----------------------------------------------------------------
 
 /**
@@ -1156,7 +1071,6 @@ function displayAffiliateDashboard() {
     const affiliateSalesList = document.getElementById('affiliateSalesList');
     if (!affiliateSalesList) return;
 
-    // S'assurer que l'utilisateur est connecté
     onAuthStateChanged(window.auth, async (user) => {
         if (!user || !window.db) {
             affiliateSalesList.innerHTML = '<div class="text-center py-10 text-red-500">Veuillez vous connecter pour voir votre dashboard.</div>';
@@ -1170,19 +1084,16 @@ function displayAffiliateDashboard() {
 
         try {
             const ordersRef = collection(window.db, "orders");
-            // Requête générale pour l'exemple. Dans une application réelle, on filtrerait mieux.
             const querySnapshot = await getDocs(ordersRef);
 
             querySnapshot.forEach((doc) => {
                 const order = doc.data();
                 const orderId = doc.id;
 
-                // Parcourir les articles de commande regroupés par Vendeur
                 for (const vendorId in order.itemsByVendor) {
                     const vendorItems = order.itemsByVendor[vendorId];
                     
                     vendorItems.forEach(item => {
-                        // Vérifier si cet article a été parrainé par l'Affilié connecté
                         if (item.affiliateId === affiliateId) {
                             const commission = parseFloat(item.affiliateCommission);
                             
@@ -1212,7 +1123,7 @@ function displayAffiliateDashboard() {
             document.getElementById('totalSales').textContent = totalSalesCount;
             document.getElementById('affiliateSalesList').innerHTML = salesHtml || `<p class="text-center py-10 text-gray-500">Aucune vente enregistrée pour vous pour l'instant.</p>`;
             
-            // Simulation des Clics (car le tracking n'est pas codé dans Firestore)
+            // Simulation des Clics 
             const simulatedClicks = totalSalesCount * 25 + Math.floor(Math.random() * 50);
             document.getElementById('totalClicks').textContent = simulatedClicks;
 
@@ -1223,23 +1134,186 @@ function displayAffiliateDashboard() {
         }
     });
 }
+
+
 // -----------------------------------------------------------------
-// 12. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
+// 11. LOGIQUE DE PUBLICITÉ AUTOMATIQUE (Simulation)
+// -----------------------------------------------------------------
+
+const ADVERTISING_SITES = [
+    { name: "Facebook", url: "https://www.facebook.com/jeoahsmarketplace", type: "Social", requiresImage: true },
+    { name: "Instagram", url: "https://www.instagram.com/jeoahsmarketplace", type: "Social", requiresImage: true },
+    { name: "X (Twitter)", url: "https://twitter.com", type: "Social", requiresImage: true },
+    { name: "YouTube Shorts", url: "https://www.youtube.com/@jeoahs1", type: "Video/Image", requiresImage: true },
+    { name: "TikTok", url: "https://tiktok.com/@jeoahs1", type: "Video/Image", requiresImage: true },
+    { name: "Telegram (Canal)", url: "https://telegram.org", type: "Text/Image", requiresImage: true },
+    { name: "Snapchat", url: "https://www.snapchat.com", type: "Social", requiresImage: true },
+    { name: "Reddit", url: "https://www.reddit.com", type: "Discussion", requiresImage: false },
+    { name: "Quora", url: "https://fr.quora.com", type: "Discussion", requiresImage: false },
+    { name: "Le Bon Coin", url: "https://www.leboncoin.fr", type: "Classified", requiresImage: true },
+    { name: "Pinterest", url: "https://www.pinterest.com", type: "Social", requiresImage: true },
+    { name: "LinkedIn", url: "https://www.linkedin.com", type: "Professional", requiresImage: true },
+    { name: "Tumblr", url: "https://www.tumblr.com", type: "Blog", requiresImage: true },
+];
+
+const ADVERTISING_PLANS = {
+    'annual_pro': { dailyLimit: 5, weeklyLimit: 20, priority: 1 },
+    'monthly_standard': { dailyLimit: 2, weeklyLimit: 8, priority: 2 },
+    'trial_basic': { dailyLimit: 0, weeklyLimit: 0, priority: 3 },
+};
+
+/**
+ * Simule la publication automatique d'un produit basé sur le plan d'abonnement du Vendeur/Affilié.
+ */
+async function triggerAutomaticAd(userId, product) {
+    if (!window.db) return;
+
+    try {
+        const userDoc = await getDoc(doc(window.db, "users", userId));
+        if (!userDoc.exists()) return showNotification("Utilisateur introuvable pour la publicité.", 'error');
+        
+        const userData = userDoc.data();
+        const planId = userData.subscriptionPlan || 'trial_basic'; 
+        const plan = ADVERTISING_PLANS[planId];
+
+        if (!plan || plan.dailyLimit === 0) {
+            return showNotification("Votre plan d'abonnement n'inclut pas la publicité automatique.", 'info');
+        }
+
+        // --- SIMULATION DU COMPTEUR DE PUBLICATION (Dans une vraie app, ce serait dans Firestore) ---
+        const adCountToday = 1; 
+        
+        if (adCountToday > plan.dailyLimit) {
+            return showNotification(`Limite journalière de ${plan.dailyLimit} publicités atteinte pour votre plan.`, 'warning');
+        }
+
+        // --- LOGIQUE DE PUBLICATION SIMULÉE (avec priorité) ---
+        const prioritySites = ADVERTISING_SITES.filter(site => site.requiresImage); 
+        const basicSites = ADVERTISING_SITES.filter(site => !site.requiresImage); 
+
+        let availableSites = [];
+        if (plan.priority === 1) { 
+            // 70% de chance d'être sur un réseau social majeur (Image)
+            availableSites = Math.random() < 0.7 ? prioritySites : ADVERTISING_SITES;
+        } else {
+            // Autres plans: 50% de chance sur un site textuel
+            availableSites = Math.random() < 0.5 ? basicSites : ADVERTISING_SITES;
+        }
+        
+        if (availableSites.length === 0) availableSites = ADVERTISING_SITES; 
+        
+        const siteToPublish = availableSites[Math.floor(Math.random() * availableSites.length)];
+        
+        const contentContext = siteToPublish.requiresImage ? `Image + Texte` : `Texte Seul`;
+        const adMessage = `NOUVEAU: ${product.name} par JEOAH'S. Prix: $${product.price.toFixed(2)}. ${product.description.substring(0, 50)}... [Lien Affilié]`;
+
+        console.log(`[AD PRIORITY ${plan.priority}]: Tentative de publication sur ${siteToPublish.name} (${contentContext}).`);
+
+        // --- Confirmation (Le point le plus important pour l'utilisateur) ---
+        showNotification(`Publicité de "${product.name}" publiée sur ${siteToPublish.name} !`, 'success', 10000); 
+        
+        const confirmationMessage = `
+            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mt-2" role="alert">
+                <p class="font-bold">Confirmation de Publicité</p>
+                <p>Votre publicité pour **${product.name}** a été publiée sur **${siteToPublish.name}** (${contentContext}).</p>
+                <p class="text-xs mt-1">Lien de la page (simulation): <a href="${siteToPublish.url}" target="_blank" class="underline text-blue-600">${siteToPublish.url}</a></p>
+                <p class="text-xs mt-1">Contenu publié (Texte): "${adMessage.substring(0, 100)}..."</p>
+            </div>
+        `;
+        const notifBox = document.getElementById('notification-box') || document.getElementById('notificationContainer'); 
+        if(notifBox) notifBox.innerHTML += confirmationMessage;
+
+
+    } catch (error) {
+        console.error("Erreur lors de la simulation de publicité:", error);
+    }
+}
+
+
+// -----------------------------------------------------------------
+// 12. LOGIQUE DE NAVIGATION (Barre de Navigation Adaptative - Démo)
+// -----------------------------------------------------------------
+
+/**
+ * Met à jour la barre de navigation en fonction de l'état de connexion et du rôle.
+ */
+function updateNavBar() {
+    const navBar = document.getElementById('main-nav');
+    if (!navBar) return;
+
+    onAuthStateChanged(window.auth, async (user) => {
+        const authLinks = document.getElementById('auth-links');
+        const roleLinks = document.getElementById('role-links');
+
+        if (!authLinks || !roleLinks) return;
+
+        // Effacer les liens existants
+        authLinks.innerHTML = '';
+        roleLinks.innerHTML = '';
+
+        if (user) {
+            // Utilisateur connecté
+            const userDoc = await getDoc(doc(window.db, "users", user.uid));
+            const role = userDoc.exists() ? userDoc.data().role : 'buyer';
+            
+            // Liens d'Authentification (Déconnexion)
+            authLinks.innerHTML = `
+                <span class="text-gray-700 mr-4 hidden sm:inline">Bienvenue, ${userDoc.data().firstName} (${role})</span>
+                <button id="logoutButton" class="bg-red-500 text-white py-2 px-3 rounded-md hover:bg-red-600 transition">Déconnexion</button>
+            `;
+            document.getElementById('logoutButton').addEventListener('click', logoutUser);
+
+            // Liens Spécifiques au Rôle
+            if (role === 'vendor') {
+                roleLinks.innerHTML = `
+                    <a href="produits-vendeurs.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md font-medium">Mes Produits</a>
+                    <a href="commandes-vendeur.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md font-medium">Commandes</a>
+                `;
+            } else if (role === 'affiliate') {
+                 roleLinks.innerHTML = `
+                    <a href="dashboard-affilié.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md font-medium">Mon Dashboard</a>
+                `;
+            } else { // buyer
+                 roleLinks.innerHTML = `
+                    <a href="panier.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md font-medium">Panier</a>
+                `;
+            }
+            
+        } else {
+            // Utilisateur non connecté
+            authLinks.innerHTML = `
+                <a href="login.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md font-medium">Connexion</a>
+                <a href="register.html" class="bg-indigo-600 text-white py-2 px-3 rounded-md hover:bg-indigo-700 transition">Inscription</a>
+            `;
+            roleLinks.innerHTML = `
+                <a href="vitrine.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md font-medium">Vitrine</a>
+            `;
+        }
+    });
+}
+
+
+// -----------------------------------------------------------------
+// 13. LISTENERS D'ÉVÉNEMENTS (Logique Principale)
 // -----------------------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialiser la navigation sur chaque chargement de page
+    updateNavBar(); 
+    
     if (!window.auth || !window.db) return;
 
     const path = window.location.pathname;
 
-    // --- A. Logique d'Inscription (registerForm) ---
+    // --- A. Logique d'Inscription/Connexion ---
     const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-       // ... (Logique d'inscription existante)
-    }
+    if (registerForm) registerForm.addEventListener('submit', (e) => { e.preventDefault(); registerUser(registerForm); });
+    
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) loginForm.addEventListener('submit', (e) => { e.preventDefault(); loginUser(loginForm); });
 
-    // --- B. Logique d'Onboarding (gestion des formulaires post-inscription) ---
-    // ... (Logique d'onboarding existante)
+    // --- B. Logique d'Onboarding ---
+    // ... (Logique Onboarding - reste identique) ...
     if (path.includes('liens-d-affiliation.html')) {
         const form = document.getElementById('affiliateLinksForm');
         if (form) form.addEventListener('submit', (e) => { e.preventDefault(); saveAffiliateLinks(form); });
@@ -1257,7 +1331,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (path.includes('affilié-social.html')) {
         const form = document.getElementById('affiliateSocialForm');
-        const nextUrl = 'produits-affiliés.html';
+        const nextUrl = 'dashboard-affilié.html'; // Redirection vers le dashboard affilié
         if (form) form.addEventListener('submit', (e) => { e.preventDefault(); saveSocialLinks(form, nextUrl); });
         const skipButton = document.getElementById('skipButton');
         if (skipButton) skipButton.addEventListener('click', () => { window.location.href = nextUrl; });
@@ -1288,9 +1362,9 @@ document.addEventListener('DOMContentLoaded', () => {
         displayVendorProducts();
     }
     
-    // --- E. Logique d'Affichage des Produits Affiliés (produits-affiliés.html) ---
-    if (path.includes('produits-affiliés.html')) {
-        displayAffiliateProducts();
+    // --- E. Logique d'Affichage de la Vitrine (vitrine.html) ---
+    if (path.includes('vitrine.html')) {
+        displayAffiliateProducts(); 
     }
     
     // --- F. Logique d'Affichage de la Page Produit (produit.html) ---
@@ -1321,21 +1395,30 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- H. Logique de Gestion du Panier (panier.html) ---
     if (path.includes('panier.html')) {
-        // Rendre les fonctions globales accessibles pour les boutons onclick dans le HTML
         window.addItemToCart = addItemToCart; 
         window.updateCartItem = updateCartItem;
-        
-        // Afficher le contenu du panier au chargement
         displayCartContents();
         
-        // Listener pour le bouton de passage à la caisse
         const checkoutButton = document.getElementById('checkoutButton');
         if (checkoutButton) {
             checkoutButton.addEventListener('click', createOrder);
         }
     }
     
-    // --- I. Logique IA (Démo - Simplifiée) ---
+    // --- I. Logique de Gestion des Commandes Vendeur (commandes-vendeur.html) ---
+    if (path.includes('commandes-vendeur.html')) {
+        window.updateOrderStatus = updateOrderStatus; 
+        window.viewOrderDetails = viewOrderDetails;
+        
+        displayVendorOrders();
+    }
+    
+    // --- J. Logique de Gestion du Dashboard Affilié (dashboard-affilié.html) ---
+    if (path.includes('dashboard-affilié.html')) {
+        displayAffiliateDashboard();
+    }
+    
+    // --- K. Logique IA (Démo - Simplifiée) ---
     const aiDemoButton = document.getElementById('ai-demo-button');
     if (aiDemoButton) {
         aiDemoButton.addEventListener('click', () => {

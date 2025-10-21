@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+
+
+     <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -24,108 +26,89 @@
     </script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
-        Ce commit introduit la structure du Dashboard Administrateur, incluant la simulation de connexion et l'affichage des contrôles globaux et des statistiques d'IA (Ney).
-
-Mises à jour:
-* Création du fichier admin-dashboard.html avec la structure de connexion simulée.
-* Intégration de la Barre de Navigation (Section 13) dans le nouveau fichier.
-* Ajout d'une section de contrôle des API de paiement et des statistiques globales (inscrits, retraits, problèmes signalés).
-* La connexion et les données sont simulées via JavaScript local pour la démonstration de la preuve de concept.
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
-
-    <div class="w-full max-w-lg bg-white rounded-xl shadow-2xl p-8 space-y-8">
-        
-        <header class="text-center">
-            <h1 class="text-3xl font-extrabold text-dark-text">Étape 2/2 : Vos Réseaux Sociaux</h1>
-            <p class="mt-2 text-sm text-gray-500">Ajoutez jusqu'à 5 de vos liens sociaux. Cela aide Ney à mieux vous cibler. (Non obligatoire)</p>
-        </header>
-
-        <form id="affiliateSocialForm" class="space-y-6">
-            
-            <div class="p-4 bg-gray-50 rounded-lg text-center">
-                <p class="text-xs font-semibold text-gray-600 mb-2">Exemples de liens acceptés :</p>
-                <div class="flex flex-wrap justify-center space-x-4 text-xl">
-                    <i class="fab fa-instagram text-pink-600" title="Instagram"></i>
-                    <i class="fab fa-tiktok text-black" title="TikTok"></i>
-                    <i class="fab fa-youtube text-red-600" title="YouTube"></i>
-                    <i class="fab fa-twitter text-blue-400" title="X/Twitter"></i>
-                    <i class="fab fa-facebook text-blue-700" title="Facebook"></i>
-                    <i class="fab fa-snapchat text-yellow-500" title="Snapchat"></i>
-                    <i class="fab fa-linkedin text-blue-800" title="LinkedIn"></i>
-                    <i class="fab fa-telegram text-blue-500" title="Telegram"></i>
-                    <i class="fab fa-quora text-red-800" title="Quora"></i>
-                    <i class="fab fa-reddit text-orange-600" title="Reddit"></i>
+<body class="min-h-screen p-4 bg-gray-bg">
+    
+    <nav class="bg-white shadow-md sticky top-0 z-10">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="index.html" class="text-2xl font-bold text-indigo-600">JEOAH'S Marketplace</a>
+                </div>
+                <div id="main-nav" class="flex items-center">
+                    <div id="role-links" class="flex space-x-4">
+                        </div>
+                    <span class="border-r border-gray-300 h-6 mx-4"></span>
+                    <div id="auth-links" class="flex items-center space-x-4">
+                        <span class="text-gray-500 text-sm">Chargement...</span> 
+                    </div>
                 </div>
             </div>
+        </div>
+    </nav>
+    <div class="flex items-center justify-center pt-8">
+        <div class="w-full max-w-lg bg-white rounded-xl shadow-2xl p-8 space-y-8">
+            
+            <header class="text-center">
+                <h1 class="text-3xl font-extrabold text-dark-text">Étape 2/2 : Vos Réseaux Sociaux</h1>
+                <p class="mt-2 text-sm text-gray-500">Ajoutez vos liens sociaux. Ceci est crucial pour les analyses de **Ney (IA)**. (Non obligatoire)</p>
+            </header>
 
-            <div class="space-y-4">
+            <form id="affiliateSocialForm" class="space-y-6">
                 
-                <div>
-                    <label for="social_link_1" class="block text-sm font-medium text-gray-700">Lien Social 1 (Principal)</label>
-                    <input type="url" id="social_link_1" name="social_link_1" placeholder="https://instagram.com/..."
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                <div class="p-4 bg-gray-50 rounded-lg text-center">
+                    <p class="text-xs font-semibold text-gray-600 mb-2">Liens Sociaux pour la promotion :</p>
+                    <div class="flex flex-wrap justify-center space-x-4 text-xl">
+                        <i class="fab fa-instagram text-pink-600" title="Instagram"></i>
+                        <i class="fab fa-tiktok text-black" title="TikTok"></i>
+                        <i class="fab fa-youtube text-red-600" title="YouTube"></i>
+                        <i class="fab fa-facebook text-blue-700" title="Facebook"></i>
+                    </div>
                 </div>
-                <div>
-                    <label for="social_link_2" class="block text-sm font-medium text-gray-700">Lien Social 2</label>
-                    <input type="url" id="social_link_2" name="social_link_2" placeholder="https://"
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
-                </div>
-                <div>
-                    <label for="social_link_3" class="block text-sm font-medium text-gray-700">Lien Social 3</label>
-                    <input type="url" id="social_link_3" name="social_link_3" placeholder="https://"
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
-                </div>
-                <div>
-                    <label for="social_link_4" class="block text-sm font-medium text-gray-700">Lien Social 4</label>
-                    <input type="url" id="social_link_4" name="social_link_4" placeholder="https://"
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
-                </div>
-                <div>
-                    <label for="social_link_5" class="block text-sm font-medium text-gray-700">Lien Social 5 (Max)</label>
-                    <input type="url" id="social_link_5" name="social_link_5" placeholder="https://"
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
-                </div>
-            </div>
-            
-            <div class="flex space-x-4 pt-4">
-                <button type="button" id="skipButton"
-                        class="w-1/2 flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-lg font-medium text-gray-700 bg-white hover:bg-gray-100 focus:outline-none transition duration-200">
-                    Sauter cette étape
-                </button>
-                <button type="submit" id="nextButton"
-                        class="w-1/2 flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-primary-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue transition duration-200">
-                    Terminer et accéder au Tableau de Bord
-                </button>
-            </div>
-            
-        </form>
 
+                <div class="space-y-4">
+                    
+                    <div>
+                        <label for="facebook" class="block text-sm font-medium text-gray-700">Lien Facebook</label>
+                        <input type="url" id="facebook" name="facebook" placeholder="https://facebook.com/..."
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                    </div>
+                    <div>
+                        <label for="instagram" class="block text-sm font-medium text-gray-700">Lien Instagram</label>
+                        <input type="url" id="instagram" name="instagram" placeholder="https://instagram.com/..."
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                    </div>
+                    <div>
+                        <label for="tiktok" class="block text-sm font-medium text-gray-700">Lien TikTok</label>
+                        <input type="url" id="tiktok" name="tiktok" placeholder="https://tiktok.com/@..."
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                    </div>
+                    <div>
+                        <label for="youtube" class="block text-sm font-medium text-gray-700">Lien YouTube</label>
+                        <input type="url" id="youtube" name="youtube" placeholder="https://youtube.com/@..."
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-blue focus:border-primary-blue transition">
+                    </div>
+                    </div>
+                
+                <div class="flex space-x-4 pt-4">
+                    <button type="button" id="skipButton"
+                            class="w-1/2 flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-lg font-medium text-gray-700 bg-white hover:bg-gray-100 focus:outline-none transition duration-200">
+                        Sauter cette étape
+                    </button>
+                    <button type="submit" id="nextButton"
+                            class="w-1/2 flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-primary-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue transition duration-200">
+                        Terminer et accéder au Tableau de Bord
+                    </button>
+                </div>
+                
+            </form>
+
+        </div>
     </div>
 
-    <script type="module">
-        // NOTE: La logique de sauvegarde sera ajoutée dans app.js ou un nouveau fichier js
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('affiliateSocialForm');
-            const skipButton = document.getElementById('skipButton');
-
-            // Logique de Soumission (Bouton Terminer)
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                // Ici, le code enverrait les données à Firestore.
-                // Après envoi, l'Affilié a terminé l'onboarding. Redirection vers le Dashboard.
-                window.location.href = 'produits-affiliés.html'; // Le Dashboard de l'Affilié
-            });
-
-            // Logique du Bouton Sauter
-            skipButton.addEventListener('click', () => {
-                // Redirection immédiate vers le Dashboard
-                window.location.href = 'produits-affiliés.html';
-            });
-        });
-    </script>
+    <script src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
     
 </body>
-</html>
+</html>       

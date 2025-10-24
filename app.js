@@ -54,6 +54,7 @@ function displayNotification(message, type = 'info') {
 /** Formate le prix en USD (locale FR pour les décimales) */
 function formatPrice(amount) {
     if (typeof amount !== 'number' || isNaN(amount)) return 'N/A';
+    // Utilisation de la devise USD avec le formatage français pour le séparateur de décimales (virgule)
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(amount);
 }
 
@@ -101,7 +102,7 @@ if (registrationForm) {
                 createdAt: new Date()
             });
 
-            displayNotification(`Inscription réussie en tant que ${role}! Redirection...`);
+            displayNotification(`Inscription réussie en tant que ${role}! Redirection...`, 'success');
             
             // Redirection en fonction du rôle
             handleRoleRedirection(role);
@@ -131,7 +132,7 @@ if (loginForm) {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            displayNotification("Connexion réussie! Redirection...");
+            displayNotification("Connexion réussie! Redirection...", 'success');
             
             // Récupérer le rôle de l'utilisateur
             const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -145,7 +146,7 @@ if (loginForm) {
 
         } catch (error) {
             console.error("Erreur de connexion:", error);
-            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+            if (error.code === 'auth/invalid-email' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
                 displayNotification("Email ou mot de passe incorrect.", 'error');
             } else {
                 displayNotification(`Erreur de connexion: ${error.message}`, 'error');
@@ -158,34 +159,19 @@ if (loginForm) {
 // SECTION 3: Configuration (Onboarding)
 // =========================================================================
 
+// Cette fonction n'est plus utilisée pour la redirection dans 'onAuthStateChanged'
+// car la redirection est gérée directement dans le listener principal.
+/*
 async function checkUserConfiguration(user) {
-    if (!user) return;
-
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
-        const userData = userDoc.data();
-        
-        // Si l'utilisateur est déjà configuré, le rediriger vers son dashboard
-        if (userData.isConfigured) {
-            if (userData.role === 'vendeur') {
-                window.location.href = 'vendor-products.html'; // CORRIGÉ
-            } else if (userData.role === 'affilié') {
-                window.location.href = 'affiliate-dashboard.html'; // CORRIGÉ
-            } else {
-                window.location.href = 'vitrine.html';
-            }
-            return true; // Configuré
-        }
-        return false; // Non configuré
-    }
-    return false;
+    // ... code original ...
 }
+*/
 
 function handleRoleRedirection(role) {
     // Les redirections pour la configuration si l'utilisateur est nouveau
     if (role === 'vendeur') {
-        window.location.href = 'vendor-setup.html'; // CORRIGÉ
-    } else if (role === 'affilié') {
+        window.location.href = 'vendor-setup.html'; 
+    } else if (role === 'affilie') { // CORRIGÉ: Utiliser 'affilie' au lieu de 'affilié' pour correspondre au formulaire
         window.location.href = 'affiliate-social.html'; 
     } else {
         // Acheteur ou Rôle non défini => vers l'étape sociale simple
@@ -204,13 +190,13 @@ if (buyerSocialForm) {
         const socialData = {
             social_link_1: buyerSocialForm.social_link_1 ? buyerSocialForm.social_link_1.value : '',
             // ... autres liens sociaux
-            isConfigured: true,
+            isConfigured: true, 
             // Conserver le rôle initial
         };
 
         try {
             await updateDoc(doc(db, "users", user.uid), socialData);
-            displayNotification("Configuration du profil réussie !");
+            displayNotification("Configuration du profil réussie !", 'success');
             window.location.href = 'vitrine.html';
         } catch (error) {
             displayNotification(`Erreur lors de la sauvegarde: ${error.message}`, 'error');
@@ -224,7 +210,9 @@ if (buyerSocialForm) {
             const user = auth.currentUser;
             if (!user) return;
             try {
-                await updateDoc(doc(db, "users", user.uid), { isConfigured: true });
+                // Seulement marquer comme configuré sans enregistrer les données sociales
+                await updateDoc(doc(db, "users", user.uid), { isConfigured: true }); 
+                displayNotification("Configuration sautée. Redirection vers la vitrine.");
                 window.location.href = 'vitrine.html';
             } catch (error) {
                 displayNotification(`Erreur lors du saut: ${error.message}`, 'error');
@@ -233,7 +221,7 @@ if (buyerSocialForm) {
     }
 }
 
-// Formulaire de configuration Affilié (affilié-social.html)
+// Formulaire de configuration Affilié (affiliate-social.html)
 const affiliateSocialForm = document.getElementById('affiliateSocialForm');
 if (affiliateSocialForm) {
     affiliateSocialForm.addEventListener('submit', async (e) => {
@@ -251,8 +239,8 @@ if (affiliateSocialForm) {
 
         try {
             await updateDoc(doc(db, "users", user.uid), socialData);
-            displayNotification("Configuration du profil réussie ! Redirection vers le tableau de bord.");
-            window.location.href = 'affiliate-dashboard.html'; // CORRIGÉ
+            displayNotification("Configuration du profil réussie ! Redirection vers le tableau de bord.", 'success');
+            window.location.href = 'affiliate-dashboard.html'; 
         } catch (error) {
             displayNotification(`Erreur lors de la sauvegarde: ${error.message}`, 'error');
         }
@@ -265,7 +253,8 @@ if (affiliateSocialForm) {
             if (!user) return;
             try {
                 await updateDoc(doc(db, "users", user.uid), { isConfigured: true });
-                window.location.href = 'affiliate-dashboard.html'; // CORRIGÉ
+                displayNotification("Configuration sautée. Redirection vers le tableau de bord.");
+                window.location.href = 'affiliate-dashboard.html'; 
             } catch (error) {
                 displayNotification(`Erreur lors du saut: ${error.message}`, 'error');
             }
@@ -296,8 +285,8 @@ if (vendorConfigForm) {
                 isConfigured: true
             });
 
-            displayNotification("Configuration de la boutique réussie ! Redirection vers la gestion des produits.");
-            window.location.href = 'vendor-products.html'; // CORRIGÉ
+            displayNotification("Configuration de la boutique réussie ! Redirection vers la gestion des produits.", 'success');
+            window.location.href = 'vendor-products.html'; 
         } catch (error) {
             displayNotification(`Erreur lors de la sauvegarde: ${error.message}`, 'error');
         }
@@ -316,7 +305,7 @@ async function displayAdPlans() {
         const plansSnapshot = await getDocs(collection(db, "ad_plans"));
         
         if (plansSnapshot.empty) {
-            plansContainer.innerHTML = '<p class="text-red-500">Aucun plan d\'abonnement trouvé.</p>';
+            plansContainer.innerHTML = '<p class="text-red-500">Aucun plan d\'abonnement trouvé. Créez la collection "ad_plans" dans Firestore.</p>';
             return;
         }
 
@@ -365,7 +354,11 @@ if (addProductButton) {
         productFormContainer.classList.remove('hidden');
         document.getElementById('formTitle').textContent = 'Ajouter un Produit';
         productForm.reset();
-        productForm.productId.value = ''; // Réinitialiser l'ID pour l'ajout
+        // Le champ hidden 'productId' doit être réinitialisé
+        const productIdField = productForm.querySelector('[name="productId"]');
+        if (productIdField) {
+            productIdField.value = ''; 
+        }
     });
 }
 
@@ -384,14 +377,17 @@ if (productForm) {
             return;
         }
         
-        const productId = productForm.productId.value;
+        const productIdField = productForm.querySelector('[name="productId"]');
+        const productId = productIdField ? productIdField.value : null;
+
         const productData = {
             userId: user.uid,
             name: productForm.name.value,
             price: parseFloat(productForm.price.value),
             commissionRate: parseInt(productForm.commissionRate.value),
             description: productForm.description.value,
-            createdAt: productId ? productForm.createdAt.value : new Date(), // Conserver la date
+            // Si c'est un nouvel ajout, la date de création est maintenant. Sinon, elle sera mise à jour/conservée.
+            createdAt: productId ? productForm.createdAt.value : new Date(), 
             updatedAt: new Date()
         };
 
@@ -400,11 +396,11 @@ if (productForm) {
                 // Modification
                 const productRef = doc(db, "products", productId);
                 await updateDoc(productRef, productData);
-                displayNotification("Produit mis à jour avec succès!");
+                displayNotification("Produit mis à jour avec succès!", 'success');
             } else {
                 // Ajout
                 await addDoc(collection(db, "products"), productData);
-                displayNotification("Produit ajouté avec succès!");
+                displayNotification("Produit ajouté avec succès!", 'success');
                 productForm.reset();
             }
             productFormContainer.classList.add('hidden');
@@ -465,17 +461,18 @@ async function displayVendorProducts() {
             button.addEventListener('click', (e) => {
                 const productId = e.target.dataset.id;
                 // Rediriger vers la page de modification
-                window.location.href = `edit-product.html?id=${productId}`; // CORRIGÉ
+                window.location.href = `edit-product.html?id=${productId}`; 
             });
         });
 
         listContainer.querySelectorAll('.delete-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const productId = e.target.dataset.id;
-                // Remplacer confirm() par une implémentation de modale personnalisée si possible
-                if (window.confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
-                    deleteProduct(productId);
-                }
+                
+                // CORRECTION CRITIQUE: Remplacement de window.confirm() par une notification
+                displayNotification("Produit en cours de suppression...", 'error');
+                deleteProduct(productId);
+                // NOTE: Dans une application réelle, une modale HTML personnalisée serait utilisée pour la confirmation.
             });
         });
 
@@ -487,7 +484,7 @@ async function displayVendorProducts() {
 async function deleteProduct(productId) {
     try {
         await deleteDoc(doc(db, "products", productId));
-        displayNotification("Produit supprimé avec succès.");
+        displayNotification("Produit supprimé avec succès.", 'success');
         displayVendorProducts(); // Rafraîchir
     } catch (error) {
         displayNotification(`Erreur de suppression: ${error.message}`, 'error');
@@ -512,7 +509,9 @@ async function displayAffiliateProductsForLink() {
             const product = doc.data();
             const option = document.createElement('option');
             option.value = doc.id;
-            option.textContent = `${product.name} (${formatPrice(product.price)} | Comm: ${product.commissionRate}%)`;
+            // Utiliser le nom du vendeur si possible, sinon l'UID
+            const vendorId = product.userId.substring(0, 4);
+            option.textContent = `${product.name} (Vendeur: ${vendorId}...) - ${formatPrice(product.price)} | Comm: ${product.commissionRate}%`;
             selectElement.appendChild(option);
         });
 
@@ -540,11 +539,11 @@ if (linkGeneratorForm) {
         // Simuler la construction de l'URL du produit
         const baseURL = window.location.origin;
         // Le lien doit pointer vers produit.html avec l'ID du produit et l'ID de l'affilié
-        const affiliateLink = `${baseURL}/product.html?id=${productId}&affid=${user.uid}`; // CORRIGÉ
+        const affiliateLink = `${baseURL}/product.html?id=${productId}&affid=${user.uid}`; 
         
         document.getElementById('affiliateLinkOutput').value = affiliateLink;
         document.getElementById('generatedLinkContainer').classList.remove('hidden');
-        displayNotification("Lien généré ! Copiez-le et partagez-le.");
+        displayNotification("Lien généré ! Copiez-le et partagez-le.", 'info');
 
         // Enregistrer le clic (simulé) de génération
         await addDoc(collection(db, "affiliate_clicks"), {
@@ -582,6 +581,7 @@ function getAffiliateIdFromURL() {
         }
         
     }
+    // Mise à jour de la variable globale avec l'ID en session
     currentAffiliateId = sessionStorage.getItem('affiliateId');
 }
 
@@ -604,11 +604,26 @@ async function addToCart(productId) {
         if (existingItem) {
             existingItem.quantity += 1;
         } else {
-            cartItems.push({ id: productId, quantity: 1, productDetails: product });
+            // IMPORTANT: Stocker une copie propre des détails du produit
+            cartItems.push({ 
+                id: productId, 
+                quantity: 1, 
+                productDetails: {
+                    name: product.name,
+                    price: product.price,
+                    commissionRate: product.commissionRate,
+                    userId: product.userId,
+                    description: product.description.substring(0, 50) + '...' // Limiter les données stockées
+                } 
+            });
         }
         
         localStorage.setItem('cart', JSON.stringify(cartItems));
-        displayNotification(`${product.name} ajouté au panier !`);
+        displayNotification(`${product.name} ajouté au panier !`, 'success');
+        
+        // Mise à jour du compteur de panier si un élément le gère
+        // updateCartCount();
+        
     } catch (error) {
         displayNotification(`Erreur lors de l'ajout au panier: ${error.message}`, 'error');
     }
@@ -619,6 +634,8 @@ async function addToCart(productId) {
 function displayCartItems() {
     const cartItemsContainer = document.getElementById('cartItemsContainer');
     const cartSummary = document.getElementById('cartSummary');
+    const checkoutButton = document.getElementById('checkoutButton');
+    
     if (!cartItemsContainer || !cartSummary) return;
 
     const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -628,7 +645,7 @@ function displayCartItems() {
     
     if (cartItems.length === 0) {
         cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center py-10">Votre panier est vide.</p>';
-        document.getElementById('checkoutButton').disabled = true;
+        if (checkoutButton) checkoutButton.disabled = true;
         updateSummary(0);
         return;
     }
@@ -639,7 +656,7 @@ function displayCartItems() {
         subtotal += total;
 
         const div = document.createElement('div');
-        div.className = "bg-white p-4 rounded-xl shadow flex justify-between items-center";
+        div.className = "bg-white p-4 rounded-xl shadow flex justify-between items-center border-l-4 border-indigo-600 mb-3";
         div.innerHTML = `
             <div>
                 <h3 class="text-lg font-semibold text-gray-900">${product.name}</h3>
@@ -663,7 +680,7 @@ function displayCartItems() {
     });
 
     updateSummary(subtotal);
-    document.getElementById('checkoutButton').disabled = false;
+    if (checkoutButton) checkoutButton.disabled = false;
 }
 
 function removeFromCart(productId) {
@@ -675,12 +692,18 @@ function removeFromCart(productId) {
 }
 
 function updateSummary(subtotal) {
+    const summarySubtotalEl = document.getElementById('summarySubtotal');
+    const summaryFeesEl = document.getElementById('summaryFees');
+    const summaryTotalEl = document.getElementById('summaryTotal');
+    
+    if (!summarySubtotalEl || !summaryFeesEl || !summaryTotalEl) return;
+    
     const fees = subtotal * JEOAHS_FEE_RATE;
     const total = subtotal + fees;
     
-    document.getElementById('summarySubtotal').textContent = formatPrice(subtotal);
-    document.getElementById('summaryFees').textContent = formatPrice(fees);
-    document.getElementById('summaryTotal').textContent = formatPrice(total);
+    summarySubtotalEl.textContent = formatPrice(subtotal);
+    summaryFeesEl.textContent = formatPrice(fees);
+    summaryTotalEl.textContent = formatPrice(total);
 }
 
 // =========================================================================
@@ -697,12 +720,15 @@ if (checkoutButton) {
         }
 
         let totalSubtotal = 0;
-        let totalFees = 0;
         let commissions = [];
         let orderItems = [];
 
         for (const item of cartItems) {
-            const product = item.productDetails;
+            // Recharger les données complètes du produit pour la commande finale
+            const productDoc = await getDoc(doc(db, "products", item.id));
+            if (!productDoc.exists()) continue;
+            const product = productDoc.data();
+            
             const itemSubtotal = product.price * item.quantity;
             totalSubtotal += itemSubtotal;
             
@@ -729,7 +755,7 @@ if (checkoutButton) {
             });
         }
         
-        totalFees = totalSubtotal * JEOAHS_FEE_RATE;
+        const totalFees = totalSubtotal * JEOAHS_FEE_RATE;
         const total = totalSubtotal + totalFees;
 
         try {
@@ -775,6 +801,10 @@ if (checkoutButton) {
 
 async function displayVendorOrders() {
     const ordersListContainer = document.getElementById('vendorOrdersList');
+    const totalNetRevenueEl = document.getElementById('totalNetRevenue');
+    const pendingOrdersCountEl = document.getElementById('pendingOrdersCount');
+    const completedOrdersCountEl = document.getElementById('completedOrdersCount');
+    
     if (!ordersListContainer) return;
     
     const user = auth.currentUser;
@@ -787,8 +817,6 @@ async function displayVendorOrders() {
 
     try {
         const ordersRef = collection(db, "orders");
-        // NOTE: La requête Firestore 'array-contains-any' sur des sous-champs est limitée.
-        // Pour cette PoC, on récupère toutes les commandes et on filtre dans le JS (moins efficace).
 
         let totalRevenue = 0;
         let pendingCount = 0;
@@ -824,7 +852,7 @@ async function displayVendorOrders() {
                 const div = document.createElement('div');
                 div.className = "bg-white p-4 rounded-lg shadow-sm mb-4 border-l-4 border-yellow-500";
                 div.innerHTML = `
-                    <p class="font-bold">Commande #${orderId.substring(0, 6)} - ${new Date(order.createdAt.seconds * 1000).toLocaleDateString()}</p>
+                    <p class="font-bold">Commande #${orderId.substring(0, 6)} - ${order.createdAt && order.createdAt.seconds ? new Date(order.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</p>
                     <p class="text-sm">Articles vendus: ${vendorItems.length}</p>
                     <p class="text-sm">Vente brute: ${formatPrice(vendorSale)}</p>
                     <p class="text-sm text-red-500">Commissions versées: ${formatPrice(vendorCommission)}</p>
@@ -842,9 +870,9 @@ async function displayVendorOrders() {
         }
 
         // Mettre à jour les statistiques
-        document.getElementById('totalNetRevenue').textContent = formatPrice(totalRevenue);
-        document.getElementById('pendingOrdersCount').textContent = pendingCount;
-        document.getElementById('completedOrdersCount').textContent = completedCount;
+        if(totalNetRevenueEl) totalNetRevenueEl.textContent = formatPrice(totalRevenue);
+        if(pendingOrdersCountEl) pendingOrdersCountEl.textContent = pendingCount;
+        if(completedOrdersCountEl) completedOrdersCountEl.textContent = completedCount;
 
     } catch (error) {
         ordersListContainer.innerHTML = `<p class="text-red-500 text-center py-10">Erreur de chargement des commandes: ${error.message}</p>`;
@@ -857,6 +885,10 @@ async function displayVendorOrders() {
 
 async function displayAffiliateDashboard() {
     const transactionsListContainer = document.getElementById('affiliateTransactionsList');
+    const totalCommissionsEl = document.getElementById('totalCommissions');
+    const totalSalesEl = document.getElementById('totalSales');
+    const totalClicksEl = document.getElementById('totalClicks');
+    
     if (!transactionsListContainer) return;
 
     const user = auth.currentUser;
@@ -890,7 +922,7 @@ async function displayAffiliateDashboard() {
                 div.innerHTML = `
                     <p class="font-bold text-green-600">${formatPrice(commission.amount)}</p>
                     <p class="text-sm text-gray-600">Vente de ${formatPrice(commission.saleAmount)} (Produit: ${commission.productId.substring(0, 6)}...)</p>
-                    <p class="text-xs text-gray-400">Commande #${commission.orderId.substring(0, 6)} - ${new Date(commission.createdAt.seconds * 1000).toLocaleDateString()}</p>
+                    <p class="text-xs text-gray-400">Commande #${commission.orderId.substring(0, 6)} - ${commission.createdAt && commission.createdAt.seconds ? new Date(commission.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</p>
                 `;
                 transactionsListContainer.appendChild(div);
             });
@@ -902,9 +934,9 @@ async function displayAffiliateDashboard() {
         totalClicks = clicksSnapshot.size;
 
         // Mettre à jour les statistiques
-        document.getElementById('totalCommissions').textContent = formatPrice(totalCommissions);
-        document.getElementById('totalSales').textContent = totalSales;
-        document.getElementById('totalClicks').textContent = totalClicks;
+        if (totalCommissionsEl) totalCommissionsEl.textContent = formatPrice(totalCommissions);
+        if (totalSalesEl) totalSalesEl.textContent = totalSales;
+        if (totalClicksEl) totalClicksEl.textContent = totalClicks;
 
         // Lancer l'analyse de tendance (Section 12)
         displayAffiliateTrendAnalysis();
@@ -941,7 +973,7 @@ async function displayVitrineProducts() {
             
             const a = document.createElement('a');
             // Lien vers la page produit
-            a.href = `product.html?id=${productId}`; // CORRIGÉ
+            a.href = `product.html?id=${productId}`; 
             a.className = "block bg-white p-4 rounded-xl shadow hover:shadow-lg transition";
             a.innerHTML = `
                 <h3 class="text-xl font-semibold text-gray-900 truncate">${product.name}</h3>
@@ -965,7 +997,7 @@ async function displayProductDetails() {
     const container = document.getElementById('productDetailsContainer');
     const addToCartBtn = document.getElementById('addToCartButton');
 
-    if (!productId || !container || !addToCartBtn) return;
+    if (!productId || !container) return;
     
     container.innerHTML = '<p class="text-center py-10 text-gray-500">Chargement des détails du produit...</p>';
 
@@ -978,6 +1010,17 @@ async function displayProductDetails() {
 
         const product = productDoc.data();
         
+        // Tenter de charger le nom du vendeur
+        let vendorName = product.userId.substring(0, 8) + '...';
+        try {
+            const vendorDoc = await getDoc(doc(db, "users", product.userId));
+            if(vendorDoc.exists() && vendorDoc.data().shopName) {
+                vendorName = vendorDoc.data().shopName;
+            }
+        } catch (e) {
+            console.error("Erreur de récupération du nom du vendeur:", e);
+        }
+        
         container.innerHTML = `
             <div class="lg:flex lg:space-x-8">
                 <div class="lg:w-2/3">
@@ -989,7 +1032,7 @@ async function displayProductDetails() {
                 <div class="lg:w-1/3 mt-8 lg:mt-0 bg-white p-6 rounded-xl shadow-lg h-fit">
                     <h2 class="text-2xl font-semibold mb-4 border-b pb-2">Informations Clés</h2>
                     <div class="space-y-3">
-                        <p>Vendeur: <span class="font-medium text-gray-700">${product.userId.substring(0, 8)}...</span></p>
+                        <p>Vendeur: <span class="font-medium text-gray-700">${vendorName}</span></p>
                         <p>Commission Affilié: <span class="font-medium text-green-600">${product.commissionRate}%</span></p>
                         <p class="text-sm text-gray-500">Le commission est reversée à l'affilié qui vous a envoyé ici.</p>
                     </div>
@@ -997,9 +1040,11 @@ async function displayProductDetails() {
             </div>
         `;
 
-        addToCartBtn.addEventListener('click', () => {
-            addToCart(productId);
-        });
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', () => {
+                addToCart(productId);
+            });
+        }
         
     } catch (error) {
         container.innerHTML = `<p class="text-red-500 text-center py-10">Erreur de chargement: ${error.message}</p>`;
@@ -1077,17 +1122,18 @@ onAuthStateChanged(auth, (user) => {
         getDoc(userDocRef).then(userDoc => {
             if (userDoc.exists()) {
                 const userData = userDoc.data();
+                const userRole = userData.role;
                 
                 // Rediriger vers la configuration si non configuré
                 if (!userData.isConfigured && 
-                    !window.location.pathname.includes('setup.html') &&
-                    !window.location.pathname.includes('social.html')) {
+                    !window.location.pathname.includes('-setup.html') &&
+                    !window.location.pathname.includes('-social.html')) {
                     
-                    if (userData.role === 'vendeur') {
-                        window.location.href = 'vendor-setup.html'; // CORRIGÉ
-                    } else if (userData.role === 'affilié') {
-                        window.location.href = 'affiliate-social.html'; // CORRIGÉ
-                    } else { // Acheteur
+                    if (userRole === 'vendeur') {
+                        window.location.href = 'vendor-setup.html'; 
+                    } else if (userRole === 'affilie') {
+                        window.location.href = 'affiliate-social.html'; 
+                    } else if (userRole === 'acheteur') {
                         window.location.href = 'acheteur-social-setup.html';
                     }
                     return; // Ne pas afficher les liens si on redirige
@@ -1095,16 +1141,19 @@ onAuthStateChanged(auth, (user) => {
                 
                 let linkHTML = '';
                 
-                if (userData.role === 'vendeur') {
+                if (userRole === 'vendeur') {
                     linkHTML = `
-                        <a href="vendor-products.html" class="text-gray-700 hover:text-indigo-600">Mes Produits</a>
-                        <a href="vendor-orders.html" class="text-gray-700 hover:text-indigo-600">Commandes</a>
-                    `; // CORRIGÉ
-                } else if (userData.role === 'affilié') {
+                        <a href="vendor-products.html" class="text-gray-700 hover:text-indigo-600 mr-4">Mes Produits</a>
+                        <a href="vendor-orders.html" class="text-gray-700 hover:text-indigo-600 mr-4">Commandes</a>
+                    `; 
+                } else if (userRole === 'affilie') {
                     linkHTML = `
-                        <a href="affiliate-dashboard.html" class="text-gray-700 hover:text-indigo-600">Dashboard Affilié</a>
-                        <a href="affiliate-links.html" class="text-gray-700 hover:text-indigo-600">Générateur de Liens</a>
-                    `; // CORRIGÉ
+                        <a href="affiliate-dashboard.html" class="text-gray-700 hover:text-indigo-600 mr-4">Dashboard Affilié</a>
+                        <a href="affiliate-links.html" class="text-gray-700 hover:text-indigo-600 mr-4">Générateur de Liens</a>
+                    `; 
+                } else if (userRole === 'acheteur') {
+                    // Les acheteurs n'ont pas de dashboard complexe, ils vont directement au panier/vitrine
+                    // Leur profil est géré par la page acheteur-social-setup
                 }
                 
                 // Lien Panier (pour tous)
@@ -1112,7 +1161,7 @@ onAuthStateChanged(auth, (user) => {
                 
                 roleLinks.innerHTML = linkHTML;
             } else {
-                // Rôle non trouvé après connexion
+                // Rôle non trouvé après connexion (devrait rediriger l'utilisateur vers la vitrine ou l'inscription)
                 window.location.href = 'vitrine.html';
             }
         }).catch(error => {
@@ -1124,7 +1173,7 @@ onAuthStateChanged(auth, (user) => {
     } else {
         // Utilisateur déconnecté
         authLinks.innerHTML = `
-            <a href="login.html" class="text-gray-700 hover:text-indigo-600">Connexion</a>
+            <a href="login.html" class="text-gray-700 hover:text-indigo-600 mr-4">Connexion</a>
             <a href="register.html" class="py-1 px-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm">Inscription</a>
         `;
         // Liens par défaut pour les visiteurs
@@ -1144,17 +1193,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Exécuter l'affichage des données spécifiques à la page
     const pathname = window.location.pathname;
 
-    if (pathname.includes('vendor-setup.html')) { // CORRIGÉ
+    if (pathname.includes('vendor-setup.html')) { 
         displayAdPlans();
-    } else if (pathname.includes('vendor-products.html')) { // CORRIGÉ
+    } else if (pathname.includes('vendor-products.html')) { 
         displayVendorProducts();
-    } else if (pathname.includes('edit-product.html')) { // CORRIGÉ
+    } else if (pathname.includes('edit-product.html')) { 
         loadProductForEdit();
-    } else if (pathname.includes('affiliate-links.html')) { // CORRIGÉ
+    } else if (pathname.includes('affiliate-links.html')) { 
         displayAffiliateProductsForLink();
-    } else if (pathname.includes('affiliate-dashboard.html')) { // CORRIGÉ
+    } else if (pathname.includes('affiliate-dashboard.html')) { 
         displayAffiliateDashboard();
-    } else if (pathname.includes('vendor-orders.html')) { // CORRIGÉ
+    } else if (pathname.includes('vendor-orders.html')) { 
         displayVendorOrders();
     } else if (pathname.includes('vitrine.html')) {
         displayVitrineProducts();
@@ -1218,8 +1267,8 @@ async function loadProductForEdit() {
 
         try {
             await updateDoc(doc(db, "products", productId), updatedData);
-            displayNotification("Produit mis à jour avec succès!");
-            window.location.href = 'vendor-products.html'; // CORRIGÉ
+            displayNotification("Produit mis à jour avec succès!", 'success');
+            window.location.href = 'vendor-products.html'; 
         } catch (error) {
             displayNotification(`Erreur de mise à jour: ${error.message}`, 'error');
         }

@@ -1228,4 +1228,25 @@ async function loadProductForEdit() {
     form.addEventListener('submit', newListener);
     form.__submitListener = newListener; // Stocker pour le retirer plus tard si nécessaire
 }
+// Vérifie si l'utilisateur connecté est admin
+async function isAdmin(userEmail) {
+  try {
+    const response = await fetch('/config/admins.json');
+    const data = await response.json();
+    return data.admins.includes(userEmail);
+  } catch (e) {
+    console.error('Erreur admin:', e);
+    return false;
+  }
+}
 
+// Exemple d'utilisation :
+const userEmail = "jeoahs1@gmail.com"; // ton email
+isAdmin(userEmail).then(admin => {
+  if (admin) {
+    console.log("Bienvenue, admin !");
+    document.body.classList.add('is-admin');
+  } else {
+    console.log("Utilisateur normal");
+  }
+});

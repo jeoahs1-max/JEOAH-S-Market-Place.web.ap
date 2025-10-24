@@ -1,5 +1,68 @@
+// --- MODULES FIREBASE (Version 11.6.1 OBLIGATOIRE pour la compatibilité CDN) ---
+import { initializeApp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+// --- CONFIGURATION ET INITIALISATION FIREBASE (MANDATORY) ---
+// Récupération des variables globales de l'environnement Canvas
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+let app, db, auth;
+
+if (firebaseConfig) {
+    setLogLevel('Debug');
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    
+    // Tentative de connexion (Authentification)
+    if (initialAuthToken) {
+        signInWithCustomToken(auth, initialAuthToken)
+            .then(() => console.log("Connexion Firebase réussie avec le token personnalisé."))
+            .catch(error => {
+                console.error("Erreur de connexion avec le token personnalisé :", error);
+                // Fallback en connexion anonyme si le token échoue
+                signInAnonymously(auth).then(() => console.log("Connexion Firebase anonyme réussie après échec token.")).catch(e => console.error("Erreur de connexion anonyme:", e));
+            });
+    } else {
+        signInAnonymously(auth)
+            .then(() => console.log("Connexion Firebase anonyme réussie."))
+            .catch(error => console.error("Erreur de connexion anonyme :", error));
+    }
+} else {
+    console.error("Firebase n'a pas pu être initialisé : configuration manquante.");
+}
+
+// --- FONCTIONS UTILITAIRES (Implémentations de base pour la PoC) ---
+
+/** Affiche une notification (simulée via console et un élément DOM s'il existe) */
+function displayNotification(message, type = 'info') {
+    console.log(`[Notification ${type.toUpperCase()}]: ${message}`);
+    const notificationBox = document.getElementById('notificationBox');
+    if (notificationBox) {
+        // Crée une notification visible temporaire
+        const div = document.createElement('div');
+        div.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-xl text-white z-50 transition-opacity duration-300 ${type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-blue-600'}`;
+        div.textContent = message;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 4000);
+    }
+}
+
+/** Formate le prix en USD (locale FR pour les décimales) */
+function formatPrice(amount) {
+    if (typeof amount !== 'number' || isNaN(amount)) return 'N/A';
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(amount);
+}
+
+// --- VARIABLES GLOBALES DE L'APPLICATION ---
+let currentAffiliateId = null;
+let JEOAHS_FEE_RATE = 0.03; // 3% de frais de plateforme
+
 // =========================================================================
-// SECTION 1: Enregistrement et Rôles (register.html) - CORRIGÉE
+// SECTION 1: Enregistrement et Rôles (register.html)
 // =========================================================================
 
 const registrationForm = document.getElementById('registrationForm');
@@ -409,7 +472,8 @@ async function displayVendorProducts() {
         listContainer.querySelectorAll('.delete-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const productId = e.target.dataset.id;
-                if (confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
+                // Remplacer confirm() par une implémentation de modale personnalisée si possible
+                if (window.confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
                     deleteProduct(productId);
                 }
             });
@@ -495,8 +559,6 @@ if (linkGeneratorForm) {
 // =========================================================================
 // SECTION 7: Panier (cart.html)
 // =========================================================================
-
-let currentAffiliateId = null;
 
 // Fonction pour récupérer l'affiliate ID depuis l'URL (si présent)
 function getAffiliateIdFromURL() {
@@ -612,8 +674,6 @@ function removeFromCart(productId) {
     displayCartItems(); // Rafraîchir
 }
 
-const JEOAHS_FEE_RATE = 0.03; // 3%
-
 function updateSummary(subtotal) {
     const fees = subtotal * JEOAHS_FEE_RATE;
     const total = subtotal + fees;
@@ -727,20 +787,16 @@ async function displayVendorOrders() {
 
     try {
         const ordersRef = collection(db, "orders");
-        // Récupérer toutes les commandes qui contiennent au moins un produit du vendeur
-        const q = query(ordersRef, where("items", "array-contains-any", [{ vendorId: user.uid }]));
-        
-        // NOTE: Firestore ne supporte pas l'array-contains-any sur les sous-champs de cette façon.
-        // Pour une PoC, nous allons simplifier et récupérer toutes les commandes pour la démo.
-        // Dans une vraie app, on aurait une collection "vendor_orders" ou une Cloud Function.
+        // NOTE: La requête Firestore 'array-contains-any' sur des sous-champs est limitée.
+        // Pour cette PoC, on récupère toutes les commandes et on filtre dans le JS (moins efficace).
 
         let totalRevenue = 0;
         let pendingCount = 0;
         let completedCount = 0;
         
-        // Pour la PoC, nous allons simplement simuler la récupération et l'agrégation
         const allOrdersSnapshot = await getDocs(ordersRef); 
         ordersListContainer.innerHTML = '';
+        let foundOrders = false;
         
         allOrdersSnapshot.forEach(orderDoc => {
             const order = orderDoc.data();
@@ -753,6 +809,7 @@ async function displayVendorOrders() {
             const vendorItems = order.items.filter(item => item.vendorId === user.uid);
             
             if (vendorItems.length > 0) {
+                foundOrders = true;
                 vendorItems.forEach(item => {
                     vendorSale += item.price * item.quantity;
                     vendorCommission += (item.price * item.quantity) * (item.commissionRate / 100);
@@ -780,7 +837,7 @@ async function displayVendorOrders() {
             }
         });
 
-        if (ordersListContainer.innerHTML === '') {
+        if (!foundOrders) {
             ordersListContainer.innerHTML = '<p class="text-center py-10 text-gray-500">Aucune commande trouvée pour vos produits.</p>';
         }
 
@@ -1022,16 +1079,16 @@ onAuthStateChanged(auth, (user) => {
                 const userData = userDoc.data();
                 
                 // Rediriger vers la configuration si non configuré
-                if (!userData.isConfigured && window.location.pathname.indexOf('setup.html') === -1) {
+                if (!userData.isConfigured && 
+                    !window.location.pathname.includes('setup.html') &&
+                    !window.location.pathname.includes('social.html')) {
+                    
                     if (userData.role === 'vendeur') {
                         window.location.href = 'vendor-setup.html'; // CORRIGÉ
                     } else if (userData.role === 'affilié') {
                         window.location.href = 'affiliate-social.html'; // CORRIGÉ
-                    } else if (userData.role === 'acheteur') {
-                        // Acheteur va vers la vitrine ou la configuration sociale
-                        if (window.location.pathname.indexOf('acheteur-social-setup.html') === -1) {
-                             window.location.href = 'acheteur-social-setup.html';
-                        }
+                    } else { // Acheteur
+                        window.location.href = 'acheteur-social-setup.html';
                     }
                     return; // Ne pas afficher les liens si on redirige
                 }
@@ -1058,6 +1115,10 @@ onAuthStateChanged(auth, (user) => {
                 // Rôle non trouvé après connexion
                 window.location.href = 'vitrine.html';
             }
+        }).catch(error => {
+            console.error("Erreur de récupération du document utilisateur:", error);
+            // Fallback: Redirection vers l'accueil
+            window.location.href = 'vitrine.html';
         });
 
     } else {
@@ -1098,6 +1159,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (pathname.includes('vitrine.html')) {
         displayVitrineProducts();
     } else if (pathname.includes('product.html')) {
+        // Assurez-vous d'appeler getAffiliateIdFromURL() avant de charger les détails
+        getAffiliateIdFromURL(); 
         displayProductDetails();
     } else if (pathname.includes('panier.html')) {
         displayCartItems();
@@ -1119,6 +1182,12 @@ async function loadProductForEdit() {
         }
         
         const product = productDoc.data();
+        // S'assurer que le formulaire existe
+        if (!form.editProductId) {
+             console.error("Le formulaire de modification est mal structuré (manque editProductId).");
+             return;
+        }
+        
         form.editProductId.value = productId;
         form.editName.value = product.name;
         form.editPrice.value = product.price;
@@ -1129,7 +1198,14 @@ async function loadProductForEdit() {
         displayNotification(`Erreur de chargement des données: ${error.message}`, 'error');
     }
 
-    form.addEventListener('submit', async (e) => {
+    // Retirer l'écouteur du formulaire existant s'il y en a un pour éviter les doublons.
+    const existingListener = form.__submitListener;
+    if (existingListener) {
+        form.removeEventListener('submit', existingListener);
+    }
+    
+    // Créer un nouvel écouteur de soumission
+    const newListener = async (e) => {
         e.preventDefault();
         
         const updatedData = {
@@ -1147,5 +1223,9 @@ async function loadProductForEdit() {
         } catch (error) {
             displayNotification(`Erreur de mise à jour: ${error.message}`, 'error');
         }
-    });
+    };
+
+    form.addEventListener('submit', newListener);
+    form.__submitListener = newListener; // Stocker pour le retirer plus tard si nécessaire
 }
+

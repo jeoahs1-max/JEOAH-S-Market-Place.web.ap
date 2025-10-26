@@ -1,0 +1,192 @@
+<!-- 
+    affiliate_onboarding_step1.html - Onboarding Affilié, Étape 1 : Saisie des Plateformes
+    
+    Cette page permet à l'affilié d'enregistrer les plateformes de commerce électronique 
+    auxquelles il est affilié (ex: Amazon, eBay), afin de centraliser ses liens.
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affilié - Étape 1 : Plateformes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth, userId;
+        const maxLinks = 10;
+        const availablePlatforms = [
+            { name: "Amazon", icon: "fab fa-amazon", placeholder: "Votre ID de suivi Amazon (ex: tag-20)" },
+            { name: "eBay", icon: "fab fa-ebay", placeholder: "Lien de suivi ou ID d'affilié eBay" },
+            { name: "Walmart", icon: "fas fa-store", placeholder: "Lien de suivi Walmart" },
+            { name: "Temu", icon: "fas fa-shopping-bag", placeholder: "Lien ou ID d'affilié Temu" },
+            { name: "Shein", icon: "fas fa-tshirt", placeholder: "Lien d'affilié Shein" },
+            { name: "Autre Plateforme", icon: "fas fa-link", placeholder: "Nom de la plateforme et lien d'affilié" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            renderFormFields();
+        });
+
+        async function initFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                 // Pour les tests sans config Firebase, on affiche le contenu directement.
+                document.getElementById('loading-indicator').classList.add('hidden');
+                document.getElementById('onboarding-content').classList.remove('hidden');
+                return;
+            }
+            
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Erreur d'authentification:", error);
+            }
+
+            onAuthStateChanged(auth, (user) => {
+                if (!user) {
+                    window.location.href = 'auth.html';
+                    return;
+                }
+                userId = user.uid;
+                document.getElementById('loading-indicator').classList.add('hidden');
+                document.getElementById('onboarding-content').classList.remove('hidden');
+            });
+        }
+        
+        /**
+         * Affiche les champs du formulaire pour les liens d'affiliation.
+         */
+        function renderFormFields() {
+            const container = document.getElementById('links-container');
+            container.innerHTML = availablePlatforms.map((platform, index) => `
+                <div class="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div class="text-xl w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg text-blue-600">
+                        <i class="${platform.icon}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <label for="platform-${index}" class="block text-sm font-medium text-gray-700">${platform.name}</label>
+                        <input type="text" id="platform-${index}" data-name="${platform.name}" 
+                               placeholder="${platform.placeholder}"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * Gère la soumission du formulaire.
+         */
+        window.handleSubmit = async function(event) {
+            event.preventDefault();
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sauvegarde en cours...';
+
+            const linksData = {};
+            const inputs = document.querySelectorAll('#links-container input[type="text"]');
+            
+            inputs.forEach(input => {
+                if (input.value.trim() !== "") {
+                    linksData[input.dataset.name] = input.value.trim();
+                }
+            });
+
+            if (Object.keys(linksData).length === 0) {
+                 // Utiliser une modal ou une notification personnalisée au lieu de alert
+                alert("Veuillez saisir au moins un lien d'affiliation pour continuer.");
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Continuer (Étape 2/3)';
+                return;
+            }
+
+            console.log("Liens d'Affiliation Enregistrés:", linksData);
+
+            if (userId && db) {
+                try {
+                    const docRef = doc(db, `artifacts/${appId}/users/${userId}/affiliate_data/platforms`);
+                    await setDoc(docRef, linksData);
+                    // Succès - Passage à l'étape 2
+                    window.location.href = 'affiliate_onboarding_step2.html';
+                } catch (e) {
+                    console.error("Erreur d'enregistrement sur Firestore:", e);
+                    alert("Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.");
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'Continuer (Étape 2/3)';
+                }
+            } else {
+                 // Mode Débogage sans Firebase
+                await new Promise(r => setTimeout(r, 1000));
+                console.log("Mode Débogage: Redirection vers l'étape 2.");
+                window.location.href = 'affiliate_onboarding_step2.html';
+            }
+        }
+        
+    </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+    </style>
+</head>
+<body>
+
+    <!-- Indicateur de Chargement -->
+    <div id="loading-indicator" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+        <p class="ml-4 text-gray-600 text-lg">Chargement de votre session...</p>
+    </div>
+
+    <!-- Contenu de l'Onboarding -->
+    <div id="onboarding-content" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl bg-white p-8 rounded-3xl shadow-2xl">
+            
+            <header class="text-center mb-8">
+                <h1 class="text-3xl font-extrabold text-[#032C4F]">Devenez un Super Affilié !</h1>
+                <p class="text-gray-500 mt-2">Étape 1/3: Centralisez vos Plateformes d'Affiliation</p>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-4">
+                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: 33%"></div>
+                </div>
+            </header>
+
+            <form onsubmit="handleSubmit(event)" class="space-y-6">
+                <p class="text-gray-700 font-medium">
+                    Veuillez saisir votre identifiant (ID) ou lien d'affiliation pour les plateformes que vous utilisez. Cela permettra à Ney (notre IA) de trouver les prix et de générer automatiquement vos liens centralisés.
+                </p>
+
+                <!-- Champs des Liens d'Affiliation -->
+                <div id="links-container" class="space-y-4">
+                    <!-- Les champs sont insérés ici par JS (renderFormFields) -->
+                </div>
+                
+                <button type="submit" id="submit-button" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition duration-300 shadow-lg">
+                    Continuer (Étape 2/3)
+                </button>
+                
+                <p class="text-center text-sm text-gray-500 mt-4">
+                    <i class="fas fa-lock mr-1"></i> Vos informations sont sécurisées et utilisées uniquement pour générer vos liens.
+                </p>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
+

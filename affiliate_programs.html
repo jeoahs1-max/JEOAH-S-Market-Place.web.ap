@@ -1,0 +1,291 @@
+<!-- 
+    affiliate_programs.html - Gestion des identifiants et des tags de programmes affiliés.
+    
+    Permet à l'affilié d'enregistrer ses identifiants uniques pour chaque plateforme (Amazon, Temu, etc.).
+    Ces IDs sont essentiels pour le générateur NEY.
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Programmes Affiliés</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        setLogLevel('debug'); // Active les logs de débogage pour Firestore
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth, userId;
+        const affiliatePrograms = [
+            { id: 'amazon', name: 'Amazon Associates', placeholder: 'Ex: mon-tag-20', logo: 'fab fa-amazon' },
+            { id: 'temu', name: 'Temu Affiliate Program', placeholder: 'Ex: T35K89L', logo: 'fas fa-store' },
+            { id: 'ebay', name: 'eBay Partner Network', placeholder: 'Ex: R4T9E7B', logo: 'fab fa-ebay' },
+            { id: 'fnac', name: 'Fnac Partenaires', placeholder: 'Ex: fnac_id_456', logo: 'fas fa-book-open' },
+        ];
+        let userPrograms = {}; // { 'amazon': 'mon-tag-20', 'temu': 'T35K89L' }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            document.getElementById('programs-form').addEventListener('submit', handleProgramSubmission);
+        });
+
+        async function initFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase config missing. Running in simulation mode.");
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('programs-manager-container').classList.remove('hidden');
+                renderPrograms(userPrograms);
+                return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Erreur d'authentification:", error);
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('programs-manager-container').classList.remove('hidden');
+
+                if (user) {
+                    userId = user.uid;
+                    startProgramsListener();
+                } else {
+                    showCustomModal("Non Connecté", "Veuillez vous connecter pour gérer vos programmes.");
+                }
+            });
+        }
+        
+        /**
+         * Écoute les changements dans les tags de programmes affiliés de l'utilisateur.
+         */
+        function startProgramsListener() {
+            if (!userId) return;
+
+            // Stockage dans un document unique pour faciliter la récupération
+            const programsDocRef = doc(db, `artifacts/${appId}/users/${userId}/affiliate_data/programs`);
+            
+            onSnapshot(programsDocRef, (docSnap) => {
+                userPrograms = docSnap.exists() ? docSnap.data() : {};
+                renderPrograms(userPrograms);
+            }, (error) => {
+                console.error("Erreur onSnapshot programmes:", error);
+                renderPrograms({});
+            });
+        }
+
+        /**
+         * Gère la soumission du formulaire et sauvegarde dans Firestore.
+         */
+        async function handleProgramSubmission(event) {
+            event.preventDefault();
+            if (!userId || !db) {
+                showCustomModal("Erreur", "Connexion Firebase non établie.");
+                return;
+            }
+
+            const formData = new FormData(event.target);
+            const updatedPrograms = {};
+
+            // Collecter les données du formulaire, n'inclure que les champs remplis
+            affiliatePrograms.forEach(program => {
+                const value = formData.get(program.id)?.trim();
+                if (value) {
+                    updatedPrograms[program.id] = value;
+                } else {
+                    // Conserver les anciens ID s'ils ne sont pas modifiés ou supprimés intentionnellement
+                    if (userPrograms[program.id] && !value) {
+                         // Si l'utilisateur vide le champ, on supprime l'ID. Sinon, on ne fait rien.
+                    }
+                }
+            });
+            
+            // On ajoute les anciens programmes non soumis au formulaire
+            const finalPrograms = { ...userPrograms, ...updatedPrograms };
+            
+            // Nettoyage : supprimer les clés si le champ a été vidé par l'utilisateur
+            affiliatePrograms.forEach(program => {
+                if (!formData.get(program.id)?.trim()) {
+                    delete finalPrograms[program.id];
+                }
+            });
+
+            const programsDocRef = doc(db, `artifacts/${appId}/users/${userId}/affiliate_data/programs`);
+            
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = true;
+            submitButton.textContent = "Sauvegarde en cours...";
+
+            try {
+                await setDoc(programsDocRef, finalPrograms, { merge: true });
+                showCustomModal("Succès", "Vos identifiants de programmes affiliés ont été mis à jour.");
+            } catch (e) {
+                console.error("Erreur lors de la sauvegarde des programmes:", e);
+                showCustomModal("Erreur Firestore", "Impossible d'enregistrer les données. Vérifiez la console.");
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = "Sauvegarder les Modifications";
+            }
+        }
+        
+        /**
+         * Rend la liste des programmes dans l'interface utilisateur.
+         */
+        function renderPrograms(currentPrograms) {
+            const formContainer = document.getElementById('programs-form-container');
+            const statusContainer = document.getElementById('programs-status-container');
+            
+            let formHtml = '';
+            let statusHtml = '';
+
+            affiliatePrograms.forEach(program => {
+                const currentTag = currentPrograms[program.id] || '';
+                const isActive = !!currentTag;
+                
+                // Génération des champs de formulaire
+                formHtml += `
+                    <div>
+                        <label for="${program.id}-tag" class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                            <i class="${program.logo} text-xl mr-2 text-blue-600"></i> ${program.name} Tag/ID
+                        </label>
+                        <input type="text" id="${program.id}-tag" name="${program.id}" value="${currentTag}" 
+                               placeholder="${program.placeholder}" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    </div>
+                `;
+                
+                // Génération des cartes de statut
+                statusHtml += `
+                    <div class="bg-white p-5 rounded-xl shadow border-l-4 ${isActive ? 'border-green-500' : 'border-gray-300'}">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-lg font-bold text-gray-900 flex items-center">
+                                <i class="${program.logo} text-2xl mr-3 ${isActive ? 'text-green-600' : 'text-gray-400'}"></i>
+                                ${program.name}
+                            </h4>
+                            <span class="text-sm font-semibold py-1 px-3 rounded-full ${isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                ${isActive ? 'Connecté' : 'Inactif'}
+                            </span>
+                        </div>
+                        <p class="mt-3 text-sm text-gray-600 truncate">
+                            ID/Tag Enregistré: 
+                            <span class="${isActive ? 'font-mono text-gray-800' : 'italic text-gray-400'}">
+                                ${currentTag || 'Non défini'}
+                            </span>
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            ${isActive ? 'Le générateur NEY utilisera cet ID.' : 'Ajoutez votre ID pour activer ce réseau.'}
+                        </p>
+                    </div>
+                `;
+            });
+            
+            formContainer.innerHTML = formHtml;
+            statusContainer.innerHTML = statusHtml;
+        }
+
+        window.showCustomModal = function(title, message) {
+            const modalId = 'custom-alert-modal';
+            document.getElementById(modalId)?.remove();
+
+            const modalHtml = `
+                <div id="${modalId}" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[999]">
+                    <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4">
+                        <h3 class="text-xl font-bold ${title.includes('Erreur') ? 'text-red-600' : 'text-blue-600'} mb-4">${title}</h3>
+                        <p class="text-gray-700 mb-6">${message}</p>
+                        <button onclick="document.getElementById('${modalId}').remove()" 
+                                class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+    </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .manager-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay de Chargement -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+        <p class="ml-4 text-gray-600 text-lg">Chargement des programmes affiliés...</p>
+    </div>
+
+    <!-- Contenu du Gestionnaire de Programmes -->
+    <div id="programs-manager-container" class="hidden min-h-screen p-4 sm:p-8">
+        <div class="max-w-4xl mx-auto space-y-8">
+
+            <header class="text-center p-4 bg-white rounded-2xl shadow-lg">
+                <i class="fas fa-code-branch text-4xl text-blue-600 mb-3"></i>
+                <h1 class="text-3xl font-extrabold text-[#032C4F]">Mes Programmes Affiliés</h1>
+                <p class="text-gray-600 mt-1">Gérez vos identifiants pour les plateformes marchandes. Ceci est essentiel pour le fonctionnement multi-sites de NEY.</p>
+            </header>
+
+            <!-- Statut des Programmes -->
+            <section>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Statut de la Connexion</h2>
+                <div id="programs-status-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Cartes de statut rendues par JS -->
+                </div>
+            </section>
+
+            <!-- Formulaire d'Enregistrement/Modification des Tags -->
+            <section class="manager-card">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Mettre à Jour mes Identifiants</h2>
+                
+                <form id="programs-form" class="space-y-6">
+                    <div id="programs-form-container" class="space-y-4">
+                        <!-- Champs de formulaire (Amazon, Temu, etc.) rendus par JS -->
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" id="submit-button" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
+                            Sauvegarder les Modifications
+                        </button>
+                    </div>
+                </form>
+            </section>
+            
+            <div class="text-center pt-4">
+                <a href="affiliate_dashboard.html" class="text-sm text-gray-500 hover:text-gray-700 font-medium transition">
+                    <i class="fas fa-arrow-left mr-1"></i> Retour au Tableau de Bord
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
+

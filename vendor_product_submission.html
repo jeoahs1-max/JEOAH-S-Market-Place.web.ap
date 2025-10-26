@@ -1,0 +1,364 @@
+<!-- 
+    vendor_product_submission.html - Portail de gestion des produits pour le vendeur.
+    
+    Permet au vendeur d'ajouter un nouveau produit ou de modifier un produit existant.
+    Utilise Firestore pour stocker les produits du vendeur.
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gérer les Produits</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, onSnapshot, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        setLogLevel('debug'); // Active les logs de débogage pour Firestore
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth, userId;
+        let products = [];
+        let editingProductId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            document.getElementById('product-form').addEventListener('submit', handleProductSubmission);
+        });
+
+        async function initFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase config missing. Running in simulation mode.");
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('product-manager-container').classList.remove('hidden');
+                return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Erreur d'authentification:", error);
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('product-manager-container').classList.remove('hidden');
+
+                if (user) {
+                    userId = user.uid;
+                    startProductListener();
+                } else {
+                    showCustomModal("Non Connecté", "Veuillez vous connecter pour gérer vos produits.");
+                }
+            });
+        }
+        
+        /**
+         * Écoute les changements dans la collection de produits du vendeur.
+         */
+        function startProductListener() {
+            if (!userId) return;
+
+            const productsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/products`);
+            
+            onSnapshot(productsCollectionRef, (snapshot) => {
+                products = [];
+                snapshot.forEach(doc => {
+                    products.push({ id: doc.id, ...doc.data() });
+                });
+                renderProductList();
+            }, (error) => {
+                console.error("Erreur onSnapshot produits:", error);
+            });
+        }
+
+        /**
+         * Gère la soumission du formulaire (Ajout ou Modification).
+         */
+        async function handleProductSubmission(event) {
+            event.preventDefault();
+            if (!userId || !db) {
+                showCustomModal("Erreur", "Connexion Firebase non établie.");
+                return;
+            }
+
+            const name = document.getElementById('product-name').value;
+            const description = document.getElementById('product-description').value;
+            const price = parseFloat(document.getElementById('product-price').value);
+            const stock = parseInt(document.getElementById('product-stock').value);
+            const imageUrl = document.getElementById('product-image-url').value || `https://placehold.co/300x200/5B21B6/ffffff?text=${encodeURIComponent(name.slice(0, 10))}`;
+
+            if (!name || isNaN(price) || isNaN(stock) || price <= 0 || stock < 0) {
+                showCustomModal("Erreur de validation", "Veuillez remplir tous les champs obligatoires avec des valeurs valides.");
+                return;
+            }
+
+            const productData = {
+                name,
+                description,
+                price,
+                stock,
+                imageUrl,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                vendorId: userId 
+            };
+            
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = true;
+            submitButton.textContent = editingProductId ? "Modification en cours..." : "Ajout en cours...";
+
+            try {
+                if (editingProductId) {
+                    // Logique de modification
+                    const productDocRef = doc(db, `artifacts/${appId}/users/${userId}/products`, editingProductId);
+                    await updateDoc(productDocRef, productData);
+                    showCustomModal("Succès", `Le produit "${name}" a été mis à jour avec succès.`);
+                } else {
+                    // Logique d'ajout
+                    const productsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/products`);
+                    await addDoc(productsCollectionRef, productData);
+                    showCustomModal("Succès", `Le nouveau produit "${name}" a été ajouté.`);
+                }
+                resetForm();
+
+            } catch (e) {
+                console.error("Erreur lors de l'enregistrement du produit:", e);
+                showCustomModal("Erreur Firestore", "Impossible d'enregistrer le produit. Vérifiez la console pour les détails.");
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = editingProductId ? "Modifier le Produit" : "Ajouter le Produit";
+            }
+        }
+        
+        /**
+         * Remplit le formulaire pour la modification.
+         */
+        window.editProduct = function(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            editingProductId = productId;
+            document.getElementById('form-title').textContent = 'Modifier un Produit';
+            document.getElementById('submit-button').textContent = 'Modifier le Produit';
+            document.getElementById('cancel-edit-button').classList.remove('hidden');
+
+            document.getElementById('product-name').value = product.name;
+            document.getElementById('product-description').value = product.description;
+            document.getElementById('product-price').value = product.price;
+            document.getElementById('product-stock').value = product.stock;
+            // Ne pas pré-remplir l'URL de l'image si c'est un placeholder
+            if (!product.imageUrl.includes('placehold.co')) {
+                document.getElementById('product-image-url').value = product.imageUrl;
+            }
+            
+            window.scrollTo(0, 0); // Remonter en haut du formulaire
+        }
+
+        /**
+         * Réinitialise le formulaire après une soumission ou une annulation.
+         */
+        window.resetForm = function() {
+            editingProductId = null;
+            document.getElementById('form-title').textContent = 'Ajouter un Nouveau Produit';
+            document.getElementById('submit-button').textContent = 'Ajouter le Produit';
+            document.getElementById('cancel-edit-button').classList.add('hidden');
+            document.getElementById('product-form').reset();
+        }
+
+        /**
+         * Rend la liste des produits dans l'interface utilisateur.
+         */
+        function renderProductList() {
+            const listContainer = document.getElementById('product-list-container');
+            if (products.length === 0) {
+                listContainer.innerHTML = '<div class="text-center py-10 text-gray-500 italic">Aucun produit trouvé. Commencez par ajouter un article !</div>';
+                return;
+            }
+
+            const html = products.map(p => `
+                <div class="bg-white p-4 rounded-xl shadow flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 border-l-4 ${p.stock <= 5 ? 'border-red-500' : 'border-green-500'}">
+                    <img src="${p.imageUrl}" 
+                         alt="Image de ${p.name}" 
+                         onerror="this.onerror=null;this.src='https://placehold.co/80x80/9CA3AF/ffffff?text=Image';" 
+                         class="w-20 h-20 object-cover rounded-lg flex-shrink-0">
+                    
+                    <div class="flex-grow">
+                        <h4 class="text-lg font-bold text-gray-900">${p.name}</h4>
+                        <p class="text-sm text-gray-600 truncate">${p.description.substring(0, 50)}...</p>
+                    </div>
+
+                    <div class="text-right flex-shrink-0 space-y-1">
+                        <p class="text-xl font-extrabold text-blue-600">${formatCurrency(p.price)}</p>
+                        <p class="text-sm ${p.stock <= 5 ? 'text-red-500 font-semibold' : 'text-gray-600'}">Stock: ${p.stock}</p>
+                    </div>
+
+                    <div class="flex flex-col space-y-2 flex-shrink-0 w-full sm:w-auto">
+                        <button onclick="editProduct('${p.id}')" class="py-1 px-3 bg-yellow-500 text-white text-sm font-semibold rounded-lg hover:bg-yellow-600 transition">
+                            <i class="fas fa-edit mr-1"></i> Modifier
+                        </button>
+                        <!-- La suppression est complexe, on la laisse en simulation pour l'instant -->
+                        <button onclick="showCustomModal('Action indisponible', 'La suppression est une fonctionnalité avancée non encore implémentée.')" class="py-1 px-3 bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-300 transition">
+                            <i class="fas fa-trash mr-1"></i> Supprimer
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            listContainer.innerHTML = html;
+        }
+
+        // Fonction utilitaire de formatage et de modale
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
+        }
+
+        window.showCustomModal = function(title, message) {
+            const modalId = 'custom-alert-modal';
+            document.getElementById(modalId)?.remove();
+
+            const modalHtml = `
+                <div id="${modalId}" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[999]">
+                    <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4">
+                        <h3 class="text-xl font-bold ${title.includes('Erreur') ? 'text-red-600' : 'text-blue-600'} mb-4">${title}</h3>
+                        <p class="text-gray-700 mb-6">${message}</p>
+                        <button onclick="document.getElementById('${modalId}').remove()" 
+                                class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+    </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .form-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"], input[type="number"], input[type="url"], textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 0.5rem;
+            transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus {
+            border-color: #3B82F6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay de Chargement -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+        <p class="ml-4 text-gray-600 text-lg">Préparation du Portail Marchand...</p>
+    </div>
+
+    <!-- Contenu du Gestionnaire de Produits -->
+    <div id="product-manager-container" class="hidden min-h-screen p-4 sm:p-8">
+        <div class="max-w-4xl mx-auto space-y-8">
+
+            <header class="text-center p-4 bg-white rounded-2xl shadow-lg">
+                <i class="fas fa-warehouse text-4xl text-blue-600 mb-3"></i>
+                <h1 class="text-3xl font-extrabold text-[#032C4F]">Gestion d'Inventaire</h1>
+                <p class="text-gray-600 mt-1">Créez et modifiez les produits visibles par les affiliés et les clients.</p>
+            </header>
+
+            <!-- Formulaire d'Ajout/Modification de Produit -->
+            <section class="form-card">
+                <h2 id="form-title" class="text-2xl font-bold text-gray-800 mb-6">Ajouter un Nouveau Produit</h2>
+                
+                <form id="product-form" class="space-y-4">
+                    <!-- Nom du Produit -->
+                    <div>
+                        <label for="product-name" class="block text-sm font-medium text-gray-700 mb-1">Nom du Produit (*)</label>
+                        <input type="text" id="product-name" placeholder="Ex: Chaussures de Course 'Flash'" required>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="product-description" class="block text-sm font-medium text-gray-700 mb-1">Description Détaillée (*)</label>
+                        <textarea id="product-description" rows="3" placeholder="Description complète et attractive pour les acheteurs." required></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Prix -->
+                        <div>
+                            <label for="product-price" class="block text-sm font-medium text-gray-700 mb-1">Prix (EUR) (*)</label>
+                            <input type="number" id="product-price" step="0.01" min="0.01" placeholder="99.99" required>
+                        </div>
+                        <!-- Stock -->
+                        <div>
+                            <label for="product-stock" class="block text-sm font-medium text-gray-700 mb-1">Quantité en Stock (*)</label>
+                            <input type="number" id="product-stock" min="0" placeholder="50" required>
+                        </div>
+                    </div>
+                    
+                    <!-- URL de l'Image (Simplification pour l'instant) -->
+                    <div>
+                        <label for="product-image-url" class="block text-sm font-medium text-gray-700 mb-1">URL de l'Image</label>
+                        <input type="url" id="product-image-url" placeholder="https://votre-site.com/images/produit.jpg">
+                        <p class="text-xs text-gray-500 mt-1">Utilisez une URL d'image publique (pas de téléversement direct dans cette version).</p>
+                    </div>
+
+                    <div class="flex space-x-3 pt-4">
+                        <button type="submit" id="submit-button" class="flex-grow py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
+                            Ajouter le Produit
+                        </button>
+                        <button type="button" id="cancel-edit-button" onclick="resetForm()" class="hidden py-3 px-6 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition">
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Liste des Produits Existants -->
+            <section class="mt-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-list-ul mr-2"></i> Liste de mes Produits (<span id="product-count">0</span>)
+                </h2>
+                <div id="product-list-container" class="space-y-4">
+                    <!-- Les cartes de produits seront rendues ici par JavaScript -->
+                    <div class="text-center py-10 text-gray-500 italic">Chargement des produits...</div>
+                </div>
+            </section>
+            
+            <div class="text-center pt-4">
+                <a href="vendor_dashboard.html" class="text-sm text-gray-500 hover:text-gray-700 font-medium transition">
+                    <i class="fas fa-arrow-left mr-1"></i> Retour au Tableau de Bord
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
+

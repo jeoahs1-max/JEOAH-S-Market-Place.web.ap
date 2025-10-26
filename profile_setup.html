@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration du Profil - JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMDJzLQQx0Z/z+Ww7P+h2D/nQy0A3X1oD0NfS/A5C4P1K0Z1QvK3K/2Q2R2Z2Q2R2Z2Q2R2Z2Q2R2Z2Q2R2Z2Q2R2Z2Q2R2Z2Q2R2Z2Q2R2Z2Q2R2Z2Q2R2Z2Q2R2Z2Q2R2Z2Q2R2Z2Q2Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; }
+        .card { background-color: white; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .btn-primary { background-color: #4f46e5; transition: background-color 0.3s; }
+        .btn-primary:hover { background-color: #4338ca; }
+        input:focus { border-color: #4f46e5; box-shadow: 0 0 0 1px #4f46e5; outline: none; }
+        .loader { border-top-color: #fff; border-right-color: transparent; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="card w-full max-w-2xl p-6 sm:p-10">
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-2 text-center">Finaliser votre Profil JEOAH'S</h1>
+            <p class="text-md text-gray-500 mb-8 text-center">C'est la dernière étape ! Ajoutez vos liens de profils sociaux pour augmenter votre crédibilité.</p>
+
+            <div id="auth-status" class="text-sm text-center text-red-500 mb-6 hidden">Erreur d'initialisation Firebase.</div>
+            
+            <form id="profile-setup-form" class="space-y-6">
+
+                <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Votre Rôle & Infos</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-4 p-3 bg-white rounded-lg border border-indigo-200">
+                            <i class="fas fa-user-tag text-indigo-500 text-xl w-6"></i>
+                            <div class="flex-1">
+                                <label class="block text-sm font-medium text-gray-500">Rôle Principal (Inscrit)</label>
+                                <p id="user-role" class="font-bold text-indigo-600">Chargement...</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="profile-bio" class="block text-sm font-medium text-gray-700">Petite Biographie (Optionnel)</label>
+                            <textarea id="profile-bio" rows="3" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Décrivez votre activité en quelques mots..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Vos Liens de Réseaux Sociaux <span class="text-sm text-gray-500">(Optionnel)</span></h2>
+                    
+                    <div id="social-links-container" class="space-y-4">
+                        </div>
+                </div>
+
+                <button type="submit" id="save-btn" class="w-full btn-primary text-white font-semibold py-3 rounded-lg shadow-md flex items-center justify-center">
+                    <span id="save-btn-text">Sauvegarder et Continuer</span>
+                    <div id="save-btn-loader" class="loader h-5 w-5 border-2 rounded-full hidden ml-2"></div>
+                </button>
+            </form>
+            
+            <p id="message" class="hidden mt-6 p-3 rounded-lg text-sm font-medium text-center"></p>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Variables Globales Mandatoires ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        let firebaseConfig = {};
+        try {
+            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        } catch (e) {
+            console.error("Impossible de parser __firebase_config.");
+        }
+        
+        let db, auth;
+
+        // Définition des réseaux sociaux avec leur icône et couleur (incluant tous les réseaux demandés)
+        const socialNetworks = [
+            { id: "tiktok", name: "TikTok", icon: "fa-brands fa-tiktok", color: "#000000", placeholder: "Lien de votre profil TikTok" },
+            { id: "reddit", name: "Reddit", icon: "fa-brands fa-reddit", color: "#FF4500", placeholder: "Lien de votre profil Reddit" },
+            { id: "telegram", name: "Telegram", icon: "fa-brands fa-telegram", color: "#2AABEE", placeholder: "Lien de votre profil Telegram" },
+            { id: "twitch", name: "Twitch", icon: "fa-brands fa-twitch", color: "#9146FF", placeholder: "Lien de votre profil Twitch" },
+            { id: "quora", name: "Quora", icon: "fa-brands fa-quora", color: "#B92B27", placeholder: "Lien de votre profil Quora" },
+            { id: "wechat", name: "WeChat", icon: "fa-brands fa-weixin", color: "#07af1d", placeholder: "Lien de votre profil WeChat" },
+            { id: "linkedin", name: "LinkedIn", icon: "fa-brands fa-linkedin", color: "#0A66C2", placeholder: "Lien de votre profil LinkedIn" },
+            { id: "facebook", name: "Facebook", icon: "fa-brands fa-facebook", color: "#1877F2", placeholder: "Lien de votre profil Facebook" },
+            { id: "instagram", name: "instagram", icon: "fa-brands fa-instagram", color: "#E4405F", placeholder: "Lien de votre profil Instagram" },
+        ];
+
+        // --- Fonctions d'Interface ---
+        
+        function displayMessage(text, type = 'success') {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            if (type === 'success') {
+                messageEl.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                messageEl.classList.add('bg-red-100', 'text-red-700');
+            }
+        }
+
+        function toggleLoading(isLoading) {
+            const btn = document.getElementById('save-btn');
+            const btnText = document.getElementById('save-btn-text');
+            const btnLoader = document.getElementById('save-btn-loader');
+            const defaultText = "Sauvegarder et Continuer";
+
+            if (isLoading) {
+                btnText.classList.add('hidden');
+                btnLoader.classList.remove('hidden');
+                btn.disabled = true;
+            } else {
+                btnText.textContent = defaultText;
+                btnText.classList.remove('hidden');
+                btnLoader.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+
+        // --- Fonctions d'Initialisation ---
+
+        function initSocialLinks() {
+            const container = document.getElementById('social-links-container');
+            container.innerHTML = ''; // Nettoyer l'ancien contenu
+
+            socialNetworks.forEach(network => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center space-x-3';
+                div.innerHTML = `
+                    <i class="${network.icon} text-2xl w-6 text-center" style="color: ${network.color};" aria-label="${network.name}"></i>
+                    <input 
+                        type="url" 
+                        id="link-${network.id}" 
+                        name="link-${network.id}" 
+                        class="flex-1 p-3 border border-gray-300 rounded-lg text-sm" 
+                        placeholder="${network.placeholder}"
+                    >
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function initFirebase() {
+            if (!firebaseConfig.apiKey) {
+                document.getElementById('auth-status').textContent = "Erreur critique: La clé API Firebase est manquante. L'enregistrement des données ne fonctionnera pas.";
+                document.getElementById('auth-status').classList.remove('hidden', 'text-red-500');
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        await loadUserData(user.uid);
+                    } else {
+                        // Si non connecté, rediriger vers la page d'inscription/connexion
+                        window.location.href = 'register.html';
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erreur d'initialisation Firebase:", error);
+                document.getElementById('auth-status').textContent = `Erreur critique: ${error.message}.`;
+                document.getElementById('auth-status').classList.remove('hidden', 'text-red-500');
+            }
+        }
+
+        async function loadUserData(uid) {
+            const usersCol = `artifacts/${appId}/public/data/users`;
+            const userRef = doc(db, usersCol, uid);
+            
+            try {
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    
+                    // Afficher le rôle de l'utilisateur
+                    document.getElementById('user-role').textContent = data.role.toUpperCase() || 'Inconnu';
+                    
+                    // Remplir les champs existants
+                    document.getElementById('profile-bio').value = data.bio || '';
+                    
+                    // Remplir les liens sociaux
+                    socialNetworks.forEach(network => {
+                        const input = document.getElementById(`link-${network.id}`);
+                        if (input && data.socialLinks && data.socialLinks[network.id]) {
+                            input.value = data.socialLinks[network.id];
+                        }
+                    });
+
+                } else {
+                    displayMessage("Profil utilisateur non trouvé dans la base de données. Veuillez vous réinscrire.", 'error');
+                    auth.signOut();
+                }
+            } catch (error) {
+                console.error("Erreur de chargement des données:", error);
+                displayMessage("Erreur lors du chargement de votre profil.", 'error');
+            }
+        }
+        
+        // --- Logique de Sauvegarde ---
+
+        document.getElementById('profile-setup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            toggleLoading(true);
+
+            if (!auth || !auth.currentUser || !db) {
+                displayMessage("Le système n'est pas prêt. Veuillez rafraîchir la page.", 'error');
+                toggleLoading(false);
+                return;
+            }
+
+            const uid = auth.currentUser.uid;
+            const bio = document.getElementById('profile-bio').value.trim();
+            const socialLinks = {};
+
+            // Récupérer tous les liens sociaux
+            socialNetworks.forEach(network => {
+                const input = document.getElementById(`link-${network.id}`);
+                const value = input.value.trim();
+                if (value) {
+                    socialLinks[network.id] = value;
+                }
+            });
+
+            const usersCol = `artifacts/${appId}/public/data/users`;
+            const userRef = doc(db, usersCol, uid);
+
+            try {
+                // Sauvegarder les nouvelles données (bio et liens sociaux)
+                await setDoc(userRef, {
+                    bio: bio,
+                    socialLinks: socialLinks,
+                    isSetupComplete: true, // Marquer le setup comme terminé
+                    updatedAt: new Date().toISOString(),
+                }, { merge: true });
+
+                displayMessage("Profil sauvegardé avec succès ! Redirection vers le tableau de bord...", 'success');
+                
+                // Redirection
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error("Erreur de sauvegarde:", error);
+                displayMessage(`Échec de la sauvegarde: ${error.message}`, 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        });
+
+
+        // Lancer l'initialisation au chargement
+        window.onload = () => {
+            initSocialLinks();
+            initFirebase();
+        };
+    </script>
+</body>
+</html>

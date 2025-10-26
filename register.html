@@ -1,0 +1,422 @@
+<!-- 
+    register.html - Page d'Authentification Unifiée
+    MAJ : Ajout de l'icône "œil" pour la confirmation du mot de passe.
+--><!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription / Connexion - JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; }
+        .card { background-color: white; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .btn-primary { background-color: #4f46e5; transition: background-color 0.3s; }
+        .btn-primary:hover { background-color: #4338ca; }
+        .tab-active { border-color: #4f46e5; color: #4f46e5; font-weight: 600; }
+        .tab-inactive { border-color: transparent; color: #6b7280; }
+        .loader { border-top-color: #fff; border-right-color: transparent; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        input:focus, select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 1px #4f46e5;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="card w-full max-w-lg p-6 sm:p-10">
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">JEOAH'S - Accès</h1>
+            
+            <p id="auth-status" class="text-sm text-center text-gray-500 mb-6">Initialisation du système...</p>
+
+            <!-- Onglets de Navigation --><div class="flex border-b mb-6">
+                <button id="tab-register" data-tab="register" class="flex-1 py-3 text-center border-b-2 tab-active">Inscription</button>
+                <button id="tab-login" data-tab="login" class="flex-1 py-3 text-center border-b-2 tab-inactive">Connexion</button>
+            </div>
+
+            <div id="auth-ui" class="space-y-6">
+
+                <!-- 1. Formulaire d'INSCRIPTION --><form id="register-form" class="space-y-4">
+                    <div>
+                        <label for="register-name" class="block text-sm font-medium text-gray-700">Nom Complet *</label>
+                        <input type="text" id="register-name" required class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Votre nom et prénom">
+                    </div>
+                    <div>
+                        <label for="register-email" class="block text-sm font-medium text-gray-700">Email *</label>
+                        <input type="email" id="register-email" required class="w-full p-3 border border-gray-300 rounded-lg" placeholder="exemple@domaine.com">
+                    </div>
+                    <div class="relative">
+                        <label for="register-password" class="block text-sm font-medium text-gray-700">Mot de passe * (min. 6 caractères)</label>
+                        <input type="password" id="register-password" required minlength="6" class="w-full p-3 border border-gray-300 rounded-lg pr-10" placeholder="Mot de passe sécurisé">
+                        <button type="button" class="absolute inset-y-0 right-0 top-6 pt-1 flex items-center pr-3" data-toggle="register-password">
+                             <!-- Icône d'œil lucide eye --><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <label for="register-confirm-password" class="block text-sm font-medium text-gray-700">Confirmer Mot de passe *</label>
+                        <input type="password" id="register-confirm-password" required minlength="6" class="w-full p-3 border border-gray-300 rounded-lg pr-10" placeholder="Confirmer le mot de passe">
+                        <button type="button" class="absolute inset-y-0 right-0 top-6 pt-1 flex items-center pr-3" data-toggle="register-confirm-password">
+                             <!-- Icône d'œil lucide eye --><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        </button>
+                    </div>
+                    <div>
+                        <label for="register-role" class="block text-sm font-medium text-gray-700">Mon rôle principal *</label>
+                        <select id="register-role" required class="w-full p-3 border border-gray-300 rounded-lg">
+                            <option value="acheteur">Acheteur/Autre (Buyer)</option>
+                            <option value="vendeur">Vendeur (Seller)</option>
+                            <option value="affilie">Affilié (Affiliate)</option>
+                            <option value="admin">Administrateur (Admin)</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="register-btn" class="w-full btn-primary text-white font-semibold py-3 rounded-lg shadow-md flex items-center justify-center">
+                        <span id="register-btn-text">Créer un Compte</span>
+                        <div id="register-btn-loader" class="loader h-5 w-5 border-2 rounded-full hidden ml-2"></div>
+                    </button>
+                </form>
+
+                <!-- 2. Formulaire de CONNEXION --><form id="login-form" class="space-y-4 hidden">
+                    <div>
+                        <label for="login-email" class="block text-sm font-medium text-gray-700">Email *</label>
+                        <input type="email" id="login-email" required class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Votre email">
+                    </div>
+                    <div class="relative">
+                        <label for="login-password" class="block text-sm font-medium text-gray-700">Mot de passe *</label>
+                        <input type="password" id="login-password" required class="w-full p-3 border border-gray-300 rounded-lg pr-10" placeholder="Votre mot de passe">
+                        <button type="button" class="absolute inset-y-0 right-0 top-6 pt-1 flex items-center pr-3" data-toggle="login-password">
+                             <!-- Icône d'œil lucide eye --><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        </button>
+                    </div>
+                    <button type="submit" id="login-btn" class="w-full btn-primary text-white font-semibold py-3 rounded-lg shadow-md flex items-center justify-center">
+                        <span id="login-btn-text">Se Connecter</span>
+                        <div id="login-btn-loader" class="loader h-5 w-5 border-2 rounded-full hidden ml-2"></div>
+                    </button>
+                </form>
+                
+                <!-- Section Après Succès --><div id="success-area" class="hidden text-center p-6 bg-green-50 border border-green-200 rounded-lg space-y-4">
+                    <h3 class="text-xl font-bold text-green-700">Authentification Réussie!</h3>
+                    <p id="success-message" class="text-gray-600"></p>
+                    <a href="dashboard.html" class="w-full inline-block btn-primary text-white font-semibold py-3 rounded-lg shadow-md mt-4">
+                        Continuer vers le Tableau de Bord
+                    </a>
+                </div>
+
+            </div>
+            
+            <p id="message" class="hidden mt-6 p-3 rounded-lg text-sm font-medium text-center"></p>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            getDoc, 
+            setLogLevel 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Variables Globales Mandatoires ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        let firebaseConfig = {};
+        try {
+            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        } catch (e) {
+            console.error("Impossible de parser __firebase_config.");
+        }
+
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth;
+
+        setLogLevel('debug'); 
+
+        // --- Fonctions d'Interface ---
+        
+        function showTab(tab) {
+            const registerForm = document.getElementById('register-form');
+            const loginForm = document.getElementById('login-form');
+            const tabRegister = document.getElementById('tab-register');
+            const tabLogin = document.getElementById('tab-login');
+            
+            document.getElementById('success-area').classList.add('hidden');
+            document.getElementById('message').classList.add('hidden');
+
+            if (tab === 'register') {
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                tabRegister.classList.add('tab-active');
+                tabRegister.classList.remove('tab-inactive');
+                tabLogin.classList.remove('tab-active');
+                tabLogin.classList.add('tab-inactive');
+            } else {
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                tabRegister.classList.remove('tab-active');
+                tabRegister.classList.add('tab-inactive');
+                tabLogin.classList.add('tab-active');
+                tabLogin.classList.remove('tab-inactive');
+            }
+        };
+
+        document.getElementById('tab-register').addEventListener('click', () => showTab('register'));
+        document.getElementById('tab-login').addEventListener('click', () => showTab('login'));
+        
+        function displayMessage(text, type = 'success') {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            if (type === 'success') {
+                messageEl.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                messageEl.classList.add('bg-red-100', 'text-red-700');
+            }
+        }
+
+        function toggleLoading(btnId, isLoading, defaultText) {
+            const btn = document.getElementById(btnId);
+            const btnText = btn.querySelector('span');
+            const btnLoader = btn.querySelector('.loader');
+
+            if (isLoading) {
+                btnText.classList.add('hidden');
+                btnLoader.classList.remove('hidden');
+                btn.disabled = true;
+            } else {
+                btnText.textContent = defaultText;
+                btnText.classList.remove('hidden');
+                btnLoader.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+
+        function showSuccess(message, uid) {
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('message').classList.add('hidden');
+            
+            document.getElementById('success-message').textContent = `${message} (UID: ${uid.substring(0, 8)}...)`;
+            document.getElementById('success-area').classList.remove('hidden');
+        }
+        
+        document.querySelectorAll('[data-toggle]').forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.getAttribute('data-toggle');
+                const input = document.getElementById(targetId);
+                const icon = button.querySelector('svg');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.94 17.94A10.07 10.07 0 0112 20c-4.477 0-8.268-2.943-9.542-7A10.07 10.07 0 0110.06 6.06M21 12c-1.274 4.057-5.065 7-9.542 7-1.458 0-2.859-.344-4.103-.984M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12L3 12m18 0l-.542 0M2 2l20 20"></path>`;
+                } else {
+                    input.type = 'password';
+                    icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>`;
+                }
+            });
+        });
+
+        // --- Initialisation Firebase ---
+
+        async function initFirebase() {
+            try {
+                if (!firebaseConfig.apiKey) {
+                    throw new Error("La clé API Firebase est manquante ou la configuration est invalide. Veuillez vous assurer que le service est correctement configuré.");
+                }
+
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                const handleAuth = async () => {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken).catch(e => {
+                            console.warn("Jeton initial non valide, connexion anonyme...");
+                            return signInAnonymously(auth);
+                        });
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+
+                await handleAuth();
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user && !user.isAnonymous) {
+                         document.getElementById('auth-status').textContent = `Session trouvée pour ${user.email}. Vérification du rôle...`;
+                         await checkUserRegistration(user.uid, user.email);
+                    } else if (user && user.isAnonymous) {
+                         document.getElementById('auth-status').textContent = "Connecté anonymement. Veuillez vous inscrire ou vous connecter.";
+                    } else {
+                         document.getElementById('auth-status').textContent = "Non authentifié. Veuillez vous inscrire ou vous connecter.";
+                    }
+                    if (document.getElementById('success-area').classList.contains('hidden')) {
+                        showTab('register'); 
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erreur d'initialisation Firebase:", error);
+                displayMessage(`Erreur critique: ${error.message}. L'application ne peut pas fonctionner.`, 'error');
+            }
+        }
+        
+        // --- Logique d'Inscription/Connexion ---
+
+        async function checkUserRegistration(uid, email) {
+            const usersCol = `artifacts/${appId}/public/data/users`;
+            const userRef = doc(db, usersCol, uid);
+            try {
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    showSuccess(`Connecté en tant que ${data.role.toUpperCase()} (${email}). Redirection...`, uid);
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (error) {
+                console.error("Erreur de vérification d'inscription:", error);
+                displayMessage("Erreur lors de la vérification de l'utilisateur.", 'error');
+                return false;
+            }
+        }
+
+        async function saveUserData(uid, name, email, role) {
+             const usersCol = `artifacts/${appId}/public/data/users`;
+             const userRef = doc(db, usersCol, uid);
+
+             let finalRole = role;
+             if (email.toLowerCase().includes('ney') && finalRole !== 'admin') {
+                 console.warn("Rôle forcé à 'admin' car l'e-mail contient 'ney'.");
+                 finalRole = 'admin';
+             }
+
+             await setDoc(userRef, {
+                 name: name,
+                 email: email,
+                 role: finalRole,
+                 isSetupComplete: false, 
+                 createdAt: new Date().toISOString(),
+             }, { merge: true });
+             return finalRole;
+        }
+
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            toggleLoading('register-btn', true, 'Créer un Compte');
+
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const role = document.getElementById('register-role').value;
+            
+            if (password !== confirmPassword) {
+                displayMessage("Les mots de passe ne correspondent pas.", 'error');
+                toggleLoading('register-btn', false, 'Créer un Compte');
+                return;
+            }
+
+            try {
+                if (!auth) {
+                    displayMessage("Erreur: Le système d'authentification n'est pas initialisé (Clé API manquante?).", 'error');
+                    toggleLoading('register-btn', false, 'Créer un Compte');
+                    return;
+                }
+
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                const finalRole = await saveUserData(user.uid, name, email, role);
+
+                displayMessage(`Compte créé avec succès. Bienvenue ${name}!`, 'success');
+                showSuccess(`Inscription réussie en tant que ${finalRole.toUpperCase()}. Redirection...`, user.uid);
+
+                setTimeout(() => {
+                    window.location.href = 'profile_setup.html'; 
+                }, 1500);
+                
+            } catch (error) {
+                console.error("Erreur d'inscription:", error);
+                let errorMessage = "Échec de l'inscription.";
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = "Cet email est déjà utilisé. Veuillez vous connecter.";
+                    showTab('login');
+                } else if (error.code === 'auth/weak-password') {
+                     errorMessage = "Mot de passe faible. Veuillez utiliser au moins 6 caractères.";
+                } else if (error.code === 'auth/invalid-api-key') {
+                     errorMessage = "Erreur de configuration Firebase: Clé API invalide ou manquante.";
+                } else {
+                    errorMessage = `Erreur: ${error.message}`;
+                }
+                displayMessage(errorMessage, 'error');
+            } finally {
+                toggleLoading('register-btn', false, 'Créer un Compte');
+            }
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            toggleLoading('login-btn', true, 'Se Connecter');
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            try {
+                if (!auth) {
+                    displayMessage("Erreur: Le système d'authentification n'est pas initialisé (Clé API manquante?).", 'error');
+                    toggleLoading('login-btn', false, 'Se Connecter');
+                    return;
+                }
+
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                const isRegistered = await checkUserRegistration(user.uid, user.email);
+                
+                if (isRegistered) {
+                    showSuccess(`Connexion réussie. Redirection...`, user.uid); 
+                } else {
+                    displayMessage(`Connexion réussie, mais profil incomplet. Veuillez vous inscrire ou re-vérifier.`, 'error');
+                    await auth.signOut();
+                    showTab('register');
+                }
+                
+            } catch (error) {
+                console.error("Erreur de connexion:", error);
+                let errorMessage = "Échec de la connexion.";
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                     errorMessage = "Email ou mot de passe incorrect.";
+                } else if (error.code === 'auth/invalid-api-key') {
+                     errorMessage = "Erreur de configuration Firebase: Clé API invalide ou manquante.";
+                } else {
+                    errorMessage = `Erreur: ${error.message}`;
+                }
+                displayMessage(errorMessage, 'error');
+            } finally {
+                toggleLoading('login-btn', false, 'Se Connecter');
+            }
+        });
+
+        initFirebase();
+    </script>
+</body>
+</html>
+

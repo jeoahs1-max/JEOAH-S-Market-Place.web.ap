@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord Admin - JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; }
+        .card { transition: all 0.3s ease; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .tab-active { border-color: #3056D3; color: #3056D3; font-weight: 600; }
+        .loader { border-top-color: #3056D3; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
+        @-webkit-keyframe spinner { 0% { -webkit-transform: rotate(0deg); } 100% { -webkit-transform: rotate(360deg); } }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
+    </div>
+    <div id="app-container" class="min-h-screen p-4 sm:p-8">
+        <!-- En-tête -->
+        <header class="mb-8 border-b pb-4">
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+                <i class="fas fa-tachometer-alt text-4xl text-blue-600 mr-3"></i>
+                Tableau de Bord Admin/Affilié JEOAH'S
+            </h1>
+            <p id="user-info" class="text-sm text-gray-500 mt-1">
+                Authentification en cours...
+            </p>
+        </header>
+
+        <!-- Navigation par Onglets -->
+        <nav class="flex space-x-4 border-b mb-6">
+            <button onclick="showTab('dashboard')" class="tab-button tab-active py-2 px-4 border-b-2 border-transparent hover:border-blue-500 text-gray-600" data-tab="dashboard">
+                <i class="fas fa-home mr-1"></i> Aperçu
+            </button>
+            <button onclick="showTab('users')" class="tab-button py-2 px-4 border-b-2 border-transparent hover:border-blue-500 text-gray-600" data-tab="users">
+                <i class="fas fa-users mr-1"></i> Utilisateurs
+            </button>
+            <button onclick="showTab('withdrawals')" class="tab-button py-2 px-4 border-b-2 border-transparent hover:border-blue-500 text-gray-600" data-tab="withdrawals">
+                <i class="fas fa-wallet mr-1"></i> Retraits
+            </button>
+            <button onclick="showTab('reports')" class="tab-button py-2 px-4 border-b-2 border-transparent hover:border-blue-500 text-gray-600" data-tab="reports">
+                <i class="fas fa-chart-line mr-1"></i> Rapports
+            </button>
+            <button onclick="showTab('products')" class="tab-button py-2 px-4 border-b-2 border-transparent hover:border-blue-500 text-gray-600" data-tab="products">
+                <i class="fas fa-link mr-1"></i> Import Affilié
+            </button>
+        </nav>
+
+        <!-- Contenu des Onglets -->
+        <div id="tab-content">
+            <!-- 1. Aperçu (Dashboard) -->
+            <div id="dashboard" class="tab-pane">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Statistiques Clés</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="card bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
+                        <p class="text-sm font-medium text-gray-500">Ventes Totales (Aujourd'hui)</p>
+                        <p id="stat-sales" class="text-3xl font-bold text-gray-900 mt-1">$0.00</p>
+                    </div>
+                    <div class="card bg-white p-6 rounded-xl shadow-lg border-l-4 border-green-500">
+                        <p class="text-sm font-medium text-gray-500">Nouvelles Inscriptions (Aujourd'hui)</p>
+                        <p id="stat-new-users" class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                    </div>
+                    <div class="card bg-white p-6 rounded-xl shadow-lg border-l-4 border-yellow-500">
+                        <p class="text-sm font-medium text-gray-500">Retraits en Attente</p>
+                        <p id="stat-pending-withdrawals" class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                    </div>
+                    <div class="card bg-white p-6 rounded-xl shadow-lg border-l-4 border-red-500">
+                        <p class="text-sm font-medium text-gray-500">Vendeurs Suspendus</p>
+                        <p id="stat-suspended" class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Gestion des Utilisateurs -->
+            <div id="users" class="tab-pane hidden">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Gestion des Vendeurs & Affiliés</h2>
+                <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID / Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
+                            <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Chargement des utilisateurs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. Gestion des Retraits -->
+            <div id="withdrawals" class="tab-pane hidden">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Retraits en Attente d'Approbation</h2>
+                <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Retrait</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Demandé le</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawals-table-body" class="bg-white divide-y divide-gray-200">
+                            <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Aucun retrait en attente.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. Rapports -->
+            <div id="reports" class="tab-pane hidden">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Rapports Quotidiens</h2>
+                <div class="flex justify-end mb-4">
+                    <button id="send-report-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200">
+                        <i class="fas fa-envelope mr-2"></i> Envoyer le Dernier Rapport
+                    </button>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ventes Totales (USD)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commissions (USD)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nouveaux Users</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
+                            <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Chargement des rapports...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. Import Produit Affilié -->
+            <div id="products" class="tab-pane hidden">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Importation de Produit par Lien Affilié</h2>
+                <div class="bg-white p-6 rounded-xl shadow-lg max-w-lg">
+                    <p class="text-gray-600 mb-4">Collez un lien produit d'un réseau affilié pour créer automatiquement une fiche produit dans JEOAH'S.</p>
+                    <input type="url" id="affiliate-link-input" placeholder="Ex: https://amazon.com/produit-affilie" class="w-full border-gray-300 rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500 mb-4">
+                    <button id="import-product-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-cloud-download-alt mr-2"></i> Importer le Produit
+                    </button>
+                    <p id="import-message" class="mt-4 text-sm"></p>
+                </div>
+                <div id="imported-products-list" class="mt-8">
+                    <h3 class="text-xl font-semibold mb-3">Vos Derniers Imports</h3>
+                    <!-- La liste des produits importés s'affichera ici -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour Confirmation/Message -->
+    <div id="action-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-gray-800">Confirmation</h3>
+            <p id="modal-message" class="text-gray-600 mb-6">Êtes-vous sûr de vouloir effectuer cette action ?</p>
+            <div class="flex justify-end space-x-4">
+                <button id="modal-cancel-btn" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition duration-150">Annuler</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-150">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, orderBy, limit, serverTimestamp, runTransaction, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
+
+        // --- Variables Globales Mandatoires ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth, functionsInstance;
+        let userId = null;
+        let isAdmin = false;
+
+        // --- Initialisation Firebase et Authentification ---
+
+        async function initFirebase() {
+            try {
+                if (Object.keys(firebaseConfig).length === 0) {
+                    throw new Error("La configuration Firebase est manquante.");
+                }
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                functionsInstance = getFunctions(app);
+
+                // Authentification
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        checkUserRole(userId);
+                    } else {
+                        document.getElementById('user-info').textContent = "Non authentifié.";
+                        // Redirection vers page de login si nécessaire, ou affichage restreint.
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erreur d'initialisation Firebase:", error);
+                document.getElementById('user-info').textContent = "Erreur: Firebase non initialisé.";
+            }
+        }
+
+        // --- Gestion des Rôles et Lancement des Listeners ---
+
+        async function checkUserRole(uid) {
+            try {
+                const userRef = doc(db, `artifacts/${appId}/public/data/users`, uid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    const role = userSnap.data().role;
+                    document.getElementById('user-info').textContent = `Connecté: ${uid.substring(0, 8)}... | Rôle: ${role}`;
+                    
+                    if (role === 'admin' || role === 'affilie') {
+                        isAdmin = true;
+                        startDataListeners();
+                        // Si c'est un affilié ou un admin, on écoute aussi les produits pour l'onglet 'Import'
+                        setupProductListener(uid);
+                    } else {
+                        // Limiter l'accès aux autres rôles
+                        document.getElementById('app-container').innerHTML = `<div class="p-8 text-center text-red-500">Accès refusé. Vous devez être Admin ou Affilié.</div>`;
+                    }
+                } else {
+                    // Si l'utilisateur n'a pas de document 'users', on doit le créer
+                    // C'est un point critique, l'utilisateur doit avoir un rôle défini après inscription.
+                    console.warn("Document utilisateur non trouvé. Rôle inconnu.");
+                    document.getElementById('user-info').textContent = `Connecté: ${uid.substring(0, 8)}... | Rôle: Inconnu (Veuillez vous inscrire).`;
+                }
+            } catch (error) {
+                console.error("Erreur lors de la vérification du rôle:", error);
+            }
+        }
+
+        // --- Listeners Firestore pour le Tableau de Bord ---
+
+        function startDataListeners() {
+            // 1. Listeners pour l'onglet 'Utilisateurs'
+            const usersQuery = collection(db, `artifacts/${appId}/public/data/users`);
+            onSnapshot(usersQuery, (snapshot) => {
+                const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderUsers(users);
+                
+                // Mettre à jour la stat "Vendeurs Suspendus"
+                const suspendedCount = users.filter(u => u.suspended).length;
+                document.getElementById('stat-suspended').textContent = suspendedCount;
+            });
+
+            // 2. Listeners pour l'onglet 'Retraits'
+            const withdrawalsQuery = query(
+                collection(db, `artifacts/${appId}/public/data/withdrawals`),
+                where('status', '==', 'pending')
+            );
+            onSnapshot(withdrawalsQuery, (snapshot) => {
+                const withdrawals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderWithdrawals(withdrawals);
+                document.getElementById('stat-pending-withdrawals').textContent = withdrawals.length;
+            });
+
+            // 3. Listeners pour l'onglet 'Rapports' et Stats Clés
+            const reportsQuery = query(
+                collection(db, `artifacts/${appId}/public/data/admin_reports`),
+                // Pas de orderBy pour éviter les erreurs d'index. On trie côté client.
+                limit(10)
+            );
+            onSnapshot(reportsQuery, (snapshot) => {
+                let reports = snapshot.docs.map(doc => doc.data());
+                // Tri manuel par date (descendant)
+                reports.sort((a, b) => (new Date(b.date) - new Date(a.date)));
+                
+                renderReports(reports);
+                
+                // Mettre à jour les stats du tableau de bord avec le dernier rapport
+                if (reports.length > 0) {
+                    const latest = reports[0];
+                    document.getElementById('stat-sales').textContent = `$${(latest.totalSalesUsd || 0).toFixed(2)}`;
+                    document.getElementById('stat-new-users').textContent = latest.newUsers || 0;
+                }
+            });
+        }
+        
+        function setupProductListener(uid) {
+             const userProductsQuery = query(
+                collection(db, `artifacts/${appId}/public/data/products`),
+                where('ownerId', '==', uid),
+                limit(5)
+            );
+             onSnapshot(userProductsQuery, (snapshot) => {
+                const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderImportedProducts(products);
+            });
+        }
+
+        // --- Fonctions de Rendu des Données ---
+
+        function renderUsers(users) {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = users.map(user => {
+                const statusColor = user.suspended ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
+                const actionBtn = user.suspended 
+                    ? `<button onclick="toggleSuspension('${user.id}', false)" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1 px-3 rounded-full transition">Activer</button>`
+                    : `<button onclick="toggleSuspension('${user.id}', true)" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-3 rounded-full transition">Suspendre</button>`;
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            ${user.id.substring(0, 8)}...
+                            <span class="block text-xs text-gray-500">${user.email || 'N/A'}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.role || 'acheteur'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">
+                                ${user.suspended ? 'Suspendu' : 'Actif'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            ${actionBtn}
+                        </td>
+                    </tr>
+                `;
+            }).join('') || '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Aucun utilisateur trouvé.</td></tr>';
+        }
+
+        function renderWithdrawals(withdrawals) {
+            const tbody = document.getElementById('withdrawals-table-body');
+            tbody.innerHTML = withdrawals.map(withdrawal => {
+                const date = withdrawal.requestedAt ? new Date(withdrawal.requestedAt.seconds * 1000).toLocaleDateString('fr-FR') : 'N/A';
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">${withdrawal.id.substring(0, 8)}...</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${withdrawal.userId.substring(0, 8)}...</td>
+                        <td class="px-6 py-4 text-sm font-bold text-gray-700">$${(withdrawal.amountUsd || 0).toFixed(2)}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${date}</td>
+                        <td class="px-6 py-4 text-sm font-medium space-x-2">
+                            <button onclick="openModal('Approver le retrait', 'Êtes-vous sûr de vouloir approuver et payer le retrait de $${withdrawal.amountUsd.toFixed(2)} pour ${withdrawal.userId.substring(0, 8)}... ?', () => approveWithdrawal('${withdrawal.id}'))" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-3 rounded-full transition">Approuver</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('') || '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Aucun retrait en attente.</td></tr>';
+        }
+        
+        function renderReports(reports) {
+            const tbody = document.getElementById('reports-table-body');
+            tbody.innerHTML = reports.map(report => {
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">${report.date}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 font-semibold">$${(report.totalSalesUsd || 0).toFixed(2)}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">$${(report.commissionsUsd || 0).toFixed(2)}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${report.newUsers || 0}</td>
+                    </tr>
+                `;
+            }).join('') || '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Aucun rapport historique.</td></tr>';
+        }
+        
+        function renderImportedProducts(products) {
+            const listDiv = document.getElementById('imported-products-list');
+            if (products.length === 0) {
+                listDiv.innerHTML = '<p class="text-gray-500">Aucun produit importé récemment.</p>';
+                return;
+            }
+            listDiv.innerHTML = '<h3 class="text-xl font-semibold mb-3">Vos Derniers Imports</h3>' + products.map(p => `
+                <div class="flex items-center space-x-4 bg-gray-50 p-3 rounded-lg mb-2">
+                    <img src="${p.images?.[0] || 'https://placehold.co/60x60/cccccc/ffffff?text=P'}" alt="Image Produit" class="w-12 h-12 object-cover rounded-md">
+                    <div>
+                        <p class="font-semibold text-gray-800">${p.title}</p>
+                        <p class="text-sm text-green-600 font-bold">$${p.priceUsd.toFixed(2)}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- Fonctions d'Action du Tableau de Bord ---
+        
+        // Gère la suspension ou l'activation d'un utilisateur
+        window.toggleSuspension = (uid, suspend) => {
+             const actionName = suspend ? 'Suspendre' : 'Activer';
+             const message = suspend 
+                ? `Êtes-vous sûr de vouloir **SUSPENDRE** l'utilisateur ${uid.substring(0, 8)}...? Ses listings seront masqués.`
+                : `Êtes-vous sûr de vouloir **ACTIVER** l'utilisateur ${uid.substring(0, 8)}...? Ses listings seront de nouveau visibles.`;
+            
+            openModal(actionName, message, async () => {
+                showLoading();
+                try {
+                    const userRef = doc(db, `artifacts/${appId}/public/data/users`, uid);
+                    await updateDoc(userRef, { suspended: suspend });
+                    console.log(`Utilisateur ${uid} statut mis à jour: ${suspend ? 'Suspendu' : 'Actif'}`);
+                } catch (error) {
+                    console.error(`Erreur lors de la mise à jour du statut de l'utilisateur ${uid}:`, error);
+                } finally {
+                    hideLoading();
+                }
+            });
+        };
+        
+        // Approuve un retrait (met à jour le statut à 'paid' - la logique de paiement externe est simulée)
+        window.approveWithdrawal = (withdrawalId) => {
+            showLoading();
+            try {
+                const withdrawalRef = doc(db, `artifacts/${appId}/public/data/withdrawals`, withdrawalId);
+                // Dans un cas réel, vous déclencheriez ici une API de Payouts (Stripe, MonCash, etc.)
+                // Une fois le paiement externe confirmé:
+                updateDoc(withdrawalRef, { 
+                    status: 'paid', 
+                    approvedAt: serverTimestamp(),
+                    adminId: userId 
+                });
+                console.log(`Retrait ${withdrawalId} approuvé et marqué comme payé.`);
+            } catch (error) {
+                console.error(`Erreur lors de l'approbation du retrait ${withdrawalId}:`, error);
+            } finally {
+                hideLoading();
+            }
+        };
+
+        // Déclenche la Cloud Function pour l'import de produit affilié
+        document.getElementById('import-product-btn').addEventListener('click', async () => {
+            const linkInput = document.getElementById('affiliate-link-input');
+            const url = linkInput.value.trim();
+            const messageEl = document.getElementById('import-message');
+
+            if (!url) {
+                messageEl.className = 'mt-4 text-sm text-red-500';
+                messageEl.textContent = 'Veuillez entrer une URL valide.';
+                return;
+            }
+
+            showLoading();
+            messageEl.textContent = 'Importation en cours...';
+
+            try {
+                // Appel de la Cloud Function Callable
+                const importProduct = httpsCallable(functionsInstance, 'importProductFromAffiliate');
+                const result = await importProduct({ url });
+
+                messageEl.className = 'mt-4 text-sm text-green-600';
+                messageEl.textContent = `Produit importé avec succès! Titre: ${result.data.title}`;
+                linkInput.value = ''; // Réinitialiser le champ
+            } catch (error) {
+                console.error("Erreur lors de l'appel d'importation:", error);
+                messageEl.className = 'mt-4 text-sm text-red-600';
+                messageEl.textContent = `Échec de l'importation: ${error.message}. Voir console pour les détails.`;
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Simule l'envoi du rapport quotidien (déclenche la Cloud Function cron manuellement)
+        document.getElementById('send-report-btn').addEventListener('click', async () => {
+             openModal('Confirmation d\'Envoi', 'Voulez-vous déclencher manuellement l\'envoi du rapport quotidien aux administrateurs maintenant ?', async () => {
+                showLoading();
+                try {
+                    // NOTE: Pour déclencher une fonction CRON manuellement, vous devez utiliser
+                    // l'interface Firebase Console ou une fonction HTTP qui appelle la CRON interne.
+                    // Ici, nous faisons une simple confirmation d'envoi.
+                    // Si vous voulez une vraie exécution, vous devrez écrire une fonction HTTP distincte.
+                    // Appelons la fonction de rapport quotidien manuellement (si elle était HTTP)
+                    // const callReport = httpsCallable(functionsInstance, 'dailyAdminReportManual');
+                    // await callReport();
+                    
+                    console.log('Simulation d\'envoi de rapport réussie.');
+                    alert("Rapport envoyé (Simulation)");
+                } catch (error) {
+                     console.error("Erreur lors de l'envoi du rapport:", error);
+                     alert("Échec de l'envoi du rapport.");
+                } finally {
+                    hideLoading();
+                }
+            });
+        });
+
+        // --- Fonctions d'Interface (Navigation, Modal, Chargement) ---
+
+        window.showTab = (tabId) => {
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                if (btn.getAttribute('data-tab') === tabId) {
+                    btn.classList.add('tab-active');
+                } else {
+                    btn.classList.remove('tab-active');
+                }
+            });
+        };
+
+        window.openModal = (title, message, onConfirm) => {
+            const modal = document.getElementById('action-modal');
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').innerHTML = message;
+            
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            
+            // Nettoyer les anciens événements et attacher le nouveau
+            confirmBtn.onclick = async () => {
+                await onConfirm();
+                modal.classList.add('hidden');
+            };
+
+            document.getElementById('modal-cancel-btn').onclick = () => {
+                modal.classList.add('hidden');
+            };
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex'); // Assure que le flex est appliqué pour le centrage
+        };
+        
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            document.getElementById('loading-overlay').classList.add('flex');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+            document.getElementById('loading-overlay').classList.remove('flex');
+        }
+        
+        // Initialisation au chargement
+        initFirebase();
+    </script>
+</body>
+</html>
+

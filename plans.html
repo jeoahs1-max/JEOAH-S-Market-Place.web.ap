@@ -1,226 +1,182 @@
+: <!-- 
+    plans.html - Grille Tarifaire d'Automatisation IA
+    
+    Ajustement du prix du plan Mensuel de $25 à $19.99 pour améliorer la conversion.
+    Utilisation de Tailwind CSS pour un meilleur rendu mobile et un design moderne.
+-->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plans d'Automatisation IA - JEOAH'S</title>
-    <link rel="stylesheet" href="styles.min.css">
-    
-    <!-- STYLE DE L'ASSISTANT IA ET GRILLE TARIFAIRE -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        .ia-chat-box {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background-color: #007bff;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-        .ia-chat-box img {
-            width: 35px;
-            height: 35px;
-        }
-        .plans-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f9; }
         .plan-card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            padding: 30px;
-            width: 100%;
-            max-width: 280px;
-            text-align: center;
             transition: transform 0.3s, box-shadow 0.3s;
             display: flex;
             flex-direction: column;
             border: 2px solid #eee;
         }
         .plan-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
         .plan-card.highlight {
             border-color: #FDC830;
-            background-color: #fff9e6;
+            background-color: #fffbeb; 
         }
-        .plan-card h3 {
-            font-size: 1.6rem;
-            color: #032C4F;
-            margin-bottom: 5px;
-        }
-        .plan-card .price {
-            font-size: 2.8rem;
-            font-weight: bold;
-            color: #007bff;
-            margin-bottom: 5px;
-        }
-        .plan-card .price span {
-            font-size: 1.2rem;
-            font-weight: normal;
-        }
-        .plan-features {
-            list-style: none;
-            padding: 0;
-            text-align: left;
-            margin-bottom: 20px;
-            flex-grow: 1;
-        }
-        .plan-features li {
-            margin-bottom: 12px;
-            color: #444;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: flex-start;
-        }
-        .plan-features li .icon {
-            font-weight: bold;
-            color: #1abc9c;
-            margin-right: 8px;
-            line-height: 1.4;
-        }
-        .plan-features li.pro-limit .icon { color: #f39c12; }
-        .plan-features li.negative .icon { color: #e74c3c; }
-        
-        @media (max-width: 768px) {
-            .plans-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            .plan-card {
-                max-width: 90%;
-            }
+        .btn-primary {
+            transition: background-color 0.3s;
         }
     </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <span style="font-size: 1.8rem; font-weight: bold; color: #032C4F;">JEOAH'S</span>
-            <div class="menu">
-                <a href="index.html">Home</a>
-                <a href="plans.html" class="active">Plans</a>
-                <a href="faq.html">Aide</a>
-                <a href="contact.html">Contact</a> 
+    
+    <!-- Header -->
+    <header class="shadow-md bg-white sticky top-0 z-10">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <span class="text-2xl font-extrabold text-[#032C4F]">JEOAH'S</span>
+            <div class="hidden md:flex space-x-6 text-gray-700 font-medium">
+                <a href="index.html" class="hover:text-blue-600">Home</a>
+                <a href="plans.html" class="text-blue-600 border-b-2 border-blue-600 pb-1">Plans</a>
+                <a href="faq.html" class="hover:text-blue-600">Aide</a>
+                <a href="contact.html" class="hover:text-blue-600">Contact</a> 
             </div>
-            <a href="inscription.html" class="btn">S'inscrire</a>
+            <a href="auth.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">S'inscrire</a>
         </nav>
     </header>
 
-    <main class="dashboard-content" style="background: #f4f7f9; min-height: 80vh; padding: 40px 20px;">
-        <h1 style="text-align: center; color: #032C4F; margin-bottom: 10px;">Grille Tarifaire d'Automatisation IA</h1>
-        <p style="text-align: center; max-width: 700px; margin: 0 auto 10px; color: #666;">
-            Optimisez votre présence en ligne grâce à notre Assistant IA, Ney. Tous les plans payants incluent 
-            **15 jours d'essai gratuits** et 0% de frais sur les ventes.
+    <main class="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-[#032C4F] text-center mb-4">
+            Grille Tarifaire d'Automatisation IA
+        </h1>
+        <p class="text-center max-w-3xl mx-auto text-gray-600 text-lg mb-2">
+            Optimisez votre présence en ligne grâce à notre Assistant IA, **Ney**. Tous les plans payants incluent 
+            <span class="font-bold text-green-600">15 jours d'essai gratuits</span> et **0% de frais sur les ventes**.
         </p>
-        <p style="text-align: center; max-width: 700px; margin: 0 auto 40px; color: #007bff; font-weight: bold;">
-            Gagnez des réductions sur votre abonnement grâce à notre <a href="faq.html" style="color: #007bff; text-decoration: underline;">Programme de Parrainage</a> !
+        <p class="text-center max-w-3xl mx-auto text-blue-600 font-bold mb-10">
+            Gagnez des réductions sur votre abonnement grâce à notre <a href="faq.html" class="text-blue-600 hover:text-blue-700 underline">Programme de Parrainage</a> !
         </p>
 
-        <div class="plans-container">
+        <div class="flex flex-wrap justify-center gap-6 plans-container max-w-6xl mx-auto">
             
             <!-- Plan 1 : GRATUIT -->
-            <div class="plan-card">
-                <h3>Gratuit (Essai)</h3>
-                <p class="price">$0<span style="color: #666;">/mois</span></p>
-                <p style="margin-bottom: 20px; font-size: 0.9em; color: #e74c3c;">Pour l'évaluation.</p>
-                <ul class="plan-features">
-                    <li><span class="icon">✔️</span> Affichage de produit **Manuel**</li>
-                    <li class="pro-limit"><span class="icon">⚠️</span> **5** Résumés IA (Petite description)</li>
-                    <li class="negative"><span class="icon">❌</span> Publication **bloquée**</li>
-                    <li><span class="icon">✔️</span> Accès à la Market Place (Acheteur/Affilié/Vendeur)</li>
-                    <li><span class="icon">✔️</span> Support IA (Ney) 24/7</li>
+            <div class="plan-card bg-white rounded-xl shadow-lg p-6 w-full sm:w-80">
+                <h3 class="text-2xl font-extrabold text-[#032C4F] mb-1">Gratuit (Essai)</h3>
+                <p class="price text-5xl font-extrabold text-gray-500 mb-1">$0<span class="text-xl font-normal text-gray-500">/mois</span></p>
+                <p class="mb-6 text-sm text-red-500 font-medium">Pour l'évaluation de 15 jours.</p>
+                <ul class="space-y-3 text-left mb-6 flex-grow">
+                    <li class="flex items-start text-gray-700"><span class="text-green-500 font-bold mr-2"><i class="fas fa-check-circle"></i></span> Affichage de produit **Manuel**</li>
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> **5** Résumés IA (Petite description)</li>
+                    <li class="flex items-start text-red-500"><span class="text-red-500 font-bold mr-2"><i class="fas fa-times-circle"></i></span> Publication **bloquée**</li>
+                    <li class="flex items-start text-gray-700"><span class="text-green-500 font-bold mr-2"><i class="fas fa-check-circle"></i></span> Accès à la Market Place (Acheteur/Affilié/Vendeur)</li>
+                    <li class="flex items-start text-gray-700"><span class="text-green-500 font-bold mr-2"><i class="fas fa-check-circle"></i></span> Support IA (Ney) 24/7</li>
                 </ul>
-                <a href="inscription.html" class="btn btn-primary" style="background-color: #032C4F;">Démarrer Gratuitement</a>
+                <a href="auth.html" class="btn-primary w-full py-3 rounded-lg font-bold bg-[#032C4F] text-white hover:bg-gray-800 transition">Démarrer Gratuitement</a>
             </div>
 
-            <!-- Plan 2 : MENSUEL -->
-            <div class="plan-card" style="border-color: #007bff;">
-                <h3>Mensuel</h3>
-                <p class="price">$25<span style="color: #666;">/mois</span></p>
-                <p style="margin-bottom: 20px; font-size: 0.9em; color: #007bff;">**$25** d'investissement total.</p>
-                <ul class="plan-features">
-                    <li class="pro-limit"><span class="icon">⚠️</span> Affichage de produit **IA (25)**</li>
-                    <li class="pro-limit"><span class="icon">⚠️</span> **25** Résumés IA détaillés</li>
-                    <li class="pro-limit"><span class="icon">⚠️</span> **3** Publications visuelles/mois</li>
-                    <li class="pro-limit"><span class="icon">⚠️</span> **10** Textes Publicitaires (Copywriting)</li>
-                    <li class="pro-limit"><span class="icon">⚠️</span> **3** Réseaux sociaux couverts</li>
-                    <li><span class="icon">✅</span> Optimisation des heures de publication par IA</li>
+            <!-- Plan 2 : MENSUEL (AJUSTÉ) -->
+            <div class="plan-card bg-white rounded-xl shadow-lg p-6 w-full sm:w-80" style="border-color: #007bff;">
+                <h3 class="text-2xl font-extrabold text-blue-600 mb-1">Mensuel</h3>
+                <p class="price text-5xl font-extrabold text-blue-600 mb-1">$19.99<span class="text-xl font-normal text-gray-500">/mois</span></p>
+                <p class="mb-6 text-sm text-blue-700 font-medium">Le plus populaire pour débuter.</p>
+                <ul class="space-y-3 text-left mb-6 flex-grow">
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> Affichage de produit **IA (25)**</li>
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> **25** Résumés IA détaillés</li>
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> **3** Publications visuelles/mois</li>
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> **10** Textes Publicitaires (Copywriting)</li>
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> **3** Réseaux sociaux couverts</li>
+                    <li class="flex items-start text-gray-700"><span class="text-green-500 font-bold mr-2"><i class="fas fa-check-circle"></i></span> Optimisation des heures de publication par IA</li>
                 </ul>
-                <a href="inscription.html?plan=mensuel" class="btn btn-primary" style="background-color: #007bff;">S'abonner Mensuel</a>
+                <a href="payment.html?plan=mensuel" class="btn-primary w-full py-3 rounded-lg font-bold bg-blue-600 text-white hover:bg-blue-700 transition">S'abonner Mensuel</a>
             </div>
 
-            <!-- Plan 3 : 3 MOIS -->
-            <div class="plan-card">
-                <h3>Trimestriel</h3>
-                <p class="price">$70<span style="color: #666;">/3 mois</span></p>
-                <p style="margin-bottom: 20px; font-size: 0.9em; color: #27ae60;">**Économisez $5** vs Mensuel.</p>
-                <ul class="plan-features">
-                    <li><span class="icon">✔️</span> Affichage de produit **IA Illimité**</li>
-                    <li><span class="icon">✔️</span> Résumés IA **Illimités**</li>
-                    <li class="pro-limit"><span class="icon">⚠️</span> **8** Publications visuelles/mois (+5 vs Mensuel)</li>
-                    <li class="pro-limit"><span class="icon">⚠️</span> **25** Textes Publicitaires (Copywriting)</li>
-                    <li class="pro-limit"><span class="icon">⚠️</span> **5** Réseaux sociaux couverts</li>
-                    <li><span class="icon">✅</span> Support de priorité IA Niveau 2</li>
+            <!-- Plan 3 : 3 MOIS (AJUSTÉ) -->
+            <div class="plan-card bg-white rounded-xl shadow-lg p-6 w-full sm:w-80">
+                <h3 class="text-2xl font-extrabold text-green-600 mb-1">Trimestriel</h3>
+                <p class="price text-5xl font-extrabold text-green-600 mb-1">$59.97<span class="text-xl font-normal text-gray-500">/3 mois</span></p>
+                <p class="mb-6 text-sm text-green-700 font-medium">**Économisez 10.00 $** (vs Mensuel).</p>
+                <ul class="space-y-3 text-left mb-6 flex-grow">
+                    <li class="flex items-start text-gray-700"><span class="text-green-500 font-bold mr-2"><i class="fas fa-check-circle"></i></span> Affichage de produit **IA Illimité**</li>
+                    <li class="flex items-start text-gray-700"><span class="text-green-500 font-bold mr-2"><i class="fas fa-check-circle"></i></span> Résumés IA **Illimités**</li>
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> **8** Publications visuelles/mois</li>
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> **25** Textes Publicitaires (Copywriting)</li>
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> **5** Réseaux sociaux couverts</li>
+                    <li class="flex items-start text-gray-700"><span class="text-green-500 font-bold mr-2"><i class="fas fa-check-circle"></i></span> Support de priorité IA Niveau 2</li>
                 </ul>
-                <a href="inscription.html?plan=trimestriel" class="btn btn-primary" style="background-color: #3498db;">S'abonner 3 Mois</a>
+                <a href="payment.html?plan=trimestriel" class="btn-primary w-full py-3 rounded-lg font-bold bg-green-600 text-white hover:bg-green-700 transition">S'abonner 3 Mois</a>
             </div>
             
-            <!-- Plan 4 : 6 MOIS -->
-            <div class="plan-card">
-                <h3>Semestriel</h3>
-                <p class="price">$120<span style="color: #666;">/6 mois</span></p>
-                <p style="margin-bottom: 20px; font-size: 0.9em; color: #27ae60;">**Économisez $30** vs Mensuel.</p>
-                <ul class="plan-features">
-                    <li><span class="icon">✔️</span> Affichage de produit **IA Illimité**</li>
-                    <li><span class="icon">✔️</span> Résumés IA **Illimités**</li>
-                    <li class="pro-limit"><span class="icon">⚠️</span> **15** Publications visuelles/mois (+7 vs Trimestriel)</li>
-                    <li class="pro-limit"><span class="icon">⚠️</span> **35** Textes Publicitaires (Copywriting)</li>
-                    <li class="pro-limit"><span class="icon">⚠️</span> **7** Réseaux sociaux couverts</li>
-                    <li><span class="icon">✅</span> 1 Rapport mensuel d'analyse de performance</li>
+            <!-- Plan 4 : 6 MOIS (AJUSTÉ) -->
+            <div class="plan-card bg-white rounded-xl shadow-lg p-6 w-full sm:w-80">
+                <h3 class="text-2xl font-extrabold text-indigo-600 mb-1">Semestriel</h3>
+                <p class="price text-5xl font-extrabold text-indigo-600 mb-1">$119.94<span class="text-xl font-normal text-gray-500">/6 mois</span></p>
+                <p class="mb-6 text-sm text-indigo-700 font-medium">**Économisez 20.00 $** (vs Trimestriel).</p>
+                <ul class="space-y-3 text-left mb-6 flex-grow">
+                    <li class="flex items-start text-gray-700"><span class="text-green-500 font-bold mr-2"><i class="fas fa-check-circle"></i></span> Affichage de produit **IA Illimité**</li>
+                    <li class="flex items-start text-gray-700"><span class="text-green-500 font-bold mr-2"><i class="fas fa-check-circle"></i></span> Résumés IA **Illimités**</li>
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> **15** Publications visuelles/mois</li>
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> **35** Textes Publicitaires (Copywriting)</li>
+                    <li class="flex items-start text-orange-500"><span class="text-orange-500 font-bold mr-2"><i class="fas fa-exclamation-triangle"></i></span> **7** Réseaux sociaux couverts</li>
+                    <li class="flex items-start text-gray-700"><span class="text-green-500 font-bold mr-2"><i class="fas fa-check-circle"></i></span> 1 Rapport mensuel d'analyse de performance</li>
                 </ul>
-                <a href="inscription.html?plan=semestriel" class="btn btn-primary" style="background-color: #2ecc71;">S'abonner 6 Mois</a>
+                <a href="payment.html?plan=semestriel" class="btn-primary w-full py-3 rounded-lg font-bold bg-indigo-600 text-white hover:bg-indigo-700 transition">S'abonner 6 Mois</a>
             </div>
 
             <!-- Plan 5 : 1 AN (Highlight) -->
-            <div class="plan-card highlight">
-                <h3>Annuel</h3>
-                <p class="price" style="color: #FDC830;">$250<span style="color: #666;">/an</span></p>
-                <p style="margin-bottom: 20px; font-size: 0.9em; color: #c0392b; font-weight: bold;">**Économisez $50** + 1 Mois Bonus !</p>
-                <ul class="plan-features">
-                    <li><span class="icon">👑</span> Affichage de produit **Illimité**</li>
-                    <li><span class="icon">👑</span> Résumés IA **Illimités**</li>
-                    <li><span class="icon">👑</span> **25** Publications visuelles/mois</li>
-                    <li><span class="icon">👑</span> **50** Textes Publicitaires (Copywriting)</li>
-                    <li><span class="icon">👑</span> **TOUS** Réseaux sociaux couverts</li>
-                    <li><span class="icon">🎁</span> **1 Mois Bonus offert**</li>
+            <div class="plan-card highlight rounded-xl shadow-xl p-6 w-full sm:w-80 border-4">
+                <div class="bg-yellow-400 text-gray-900 text-sm font-bold py-1 rounded-t-lg -mx-6 -mt-6 mb-3">
+                    LE MEILLEUR CHOIX
+                </div>
+                <h3 class="text-2xl font-extrabold text-[#032C4F] mb-1">Annuel</h3>
+                <p class="price text-5xl font-extrabold text-yellow-600 mb-1">$250<span class="text-xl font-normal text-gray-500">/an</span></p>
+                <p class="mb-6 text-sm text-red-600 font-bold">**Économisez plus de 50.00 $** + 1 Mois Bonus !</p>
+                <ul class="space-y-3 text-left mb-6 flex-grow">
+                    <li class="flex items-start text-gray-700"><span class="text-yellow-600 font-bold mr-2"><i class="fas fa-crown"></i></span> Affichage de produit **Illimité**</li>
+                    <li class="flex items-start text-gray-700"><span class="text-yellow-600 font-bold mr-2"><i class="fas fa-crown"></i></span> Résumés IA **Illimités**</li>
+                    <li class="flex items-start text-gray-700"><span class="text-yellow-600 font-bold mr-2"><i class="fas fa-crown"></i></span> **25** Publications visuelles/mois</li>
+                    <li class="flex items-start text-gray-700"><span class="text-yellow-600 font-bold mr-2"><i class="fas fa-crown"></i></span> **50** Textes Publicitaires (Copywriting)</li>
+                    <li class="flex items-start text-gray-700"><span class="text-yellow-600 font-bold mr-2"><i class="fas fa-crown"></i></span> **TOUS** Réseaux sociaux couverts</li>
+                    <li class="flex items-start text-gray-700"><span class="text-yellow-600 font-bold mr-2"><i class="fas fa-gift"></i></span> **1 Mois Bonus offert**</li>
                 </ul>
-                <a href="inscription.html?plan=annuel" class="btn btn-primary" style="background-color: #FDC830; color: #032C4F;">S'abonner 1 An</a>
+                <a href="payment.html?plan=annuel" class="btn-primary w-full py-3 rounded-lg font-bold bg-yellow-500 text-[#032C4F] hover:bg-yellow-600 transition">S'abonner 1 An</a>
             </div>
-
         </div>
     </main>
 
     <!-- ASSISTANT IA (NEY) -->
-    <div class="ia-chat-box" onclick="alert('Bienvenue ! Je suis Ney, l\'Assistant IA de JEOAH\'S. Je suis disponible pour répondre à vos questions 24/7. Le chat sera activé dès le lancement de la version Beta !');">
-        <img src="assets/icon-ai.png" alt="Chat IA">
+    <!-- Remplace l'image par une icône Font Awesome pour éviter la dépendance à un fichier externe -->
+    <div class="ia-chat-box bg-blue-600 hover:bg-blue-700" onclick="showCustomModal('Assistant IA (Ney)', 'Bienvenue ! Je suis Ney, l\'Assistant IA de JEOAH\'S. Je suis disponible pour répondre à vos questions 24/7. Le chat sera activé dès le lancement de la version Beta !');">
+        <i class="fas fa-robot text-white text-3xl"></i>
+    </div>
+
+    <!-- Modal pour remplacer alert() -->
+    <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h4 id="modal-title" class="text-xl font-bold mb-3 text-[#032C4F]"></h4>
+            <p id="modal-content" class="text-gray-700 mb-4"></p>
+            <button class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" onclick="document.getElementById('custom-modal').classList.add('hidden')">
+                Fermer
+            </button>
+        </div>
     </div>
 
     <footer>
-        <p>© 2025 JEOAH’S Market Place</p>
+        <p class="text-center py-4 text-gray-500 text-sm border-t border-gray-200 mt-10">© 2025 JEOAH’S Market Place</p>
     </footer>
 
-    <script src="app.js"></script>
+    <script>
+        // Fonction pour gérer l'ouverture du modal de message (remplace alert())
+        function showCustomModal(title, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').textContent = content;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
+

@@ -1,15 +1,15 @@
 <!-- 
-    affiliate_onboarding_step1.html - Onboarding Affilié, Étape 1 : Saisie des Plateformes
+    affiliate_onboarding_step1.html - Onboarding Affilié, Étape 1 : Liens d'Affiliation (V3)
     
-    Cette page permet à l'affilié d'enregistrer les plateformes de commerce électronique 
-    auxquelles il est affilié (ex: Amazon, eBay), afin de centraliser ses liens.
+    Cette version utilise un design de carte/boîte pour chaque lien, se rapprochant de l'exemple visuel de l'utilisateur,
+    tout en conservant la fonctionnalité dynamique (ajout/suppression/limite de 10).
 -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Affilié - Étape 1 : Plateformes</title>
+    <title>Affilié - Étape 1 : Liens d'Affiliation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -17,36 +17,39 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
         let db, auth, userId;
-        const maxLinks = 10;
-        const availablePlatforms = [
-            { name: "Amazon", icon: "fab fa-amazon", placeholder: "Votre ID de suivi Amazon (ex: tag-20)" },
-            { name: "eBay", icon: "fab fa-ebay", placeholder: "Lien de suivi ou ID d'affilié eBay" },
-            { name: "Walmart", icon: "fas fa-store", placeholder: "Lien de suivi Walmart" },
-            { name: "Temu", icon: "fas fa-shopping-bag", placeholder: "Lien ou ID d'affilié Temu" },
-            { name: "Shein", icon: "fas fa-tshirt", placeholder: "Lien d'affilié Shein" },
-            { name: "Autre Plateforme", icon: "fas fa-link", placeholder: "Nom de la plateforme et lien d'affilié" }
+        let affiliateLinks = []; // Tableau principal des liens
+
+        // 5 liens initiaux demandés par l'utilisateur
+        const initialMerchants = [
+            { name: "Amazon", base_link: "", icon: "fab fa-amazon", color: "text-orange-500", placeholder: "Ex: amazon-affiliate-tag-fr", required: true },
+            { name: "Temu", base_link: "", icon: "fas fa-bolt", color: "text-purple-600", placeholder: "Ex: temu-affiliate-id", required: true },
+            { name: "Shein", base_link: "", icon: "fas fa-shirt", color: "text-pink-500", placeholder: "Ex: shein-partner-code", required: true },
+            { name: "Walmart", base_link: "", icon: "fas fa-warehouse", color: "text-blue-600", placeholder: "Ex: walmart-program-key", required: true },
+            { name: "Ebay", base_link: "", icon: "fab fa-ebay", color: "text-red-600", placeholder: "Ex: ebay-partner-network", required: true },
         ];
+        
+        const MAX_LINKS = 10;
 
         document.addEventListener('DOMContentLoaded', () => {
             initFirebase();
-            renderFormFields();
         });
 
         async function initFirebase() {
             if (Object.keys(firebaseConfig).length === 0) {
-                 // Pour les tests sans config Firebase, on affiche le contenu directement.
                 document.getElementById('loading-indicator').classList.add('hidden');
+                affiliateLinks = [...initialMerchants];
+                renderAffiliateLinks();
                 document.getElementById('onboarding-content').classList.remove('hidden');
                 return;
             }
-            
+
             const app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
@@ -61,89 +64,296 @@
                 console.error("Erreur d'authentification:", error);
             }
 
-            onAuthStateChanged(auth, (user) => {
+            onAuthStateChanged(auth, async (user) => {
                 if (!user) {
-                    window.location.href = 'auth.html';
                     return;
                 }
                 userId = user.uid;
+                await loadExistingLinks();
                 document.getElementById('loading-indicator').classList.add('hidden');
                 document.getElementById('onboarding-content').classList.remove('hidden');
             });
         }
         
         /**
-         * Affiche les champs du formulaire pour les liens d'affiliation.
+         * Charge les liens existants depuis Firestore ou initialise avec les liens de base.
          */
-        function renderFormFields() {
-            const container = document.getElementById('links-container');
-            container.innerHTML = availablePlatforms.map((platform, index) => `
-                <div class="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-xl shadow-sm">
-                    <div class="text-xl w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg text-blue-600">
-                        <i class="${platform.icon}"></i>
-                    </div>
-                    <div class="flex-1">
-                        <label for="platform-${index}" class="block text-sm font-medium text-gray-700">${platform.name}</label>
-                        <input type="text" id="platform-${index}" data-name="${platform.name}" 
-                               placeholder="${platform.placeholder}"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
-                    </div>
-                </div>
-            `).join('');
+        async function loadExistingLinks() {
+            if (!userId || !db) return;
+
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/affiliate_data/links`);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists() && docSnap.data().links) {
+                    // Charger les liens existants et les compléter avec les infos d'icônes/couleurs si possible
+                    const savedLinks = docSnap.data().links;
+                    
+                    // Créer un mapping pour identifier les liens enregistrés qui correspondent aux liens initiaux
+                    const savedMap = savedLinks.reduce((acc, link) => {
+                        acc[link.name.toLowerCase()] = link;
+                        return acc;
+                    }, {});
+
+                    affiliateLinks = [];
+                    
+                    // 1. Ajouter les 5 marchands initiaux, en utilisant les données enregistrées
+                    initialMerchants.forEach(merchant => {
+                        const saved = savedMap[merchant.name.toLowerCase()];
+                        affiliateLinks.push({ 
+                            ...merchant, 
+                            base_link: saved ? saved.base_link : "",
+                            required: true // Les 5 premiers restent requis
+                        });
+                    });
+                    
+                    // 2. Ajouter les autres liens enregistrés par l'utilisateur
+                    savedLinks.filter(link => !initialMerchants.map(m => m.name.toLowerCase()).includes(link.name.toLowerCase()))
+                        .forEach(link => {
+                            affiliateLinks.push({
+                                name: link.name,
+                                base_link: link.base_link,
+                                icon: "fas fa-link", 
+                                color: "text-gray-500",
+                                placeholder: "Nom ou Tag de suivi",
+                                required: false // Les autres sont optionnels
+                            });
+                        });
+                    
+                } else {
+                    // Initialiser avec les 5 marchands par défaut si aucune donnée n'est trouvée
+                    affiliateLinks = [...initialMerchants];
+                }
+                renderAffiliateLinks();
+            } catch (e) {
+                console.error("Erreur lors du chargement des liens:", e);
+                affiliateLinks = [...initialMerchants];
+                renderAffiliateLinks();
+            }
         }
 
         /**
-         * Gère la soumission du formulaire.
+         * Ajoute un nouveau lien d'affiliation vide à la liste.
+         */
+        window.addAffiliateLink = function() {
+            if (affiliateLinks.length >= MAX_LINKS) {
+                showCustomModal("Limite Atteinte", `Vous ne pouvez pas ajouter plus de ${MAX_LINKS} liens d'affiliation.`);
+                return;
+            }
+            
+            affiliateLinks.push({ 
+                name: "", 
+                base_link: "", 
+                icon: "fas fa-link", 
+                color: "text-gray-500",
+                placeholder: "Nom du Commerçant (Ex: Fnac)",
+                required: false // Nouveaux liens sont optionnels
+            });
+            renderAffiliateLinks();
+        }
+
+        /**
+         * Supprime un lien d'affiliation de la liste.
+         */
+        window.removeAffiliateLink = function(index) {
+            // Empêche la suppression des 5 premiers liens requis
+            if (affiliateLinks[index].required) {
+                showCustomModal("Action Interdite", `Le lien ${affiliateLinks[index].name} est considéré comme essentiel et ne peut pas être supprimé.`);
+                return;
+            }
+            
+            affiliateLinks.splice(index, 1);
+            renderAffiliateLinks();
+        }
+
+        /**
+         * Met à jour la valeur d'un lien d'affiliation lors de la saisie.
+         */
+        window.handleInputChange = function(index, field, value) {
+            affiliateLinks[index][field] = value;
+            // Retirer la bordure rouge si le champ est rempli
+            if (value.trim()) {
+                 document.getElementById(`${field}-${index}`).classList.remove('border-red-500');
+            }
+        }
+
+        /**
+         * Affiche la liste complète des liens dans l'interface utilisateur.
+         */
+        function renderAffiliateLinks() {
+            const container = document.getElementById('affiliate-links-container');
+            container.innerHTML = '';
+            
+            affiliateLinks.forEach((link, index) => {
+                const isRemovable = !link.required;
+                const fieldPlaceholder = link.placeholder || "Nom du Commerçant (Ex: Rakuten)";
+
+                const linkHtml = `
+                    <div id="link-card-${index}" class="p-4 rounded-xl border border-gray-200 bg-white shadow-md transition hover:shadow-lg flex items-start space-x-3">
+                        
+                        <!-- Icône de la carte -->
+                        <div class="pt-2">
+                             <i class="${link.icon} ${link.color} text-2xl w-6 text-center"></i>
+                        </div>
+
+                        <!-- Champs de Saisie -->
+                        <div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
+                            
+                            <!-- Nom du Commerçant -->
+                            <div>
+                                <label for="name-${index}" class="block text-xs font-medium text-gray-500">
+                                    Nom du Commerçant ${link.required ? '(*)' : ''}
+                                </label>
+                                <input type="text" id="name-${index}" 
+                                       value="${link.name}" 
+                                       oninput="handleInputChange(${index}, 'name', this.value)"
+                                       placeholder="${fieldPlaceholder}"
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                            </div>
+
+                            <!-- Lien d'Affiliation (Base) -->
+                            <div>
+                                <label for="link-${index}" class="block text-xs font-medium text-gray-500">
+                                    Lien d'Affiliation (Base) ${link.required ? '(*)' : ''}
+                                </label>
+                                <input type="url" id="link-${index}" 
+                                       value="${link.base_link}" 
+                                       oninput="handleInputChange(${index}, 'base_link', this.value)"
+                                       placeholder="URL de base (https://...)"
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                            </div>
+
+                        </div>
+
+                        <!-- Bouton de Suppression -->
+                        ${isRemovable ? `
+                            <div class="pt-6 flex-shrink-0">
+                                <button type="button" onclick="removeAffiliateLink(${index})" 
+                                        class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition duration-150 shadow-sm"
+                                        title="Supprimer ce lien">
+                                    <i class="fas fa-trash-alt text-sm"></i>
+                                </button>
+                            </div>
+                        ` : `<div class="w-10"></div>`} <!-- Espace pour l'alignement des champs non amovibles -->
+                    </div>
+                `;
+                container.innerHTML += linkHtml;
+            });
+
+            // Gérer l'état du bouton d'ajout
+            const addButton = document.getElementById('add-link-button');
+            const limitText = document.getElementById('limit-text');
+            if (affiliateLinks.length >= MAX_LINKS) {
+                addButton.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+                addButton.classList.remove('hover:bg-blue-700', 'bg-blue-600');
+                addButton.disabled = true;
+                limitText.classList.remove('hidden');
+            } else {
+                addButton.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+                addButton.classList.add('hover:bg-blue-700', 'bg-blue-600');
+                addButton.disabled = false;
+                limitText.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Gère la soumission du formulaire et l'enregistrement dans Firestore.
          */
         window.handleSubmit = async function(event) {
             event.preventDefault();
+            
             const submitButton = document.getElementById('submit-button');
             submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sauvegarde en cours...';
-
-            const linksData = {};
-            const inputs = document.querySelectorAll('#links-container input[type="text"]');
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Vérification...';
             
-            inputs.forEach(input => {
-                if (input.value.trim() !== "") {
-                    linksData[input.dataset.name] = input.value.trim();
+            let allValid = true;
+
+            // 1. Validation : Vérifier si les champs requis sont remplis
+            const linksToSave = affiliateLinks.filter((link, index) => {
+                const hasLink = link.base_link.trim() !== "";
+                const hasName = link.name.trim() !== "";
+                
+                const nameInput = document.getElementById(`name-${index}`);
+                const linkInput = document.getElementById(`link-${index}`);
+                
+                nameInput.classList.remove('border-red-500');
+                linkInput.classList.remove('border-red-500');
+
+                // Si c'est un lien requis (les 5 premiers)
+                if (link.required) {
+                    if (!hasLink || !hasName) {
+                        if (!hasName) nameInput.classList.add('border-red-500');
+                        if (!hasLink) linkInput.classList.add('border-red-500');
+                        allValid = false;
+                    }
+                    return true; // On garde les liens requis même si invalides pour les montrer.
                 }
+
+                // Pour les liens ajoutés dynamiquement, on les garde que s'ils sont entièrement remplis.
+                return hasLink && hasName;
             });
 
-            if (Object.keys(linksData).length === 0) {
-                 // Utiliser une modal ou une notification personnalisée au lieu de alert
-                alert("Veuillez saisir au moins un lien d'affiliation pour continuer.");
+            if (!allValid) {
+                showCustomModal("Champs Obligatoires Manquants", "Veuillez remplir le nom et le lien pour les 5 marchands principaux (champs en rouge).");
                 submitButton.disabled = false;
-                submitButton.innerHTML = 'Continuer (Étape 2/3)';
+                submitButton.innerHTML = 'Étape Suivante <i class="fas fa-arrow-right ml-2"></i>';
                 return;
             }
 
-            console.log("Liens d'Affiliation Enregistrés:", linksData);
+            // Filtrer à nouveau pour ne garder que les données à sauvegarder (y compris les 5 requis remplis)
+            const finalLinksToSave = linksToSave
+                .filter(link => link.name.trim() && link.base_link.trim())
+                .map(link => ({
+                    name: link.name.trim(),
+                    base_link: link.base_link.trim(),
+                }));
+            
+            console.log("Liens d'Affiliation à enregistrer:", finalLinksToSave);
 
             if (userId && db) {
                 try {
-                    const docRef = doc(db, `artifacts/${appId}/users/${userId}/affiliate_data/platforms`);
-                    await setDoc(docRef, linksData);
-                    // Succès - Passage à l'étape 2
-                    window.location.href = 'affiliate_onboarding_step2.html';
+                    // Stockage des liens d'affiliation
+                    const docRef = doc(db, `artifacts/${appId}/users/${userId}/affiliate_data/links`);
+                    await setDoc(docRef, { links: finalLinksToSave }, { merge: true });
+                    
+                    window.location.href = 'affiliate_onboarding_step2.html'; // Rediriger vers l'étape 2
                 } catch (e) {
                     console.error("Erreur d'enregistrement sur Firestore:", e);
-                    alert("Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.");
+                    showCustomModal("Erreur", "Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.");
                     submitButton.disabled = false;
-                    submitButton.innerHTML = 'Continuer (Étape 2/3)';
+                    submitButton.innerHTML = 'Étape Suivante <i class="fas fa-arrow-right ml-2"></i>';
                 }
             } else {
-                 // Mode Débogage sans Firebase
+                // Mode Débogage sans Firebase
                 await new Promise(r => setTimeout(r, 1000));
-                console.log("Mode Débogage: Redirection vers l'étape 2.");
                 window.location.href = 'affiliate_onboarding_step2.html';
             }
         }
-        
+
+        // Fonction pour afficher une modale personnalisée (remplacement de alert())
+        function showCustomModal(title, message) {
+            const modalHtml = `
+                <div id="custom-alert-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[999]">
+                    <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4">
+                        <h3 class="text-xl font-bold text-red-600 mb-4">${title}</h3>
+                        <p class="text-gray-700 mb-6">${message}</p>
+                        <button onclick="document.getElementById('custom-alert-modal').remove()" 
+                                class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
     </script>
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .border-red-500 {
+            border-color: #ef4444 !important;
+        }
     </style>
 </head>
 <body>
@@ -156,37 +366,61 @@
 
     <!-- Contenu de l'Onboarding -->
     <div id="onboarding-content" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-2xl bg-white p-8 rounded-3xl shadow-2xl">
+        <div class="w-full max-w-4xl bg-white p-8 rounded-3xl shadow-2xl">
             
             <header class="text-center mb-8">
-                <h1 class="text-3xl font-extrabold text-[#032C4F]">Devenez un Super Affilié !</h1>
-                <p class="text-gray-500 mt-2">Étape 1/3: Centralisez vos Plateformes d'Affiliation</p>
+                <h1 class="text-3xl font-extrabold text-[#032C4F]">Configuration Affilié</h1>
+                <p class="text-gray-500 mt-2">Étape 1/3: Liens d'Affiliation Commerçants</p>
                 <div class="w-full bg-gray-200 rounded-full h-2.5 mt-4">
                     <div class="bg-blue-600 h-2.5 rounded-full" style="width: 33%"></div>
                 </div>
             </header>
 
             <form onsubmit="handleSubmit(event)" class="space-y-6">
-                <p class="text-gray-700 font-medium">
-                    Veuillez saisir votre identifiant (ID) ou lien d'affiliation pour les plateformes que vous utilisez. Cela permettra à Ney (notre IA) de trouver les prix et de générer automatiquement vos liens centralisés.
+                
+                <p class="text-gray-700 font-medium bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                    **Les 5 liens principaux ci-dessous sont obligatoires.** Ajoutez la base de vos liens d'affiliation pour que le système NEY puisse les convertir en liens personnalisés. Vous pouvez ajouter jusqu'à 5 autres liens si nécessaire (max 10).
                 </p>
 
-                <!-- Champs des Liens d'Affiliation -->
-                <div id="links-container" class="space-y-4">
-                    <!-- Les champs sont insérés ici par JS (renderFormFields) -->
+                <!-- Conteneur des Liens d'Affiliation (rendus par JS) -->
+                <div id="affiliate-links-container" class="space-y-4">
+                    <!-- Les liens sont insérés ici par renderAffiliateLinks() -->
                 </div>
-                
-                <button type="submit" id="submit-button" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition duration-300 shadow-lg">
-                    Continuer (Étape 2/3)
-                </button>
-                
-                <p class="text-center text-sm text-gray-500 mt-4">
-                    <i class="fas fa-lock mr-1"></i> Vos informations sont sécurisées et utilisées uniquement pour générer vos liens.
-                </p>
+
+                <!-- Bouton d'Ajout Dynamique -->
+                <div class="flex flex-col space-y-2 mt-6">
+                    <button type="button" id="add-link-button" onclick="addAffiliateLink()" 
+                            class="w-full py-3 px-6 bg-blue-600 text-white font-bold rounded-xl transition duration-300 flex items-center justify-center shadow-md">
+                        <i class="fas fa-plus-circle mr-2"></i> Ajouter un autre lien d'affiliation
+                    </button>
+                    <p id="limit-text" class="text-sm text-red-500 font-medium hidden text-center">
+                        Maximum de ${MAX_LINKS} liens d'affiliation atteints.
+                    </p>
+                </div>
+
+
+                <!-- Bouton de Navigation -->
+                <div class="flex justify-end pt-4">
+                    <button type="submit" id="submit-button" class="py-3 px-8 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition duration-300 shadow-lg flex items-center">
+                        Étape Suivante <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 
+    <script type="module">
+        // Le script est déjà défini dans le head, mais on s'assure que le rendu est appelé au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.getElementById('onboarding-content').classList.contains('hidden')) {
+                // S'assurer que les liens initiaux sont chargés si Firebase n'est pas utilisé ou non initialisé
+                if (typeof userId === 'undefined' || !db) {
+                     window.affiliateLinks = [...initialMerchants];
+                     window.renderAffiliateLinks();
+                }
+            }
+        });
+    </script>
 </body>
 </html>
 

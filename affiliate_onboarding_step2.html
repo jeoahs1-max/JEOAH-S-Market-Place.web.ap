@@ -1,8 +1,9 @@
-<!-- 
-    affiliate_onboarding_step2.html - Onboarding Affilié, Étape 2 : Saisie des Réseaux Sociaux (V3)
+<!                    submitButton.disabled = false;
+  <!-- 
+    affiliate_onboarding_step2.html - Onboarding Affilié, Étape 2 : Réseaux Sociaux (V3)
     
-    Cette page permet à l'affilié d'enregistrer ses liens de réseaux sociaux pour la promotion,
-    incluant désormais Telegram et une liste complète de plateformes pour un ciblage marketing maximal.
+    Cette version inclut la liste complète des réseaux sociaux demandée par l'utilisateur:
+    TikTok, YouTube, Instagram (requis), Facebook, Quora, Reddit, Twitch, Twitter et Telegram (optionnels).
 -->
 <!DOCTYPE html>
 <html lang="fr">
@@ -17,42 +18,47 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
         let db, auth, userId;
-        // Liste étendue des plateformes sociales, y compris Telegram
-        const socialPlatforms = [
-            { name: "TikTok", icon: "fab fa-tiktok", placeholder: "Lien de votre profil TikTok" },
-            { name: "YouTube", icon: "fab fa-youtube", placeholder: "Lien de votre chaîne YouTube" },
-            { name: "Instagram", icon: "fab fa-instagram", placeholder: "Lien de votre profil Instagram" },
-            { name: "Facebook", icon: "fab fa-facebook", placeholder: "Lien de votre page Facebook" },
-            { name: "X (Twitter)", icon: "fab fa-twitter", placeholder: "Lien de votre profil X / Twitter" },
-            { name: "LinkedIn", icon: "fab fa-linkedin", placeholder: "Lien de votre profil LinkedIn" },
-            { name: "Telegram", icon: "fab fa-telegram-plane", placeholder: "Lien de votre canal ou groupe Telegram" },
-            { name: "Twitch", icon: "fab fa-twitch", placeholder: "Lien de votre chaîne Twitch" },
-            { name: "Reddit", icon: "fab fa-reddit", placeholder: "Lien de votre subreddit/profil" },
-            { name: "Quora", icon: "fab fa-quora", placeholder: "Lien de votre profil Quora" },
-            { name: "WeChat", icon: "fab fa-weixin", placeholder: "Votre lien de profil/page WeChat" },
-            { name: "Pinterest", icon: "fab fa-pinterest", placeholder: "Lien de votre profil Pinterest" },
-            { name: "Snapchat", icon: "fab fa-snapchat", placeholder: "Lien de votre profil Snapchat" },
-        ];
+        // Initialisation de la structure de données pour tous les réseaux
+        let socialLinks = {
+            tiktok: "", youtube: "", instagram: "", facebook: "", quora: "", reddit: "", twitch: "", twitter: "", telegram: "", snapchat: ""
+        };
 
+        const SOCIAL_PLATFORMS = [
+            // REQUIS
+            { id: 'tiktok', name: 'TikTok', icon: 'fab fa-tiktok', color: 'text-black', placeholder: 'Lien de votre profil TikTok', required: true },
+            { id: 'youtube', name: 'YouTube', icon: 'fab fa-youtube', color: 'text-red-600', placeholder: 'Lien de votre chaîne YouTube', required: true },
+            { id: 'instagram', name: 'Instagram', icon: 'fab fa-instagram', color: 'text-pink-500', placeholder: 'Lien de votre profil Instagram', required: true },
+            
+            // OPTIONNELS
+            { id: 'twitter', name: 'X / Twitter', icon: 'fab fa-twitter', color: 'text-gray-700', placeholder: 'Lien de votre profil X (Twitter)', required: false },
+            { id: 'twitch', name: 'Twitch', icon: 'fab fa-twitch', color: 'text-purple-600', placeholder: 'Lien de votre chaîne Twitch', required: false },
+            { id: 'reddit', name: 'Reddit', icon: 'fab fa-reddit', color: 'text-orange-500', placeholder: 'Lien de votre profil Reddit', required: false },
+            { id: 'quora', name: 'Quora', icon: 'fab fa-quora', color: 'text-red-700', placeholder: 'Lien de votre profil Quora', required: false }, 
+            { id: 'telegram', name: 'Telegram', icon: 'fab fa-telegram', color: 'text-blue-500', placeholder: 'Lien de votre canal/profil Telegram', required: false }, // Ajouté
+            { id: 'snapchat', name: 'Snapchat', icon: 'fab fa-snapchat', color: 'text-yellow-400', placeholder: 'Lien de votre profil Snapchat', required: false }, // Ajouté
+            { id: 'facebook', name: 'Facebook', icon: 'fab fa-facebook', color: 'text-blue-600', placeholder: 'Lien de votre page/profil Facebook', required: false }, 
+        ];
+        
         document.addEventListener('DOMContentLoaded', () => {
             initFirebase();
-            renderFormFields();
+            // Le rendu sera appelé après le chargement des données
         });
 
         async function initFirebase() {
             if (Object.keys(firebaseConfig).length === 0) {
                 document.getElementById('loading-indicator').classList.add('hidden');
+                renderSocialLinks();
                 document.getElementById('onboarding-content').classList.remove('hidden');
                 return;
             }
-            
+
             const app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
@@ -67,85 +73,157 @@
                 console.error("Erreur d'authentification:", error);
             }
 
-            onAuthStateChanged(auth, (user) => {
+            onAuthStateChanged(auth, async (user) => {
                 if (!user) {
-                    window.location.href = 'auth.html';
                     return;
                 }
                 userId = user.uid;
+                await loadExistingLinks();
                 document.getElementById('loading-indicator').classList.add('hidden');
                 document.getElementById('onboarding-content').classList.remove('hidden');
             });
         }
         
         /**
-         * Affiche les champs du formulaire pour les réseaux sociaux.
+         * Charge les liens existants depuis Firestore.
          */
-        function renderFormFields() {
-            const container = document.getElementById('social-links-container');
-            container.innerHTML = socialPlatforms.map((platform, index) => `
-                <div class="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-xl shadow-sm">
-                    <div class="text-xl w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg text-blue-500">
-                        <i class="${platform.icon}"></i>
-                    </div>
-                    <div class="flex-1">
-                        <label for="social-${index}" class="block text-sm font-medium text-gray-700">${platform.name}</label>
-                        <input type="url" id="social-${index}" data-name="${platform.name}" 
-                               placeholder="${platform.placeholder}"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
-                    </div>
-                </div>
-            `).join('');
-        }
+        async function loadExistingLinks() {
+            if (!userId || !db) return;
 
-        /**
-         * Gère la soumission du formulaire.
-         */
-        window.handleSubmit = async function(event) {
-            event.preventDefault();
-            const submitButton = document.getElementById('submit-button');
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Finalisation en cours...';
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/affiliate_data/socials`);
+                const docSnap = await getDoc(docRef);
 
-            const socialLinksData = {};
-            const inputs = document.querySelectorAll('#social-links-container input[type="url"]');
-            
-            inputs.forEach(input => {
-                if (input.value.trim() !== "") {
-                    socialLinksData[input.dataset.name] = input.value.trim();
+                if (docSnap.exists() && docSnap.data()) {
+                    // Fusionner les données existantes avec le modèle actuel
+                    socialLinks = { ...socialLinks, ...docSnap.data() };
                 }
-            });
-
-            console.log("Liens Sociaux Enregistrés:", socialLinksData);
-
-            if (userId && db) {
-                try {
-                    const docRef = doc(db, `artifacts/${appId}/users/${userId}/affiliate_data/social`);
-                    // Utiliser merge: true pour mettre à jour ou créer
-                    await setDoc(docRef, socialLinksData, { merge: true });
-                    
-                    // Finalisation - Passage au tableau de bord
-                    const onboardingDocRef = doc(db, `artifacts/${appId}/users/${userId}/affiliate_data/onboarding`);
-                    await setDoc(onboardingDocRef, { isComplete: true, lastUpdate: new Date().toISOString() }, { merge: true });
-                    
-                    window.location.href = 'affiliate_dashboard.html';
-                } catch (e) {
-                    console.error("Erreur d'enregistrement sur Firestore:", e);
-                    // Utiliser une boîte de dialogue personnalisée au lieu d'alert()
-                    showCustomModal("Erreur", "Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.");
-                    submitButton.disabled = false;
-                    submitButton.innerHTML = 'Accéder au Tableau de Bord';
-                }
-            } else {
-                 // Mode Débogage sans Firebase
-                await new Promise(r => setTimeout(r, 1000));
-                console.log("Mode Débogage: Redirection vers le tableau de bord.");
-                window.location.href = 'affiliate_dashboard.html';
+                renderSocialLinks(); // Mettre à jour l'UI avec les données chargées
+            } catch (e) {
+                console.error("Erreur lors du chargement des liens sociaux:", e);
+                renderSocialLinks(); // Afficher la page même en cas d'erreur
             }
         }
 
-        window.goToPreviousStep = function() {
-            window.location.href = 'affiliate_onboarding_step1.html';
+        /**
+         * Met à jour la valeur d'un lien social lors de la saisie.
+         */
+        window.handleInputChange = function(platformId, value) {
+            socialLinks[platformId] = value;
+            // Retirer la bordure rouge si le champ est rempli
+            if (value.trim()) {
+                 document.getElementById(`input-${platformId}`).classList.remove('border-red-500');
+            }
+        }
+
+        /**
+         * Affiche la liste complète des liens sociaux dans l'interface utilisateur.
+         */
+        function renderSocialLinks() {
+            const container = document.getElementById('social-links-container');
+            container.innerHTML = '';
+            
+            // Séparer les requis des optionnels pour l'affichage
+            const requiredPlatforms = SOCIAL_PLATFORMS.filter(p => p.required);
+            const optionalPlatforms = SOCIAL_PLATFORMS.filter(p => !p.required);
+
+            // Rendu des liens REQUIS
+            requiredPlatforms.forEach(platform => {
+                container.innerHTML += createSocialLinkHtml(platform, socialLinks[platform.id] || "");
+            });
+
+            // Ajout du séparateur pour les liens optionnels
+            container.innerHTML += `
+                <div class="pt-6 pb-2 text-lg font-bold text-gray-700 border-t border-gray-200 mt-4">
+                    Autres Réseaux (Optionnels)
+                </div>
+            `;
+            
+            // Rendu des liens OPTIONNELS
+            optionalPlatforms.forEach(platform => {
+                container.innerHTML += createSocialLinkHtml(platform, socialLinks[platform.id] || "");
+            });
+        }
+        
+        /**
+         * Génère le HTML pour une carte de lien social.
+         */
+        function createSocialLinkHtml(platform, currentValue) {
+            const isRequired = platform.required;
+            return `
+                <div class="p-4 rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-lg">
+                    <label for="input-${platform.id}" class="block text-sm font-semibold text-gray-800 flex items-center mb-1">
+                        <i class="${platform.icon} ${platform.color} text-xl mr-3 w-6 text-center"></i>
+                        ${platform.name} ${isRequired ? '(*)' : ''}
+                    </label>
+                    <input type="url" id="input-${platform.id}" 
+                           value="${currentValue}" 
+                           oninput="handleInputChange('${platform.id}', this.value)"
+                           placeholder="${platform.placeholder}"
+                           class="mt-2 block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                </div>
+            `;
+        }
+
+
+        /**
+         * Gère la soumission du formulaire et l'enregistrement dans Firestore.
+         */
+        window.handleSubmit = async function(event) {
+            event.preventDefault();
+            
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Vérification...';
+            
+            let allValid = true;
+
+            // 1. Validation : Vérifier si les champs requis (TikTok, YouTube, Instagram) sont remplis
+            const linksToSave = {};
+            SOCIAL_PLATFORMS.forEach(platform => {
+                const value = socialLinks[platform.id] ? socialLinks[platform.id].trim() : '';
+                const inputElement = document.getElementById(`input-${platform.id}`);
+                
+                inputElement.classList.remove('border-red-500');
+
+                if (platform.required && !value) {
+                    inputElement.classList.add('border-red-500');
+                    allValid = false;
+                }
+                
+                // Conserver le lien s'il est rempli
+                if (value) {
+                    linksToSave[platform.id] = value;
+                }
+            });
+
+            if (!allValid) {
+                showCustomModal("Champs Obligatoires Manquants", "Veuillez remplir les liens pour TikTok, YouTube et Instagram (champs en rouge) avant de continuer.");
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Étape Suivante <i class="fas fa-arrow-right ml-2"></i>';
+                return;
+            }
+
+            console.log("Liens Sociaux à enregistrer:", linksToSave);
+
+            if (userId && db) {
+                try {
+                    // Stockage des liens sociaux dans un document 'socials'
+                    const docRef = doc(db, `artifacts/${appId}/users/${userId}/affiliate_data/socials`);
+                    await setDoc(docRef, linksToSave, { merge: true });
+                    
+                    window.location.href = 'affiliate_onboarding_step3.html'; // Rediriger vers l'étape 3
+                } catch (e) {
+                    console.error("Erreur d'enregistrement sur Firestore:", e);
+                    showCustomModal("Erreur", "Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.");
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = 'Étape Suivante <i class="fas fa-arrow-right ml-2"></i>';
+                }
+            } else {
+                // Mode Débogage sans Firebase
+                await new Promise(r => setTimeout(r, 1000));
+                window.location.href = 'affiliate_onboarding_step3.html';
+            }
         }
 
         // Fonction pour afficher une modale personnalisée (remplacement de alert())
@@ -164,11 +242,14 @@
             `;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
-        
+
     </script>
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .border-red-500 {
+            border-color: #ef4444 !important;
+        }
     </style>
 </head>
 <body>
@@ -181,32 +262,34 @@
 
     <!-- Contenu de l'Onboarding -->
     <div id="onboarding-content" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-2xl bg-white p-8 rounded-3xl shadow-2xl">
+        <div class="w-full max-w-xl bg-white p-8 rounded-3xl shadow-2xl">
             
             <header class="text-center mb-8">
-                <h1 class="text-3xl font-extrabold text-[#032C4F]">Promotion Affiliée</h1>
-                <p class="text-gray-500 mt-2">Étape 2/3: Ajoutez vos Liens de Réseaux Sociaux (Maximalisez votre Portée)</p>
+                <h1 class="text-3xl font-extrabold text-[#032C4F]">Configuration Affilié</h1>
+                <p class="text-gray-500 mt-2">Étape 2/3: Liens de Réseaux Sociaux</p>
                 <div class="w-full bg-gray-200 rounded-full h-2.5 mt-4">
                     <div class="bg-blue-600 h-2.5 rounded-full" style="width: 66%"></div>
                 </div>
             </header>
 
             <form onsubmit="handleSubmit(event)" class="space-y-6">
-                <p class="text-gray-700 font-medium">
-                    Ajoutez les liens de tous vos profils sociaux pour maximiser votre portée. Ces liens alimenteront votre page de profil JEOAH'S publique.
+                
+                <p class="text-gray-700 font-medium bg-indigo-50 p-4 rounded-xl border border-indigo-200">
+                    Ajoutez les liens de vos réseaux sociaux. **TikTok, YouTube et Instagram sont obligatoires** pour la validation de votre profil. Les autres sont optionnels.
                 </p>
 
-                <!-- Champs des Liens Sociaux -->
+                <!-- Conteneur des Liens Sociaux (rendus par JS) -->
                 <div id="social-links-container" class="space-y-4">
-                    <!-- Les champs sont insérés ici par JS (renderFormFields) -->
+                    <!-- Les liens sont insérés ici par renderSocialLinks() -->
                 </div>
-                
-                <div class="flex space-x-4">
-                    <button type="button" onclick="goToPreviousStep()" class="flex-1 py-3 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition duration-300 shadow-md">
+
+                <!-- Boutons de Navigation -->
+                <div class="flex justify-between pt-4">
+                    <a href="affiliate_onboarding_step1.html" class="py-3 px-6 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition duration-300 shadow-md flex items-center">
                         <i class="fas fa-arrow-left mr-2"></i> Précédent
-                    </button>
-                    <button type="submit" id="submit-button" class="flex-1 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition duration-300 shadow-lg">
-                        Accéder au Tableau de Bord
+                    </a>
+                    <button type="submit" id="submit-button" class="py-3 px-6 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition duration-300 shadow-lg flex items-center">
+                        Étape Suivante <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                 </div>
             </form>

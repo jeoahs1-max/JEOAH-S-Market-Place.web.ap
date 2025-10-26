@@ -1,0 +1,399 @@
+<!-- 
+    universal_chat_system.html - Interface de chat en temps réel pour tous les rôles (Vendeur, Affilié, Client).
+    
+    Les discussions sont stockées dans une collection publique 'chats' et filtrées par userId.
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messagerie NEY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, where, doc, getDocs, addDoc, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        setLogLevel('debug'); // Active les logs de débogage
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth, userId;
+        let currentUserId = 'User-' + (Math.random() * 1000).toFixed(0); // ID par défaut ou anonyme
+        let activeChatId = null;
+        let chats = [];
+        let messages = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            document.getElementById('send-message-btn').addEventListener('click', sendMessage);
+            document.getElementById('message-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+
+        async function initFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase config missing. Running in simulation mode.");
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('chat-container').classList.remove('hidden');
+                document.getElementById('user-id-display').textContent = `ID Utilisateur: ${currentUserId} (Simulé)`;
+                return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Erreur d'authentification:", error);
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('chat-container').classList.remove('hidden');
+
+                if (user) {
+                    userId = user.uid;
+                    currentUserId = userId;
+                    document.getElementById('user-id-display').textContent = `ID Utilisateur: ${currentUserId}`;
+                    startChatsListener();
+                } else {
+                    document.getElementById('user-id-display').textContent = `ID Utilisateur: ${currentUserId} (Anonyme)`;
+                    showCustomModal("Non Connecté", "Vous êtes connecté de manière anonyme. Seules vos conversations initiées seront sauvegardées.");
+                }
+            });
+        }
+        
+        /**
+         * Écoute les conversations auxquelles l'utilisateur participe.
+         * NOTE: Les conversations sont stockées dans une collection publique 'chats'.
+         */
+        function startChatsListener() {
+            if (!currentUserId || !db) return;
+
+            // Collection publique pour les chats: /artifacts/{appId}/public/data/chats
+            const chatsCollectionRef = collection(db, `artifacts/${appId}/public/data/chats`);
+            
+            // Requête pour filtrer les chats où l'utilisateur est un participant (filtrage local pour éviter orderBy)
+            // Dans un cas réel, on aurait deux index pour 'participant1Id' et 'participant2Id'
+            
+            // Pour la démo, on écoute tous les chats et on filtre localement pour la simplicité.
+            onSnapshot(chatsCollectionRef, (snapshot) => {
+                chats = [];
+                snapshot.forEach(doc => {
+                    const chat = { id: doc.id, ...doc.data() };
+                    // Filtrage local pour inclure uniquement les chats de l'utilisateur
+                    if (chat.participants.includes(currentUserId)) {
+                        chats.push(chat);
+                    }
+                });
+                
+                // Tri par dernière activité (simulé)
+                chats.sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0));
+
+                renderChatList();
+                
+                // Si un chat est actif, redémarrer l'écoute des messages pour garantir la synchronisation
+                if (activeChatId) {
+                    const chatExists = chats.find(c => c.id === activeChatId);
+                    if (!chatExists) {
+                        // Le chat actif a été supprimé ou n'existe plus
+                        setActiveChat(null);
+                    } else {
+                         startMessagesListener(activeChatId);
+                    }
+                } else if (chats.length > 0) {
+                    // Sélectionner le premier chat si aucun n'est actif
+                    setActiveChat(chats[0].id);
+                }
+
+            }, (error) => {
+                console.error("Erreur onSnapshot chats:", error);
+            });
+        }
+
+        /**
+         * Écoute les messages d'une conversation spécifique.
+         */
+        function startMessagesListener(chatId) {
+            if (!db || !chatId) return;
+
+            const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/chats/${chatId}/messages`);
+            // Pour les messages, on peut utiliser orderBy et limit
+            const q = query(messagesCollectionRef, orderBy('timestamp', 'asc')); 
+            
+            onSnapshot(q, (snapshot) => {
+                messages = [];
+                snapshot.forEach(doc => {
+                    messages.push({ id: doc.id, ...doc.data() });
+                });
+                renderMessages();
+            }, (error) => {
+                console.error("Erreur onSnapshot messages:", error);
+            });
+        }
+        
+        /**
+         * Définit la conversation active et met à jour l'interface.
+         */
+        window.setActiveChat = function(chatId) {
+            activeChatId = chatId;
+            const chatListItems = document.querySelectorAll('.chat-list-item');
+            chatListItems.forEach(item => {
+                item.classList.remove('bg-blue-100', 'border-blue-500');
+                item.classList.add('bg-white', 'border-gray-200');
+            });
+
+            if (chatId) {
+                const activeItem = document.getElementById(`chat-item-${chatId}`);
+                if (activeItem) {
+                    activeItem.classList.remove('bg-white', 'border-gray-200');
+                    activeItem.classList.add('bg-blue-100', 'border-blue-500');
+                    const activeChat = chats.find(c => c.id === chatId);
+                    document.getElementById('chat-header-title').textContent = activeChat ? getChatTitle(activeChat) : 'Conversation';
+                    document.getElementById('chat-header-subtitle').textContent = activeChat ? `Participants: ${activeChat.participants.length}` : '';
+                    startMessagesListener(chatId);
+                }
+            } else {
+                 document.getElementById('chat-header-title').textContent = 'Sélectionnez une conversation';
+                 document.getElementById('chat-header-subtitle').textContent = '';
+                 document.getElementById('message-list').innerHTML = '<div class="p-4 text-center text-gray-500">Aucune conversation sélectionnée.</div>';
+                 messages = [];
+            }
+        }
+
+        /**
+         * Envoie un nouveau message dans la conversation active.
+         */
+        async function sendMessage() {
+            const inputElement = document.getElementById('message-input');
+            const text = inputElement.value.trim();
+
+            if (!text || !activeChatId || !db) {
+                return;
+            }
+
+            try {
+                const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/chats/${activeChatId}/messages`);
+                await addDoc(messagesCollectionRef, {
+                    senderId: currentUserId,
+                    text: text,
+                    timestamp: serverTimestamp() // Utiliser le timestamp du serveur
+                });
+                
+                // Mettre à jour la dernière activité du chat parent
+                const chatDocRef = doc(db, `artifacts/${appId}/public/data/chats`, activeChatId);
+                // NOTE: updateDoc ne supporte pas l'ajout de champ si absent, mais setDoc avec merge: true le fait.
+                // Ici, on utilise updateDoc pour mettre à jour la dernière activité.
+                // await updateDoc(chatDocRef, { lastActivity: Date.now() }); 
+                
+                inputElement.value = '';
+                // Le listener onSnapshot gérera le défilement et l'affichage
+            } catch (e) {
+                console.error("Erreur envoi message:", e);
+                showCustomModal("Erreur d'Envoi", "Impossible d'envoyer le message. Veuillez réessayer.");
+            }
+        }
+
+        /**
+         * Rend la liste des conversations (panneau de gauche).
+         */
+        function renderChatList() {
+            const listContainer = document.getElementById('chat-list');
+            if (chats.length === 0) {
+                listContainer.innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">Aucune conversation.</div>';
+                return;
+            }
+
+            const html = chats.map(chat => {
+                const title = getChatTitle(chat);
+                const lastMessage = chat.lastMessage || 'Nouvelle conversation...';
+                const isActive = chat.id === activeChatId;
+
+                return `
+                    <div id="chat-item-${chat.id}" 
+                         class="chat-list-item p-4 border-b border-gray-200 cursor-pointer transition hover:bg-gray-50 ${isActive ? 'bg-blue-100 border-blue-500' : 'bg-white border-gray-200'}"
+                         onclick="setActiveChat('${chat.id}')">
+                        <div class="font-bold text-gray-900 truncate">${title}</div>
+                        <p class="text-sm text-gray-500 truncate">${lastMessage}</p>
+                    </div>
+                `;
+            }).join('');
+
+            listContainer.innerHTML = html;
+        }
+
+        /**
+         * Détermine le titre de la conversation pour l'utilisateur actuel.
+         */
+        function getChatTitle(chat) {
+            const otherParticipants = chat.participants.filter(id => id !== currentUserId);
+            if (chat.title) return chat.title;
+            if (otherParticipants.length === 1) {
+                return otherParticipants[0]; // Afficher l'ID de l'autre participant
+            }
+            return `Chat de groupe (${otherParticipants.length + 1})`;
+        }
+
+        /**
+         * Rend la liste des messages (panneau de droite).
+         */
+        function renderMessages() {
+            const listContainer = document.getElementById('message-list');
+            
+            if (messages.length === 0) {
+                listContainer.innerHTML = '<div class="p-4 text-center text-gray-500">Commencez la conversation!</div>';
+                listContainer.scrollTop = listContainer.scrollHeight;
+                return;
+            }
+
+            const html = messages.map(msg => {
+                const isMine = msg.senderId === currentUserId;
+                const time = msg.timestamp?.toDate ? new Date(msg.timestamp.toDate()).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : 'Maintenant';
+                
+                return `
+                    <div class="flex ${isMine ? 'justify-end' : 'justify-start'} mb-4">
+                        <div class="max-w-xs lg:max-w-md px-4 py-3 rounded-xl shadow-md 
+                                    ${isMine ? 'bg-blue-600 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-tl-none'}">
+                            <div class="text-xs font-semibold mb-1 ${isMine ? 'text-blue-200' : 'text-gray-500'}">
+                                ${isMine ? 'Vous' : msg.senderId} <span class="ml-2 font-normal text-xs">${time}</span>
+                            </div>
+                            <p class="text-sm">${msg.text}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            listContainer.innerHTML = html;
+            // Défiler vers le bas pour voir le dernier message
+            listContainer.scrollTop = listContainer.scrollHeight;
+        }
+        
+        // Modale d'alerte personnalisée (comme dans les autres fichiers)
+        window.showCustomModal = function(title, message) {
+            const modalId = 'custom-alert-modal';
+            document.getElementById(modalId)?.remove();
+
+            const modalHtml = `
+                <div id="${modalId}" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[999]">
+                    <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4">
+                        <h3 class="text-xl font-bold ${title.includes('Erreur') ? 'text-red-600' : 'text-blue-600'} mb-4">${title}</h3>
+                        <p class="text-gray-700 mb-6">${message}</p>
+                        <button onclick="document.getElementById('${modalId}').remove()" 
+                                class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+    </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        #message-list {
+            height: calc(100vh - 200px); /* Hauteur calculée pour le mobile */
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        /* Style pour les dispositifs plus grands */
+        @media (min-width: 768px) {
+            #message-list {
+                height: calc(100vh - 120px);
+            }
+            #chat-container {
+                height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay de Chargement -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+        <p class="ml-4 text-gray-600 text-lg">Chargement du Système de Messagerie...</p>
+    </div>
+
+    <!-- Interface de Chat -->
+    <div id="chat-container" class="hidden flex h-screen bg-gray-50 shadow-lg">
+
+        <!-- Colonne de Gauche: Liste des Chats -->
+        <div class="w-full md:w-80 border-r border-gray-200 bg-white flex flex-col">
+            <header class="p-4 border-b border-gray-200 shadow-sm">
+                <h2 class="text-2xl font-extrabold text-[#032C4F]">Conversations</h2>
+                <p id="user-id-display" class="text-xs text-gray-400 font-mono mt-1 truncate"></p>
+            </header>
+            
+            <div id="chat-list" class="flex-1 overflow-y-auto">
+                <!-- Les conversations seront rendues ici -->
+            </div>
+            
+            <footer class="p-3 border-t border-gray-200">
+                <button class="w-full py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition">
+                    <i class="fas fa-plus mr-2"></i> Nouvelle Discussion
+                </button>
+            </footer>
+        </div>
+
+        <!-- Colonne de Droite: Fenêtre de Chat Active -->
+        <div class="hidden md:flex flex-col flex-1">
+            
+            <!-- Entête du Chat Actif -->
+            <header class="p-4 border-b border-gray-200 bg-white shadow-sm">
+                <h3 id="chat-header-title" class="text-xl font-bold text-gray-900 truncate">Sélectionnez une conversation</h3>
+                <p id="chat-header-subtitle" class="text-sm text-gray-500"></p>
+            </header>
+            
+            <!-- Liste des Messages -->
+            <div id="message-list" class="flex-1 overflow-y-auto bg-gray-50">
+                <div class="p-4 text-center text-gray-500">Aucune conversation sélectionnée.</div>
+            </div>
+            
+            <!-- Zone de Saisie -->
+            <footer class="p-4 bg-white border-t border-gray-200">
+                <div class="flex space-x-3">
+                    <input type="text" id="message-input" placeholder="Écrivez votre message..." 
+                           class="flex-1 py-2 px-4 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition shadow-inner">
+                    <button id="send-message-btn" 
+                            class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition shadow-lg disabled:opacity-50"
+                            disabled>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </footer>
+        </div>
+
+    </div>
+
+    <!-- Mobile view: cacher la liste des chats pour la fenêtre active (simplifié) -->
+    <script>
+        // Active le bouton d'envoi si le chat est actif
+        document.getElementById('message-input').addEventListener('input', (e) => {
+             const btn = document.getElementById('send-message-btn');
+             btn.disabled = !(e.target.value.trim().length > 0 && activeChatId);
+        });
+        
+        // La gestion des vues mobiles est gérée via les classes CSS (hidden md:flex)
+    </script>
+</body>
+</html>
+

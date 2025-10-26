@@ -1,0 +1,354 @@
+<!--vendor_orders.html".
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Commandes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        setLogLevel('debug'); // Active les logs de débogage pour Firestore
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth, userId;
+        let allOrders = [];
+        let currentFilter = 'all'; // 'all', 'pending', 'shipped', 'delivered', 'cancelled'
+
+        const STATUS_MAPPING = {
+            pending: { label: 'En Attente', color: 'bg-yellow-500', icon: 'fas fa-hourglass-half' },
+            shipped: { label: 'Expédiée', color: 'bg-blue-500', icon: 'fas fa-truck' },
+            delivered: { label: 'Livrée', color: 'bg-green-500', icon: 'fas fa-check-circle' },
+            cancelled: { label: 'Annulée', color: 'bg-red-500', icon: 'fas fa-times-circle' }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            document.getElementById('status-filter').addEventListener('change', (e) => {
+                currentFilter = e.target.value;
+                renderOrderList();
+            });
+        });
+
+        async function initFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase config missing. Running in simulation mode.");
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('orders-manager-container').classList.remove('hidden');
+                return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Erreur d'authentification:", error);
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('orders-manager-container').classList.remove('hidden');
+
+                if (user) {
+                    userId = user.uid;
+                    document.getElementById('vendor-id-display').textContent = `ID Vendeur: ${userId}`;
+                    startOrdersListener();
+                } else {
+                    showCustomModal("Non Connecté", "Veuillez vous connecter pour gérer vos commandes.");
+                }
+            });
+        }
+        
+        /**
+         * Écoute les commandes destinées à ce vendeur.
+         * NOTE: Les commandes sont stockées dans une collection publique 'orders' et filtrées par vendorId.
+         */
+        function startOrdersListener() {
+            if (!userId) return;
+
+            // Collection publique pour les commandes: /artifacts/{appId}/public/data/orders
+            const ordersCollectionRef = collection(db, `artifacts/${appId}/public/data/orders`);
+            
+            // Requête pour filtrer uniquement les commandes destinées à ce vendeur (simulé)
+            // Dans un système réel, chaque item de commande aurait le vendorId. Ici on simule une seule commande.
+            const q = query(ordersCollectionRef, where('vendorId', '==', userId));
+            
+            onSnapshot(q, (snapshot) => {
+                allOrders = [];
+                snapshot.forEach(doc => {
+                    allOrders.push({ id: doc.id, ...doc.data() });
+                });
+                // Sorte les commandes par date de création (plus récentes en premier)
+                allOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+                renderOrderList();
+            }, (error) => {
+                console.error("Erreur onSnapshot commandes:", error);
+            });
+        }
+
+        /**
+         * Met à jour le statut d'une commande dans Firestore.
+         */
+        window.updateOrderStatus = async function(orderId, newStatus) {
+            if (!userId || !db) return;
+
+            const order = allOrders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const confirmUpdate = await showConfirmationModal(`Changer le statut de la commande #${order.shortId} ?`, `Passer le statut à "${STATUS_MAPPING[newStatus].label}" ?`);
+
+            if (confirmUpdate) {
+                try {
+                    const orderDocRef = doc(db, `artifacts/${appId}/public/data/orders`, orderId);
+                    await updateDoc(orderDocRef, {
+                        status: newStatus,
+                        updatedAt: new Date().toISOString()
+                    });
+                    showCustomModal("Succès", `Commande #${order.shortId} mise à jour à "${STATUS_MAPPING[newStatus].label}".`);
+                } catch (e) {
+                    console.error("Erreur mise à jour commande:", e);
+                    showCustomModal("Erreur", "Impossible de mettre à jour la commande.");
+                }
+            }
+        }
+
+        /**
+         * Rend la liste des commandes filtrées dans l'interface utilisateur.
+         */
+        function renderOrderList() {
+            const listContainer = document.getElementById('order-list-container');
+            
+            const filteredOrders = allOrders.filter(order => 
+                currentFilter === 'all' || order.status === currentFilter
+            );
+
+            document.getElementById('order-count-display').textContent = filteredOrders.length;
+            
+            if (filteredOrders.length === 0) {
+                listContainer.innerHTML = `<div class="text-center py-10 text-gray-500 italic">Aucune commande trouvée pour le filtre "${currentFilter === 'all' ? 'Tous' : STATUS_MAPPING[currentFilter].label}".</div>`;
+                return;
+            }
+
+            const html = filteredOrders.map(order => {
+                const statusInfo = STATUS_MAPPING[order.status] || { label: 'Inconnu', color: 'bg-gray-400', icon: 'fas fa-question-circle' };
+                const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
+                
+                // Simule un produit simple pour l'affichage
+                const product = order.items?.[0] || { name: "Produit Inconnu", quantity: 1, price: 0 };
+                
+                return `
+                    <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition flex flex-col space-y-4">
+                        
+                        <!-- Entête de la Commande -->
+                        <div class="flex justify-between items-start border-b pb-3">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900">Commande #${order.shortId || order.id.substring(0, 8).toUpperCase()}</h3>
+                                <p class="text-sm text-gray-500">Passée le ${orderDate}</p>
+                            </div>
+                            <span class="py-1 px-3 text-sm font-semibold rounded-full text-white ${statusInfo.color}">
+                                <i class="${statusInfo.icon} mr-1"></i> ${statusInfo.label}
+                            </span>
+                        </div>
+
+                        <!-- Détails des Articles (Simulé) -->
+                        <div class="text-sm text-gray-700">
+                            <p class="font-semibold mb-1">Articles (${order.items?.length || 1}) :</p>
+                            <div class="flex justify-between text-xs py-1 border-b border-gray-100">
+                                <span class="text-gray-600">${product.name} (x${product.quantity})</span>
+                                <span class="font-medium">${formatCurrency(product.price * product.quantity)}</span>
+                            </div>
+                        </div>
+
+                        <!-- Total et Client -->
+                        <div class="flex justify-between text-md font-semibold pt-2 border-t">
+                            <span class="text-gray-600">Total :</span>
+                            <span class="text-2xl text-blue-600 font-extrabold">${formatCurrency(order.totalAmount || 0)}</span>
+                        </div>
+                        <p class="text-sm text-gray-500">Client : ${order.customerName || 'Anonyme'} | Affilié: <span class="font-mono text-xs">${order.affiliateId || 'N/A'}</span></p>
+
+                        <!-- Actions de Statut -->
+                        <div class="pt-3 border-t flex flex-wrap gap-2">
+                            ${Object.keys(STATUS_MAPPING).map(statusKey => {
+                                if (statusKey === order.status || statusKey === 'cancelled') return ''; // Ne pas montrer le statut actuel ou Annuler par défaut
+                                return `
+                                    <button onclick="updateOrderStatus('${order.id}', '${statusKey}')" 
+                                            class="flex-1 py-2 px-3 text-xs font-bold rounded-lg transition 
+                                            ${STATUS_MAPPING[statusKey].color.replace('bg-', 'bg-')}-600 text-white hover:${STATUS_MAPPING[statusKey].color.replace('bg-', 'bg-')}-700 min-w-[100px] shadow-md">
+                                        <i class="${STATUS_MAPPING[statusKey].icon}"></i> Mettre à ${STATUS_MAPPING[statusKey].label}
+                                    </button>
+                                `;
+                            }).join('')}
+                            ${order.status !== 'cancelled' ? `
+                                <button onclick="updateOrderStatus('${order.id}', 'cancelled')" 
+                                        class="flex-1 py-2 px-3 text-xs font-bold rounded-lg bg-gray-300 text-gray-700 hover:bg-gray-400 min-w-[100px] shadow-md">
+                                    <i class="${STATUS_MAPPING['cancelled'].icon}"></i> Annuler
+                                </button>` : ''}
+                        </div>
+
+                    </div>
+                `;
+            }).join('');
+
+            listContainer.innerHTML = html;
+        }
+
+        // Fonction utilitaire de formatage
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
+        }
+
+        /**
+         * Modale de confirmation personnalisée (à la place de window.confirm)
+         */
+        function showConfirmationModal(title, message) {
+            return new Promise((resolve) => {
+                const modalId = 'confirmation-modal';
+                document.getElementById(modalId)?.remove();
+
+                const modalHtml = `
+                    <div id="${modalId}" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[999]">
+                        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 transform transition-all scale-100">
+                            <h3 class="text-xl font-bold text-orange-600 mb-4">${title}</h3>
+                            <p class="text-gray-700 mb-6">${message}</p>
+                            <div class="flex justify-end space-x-3">
+                                <button id="cancel-btn" class="py-2 px-4 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 transition">
+                                    Annuler
+                                </button>
+                                <button id="confirm-btn" class="py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
+                                    Confirmer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+                document.getElementById('cancel-btn').onclick = () => {
+                    document.getElementById(modalId).remove();
+                    resolve(false);
+                };
+                document.getElementById('confirm-btn').onclick = () => {
+                    document.getElementById(modalId).remove();
+                    resolve(true);
+                };
+            });
+        }
+        
+        /**
+         * Modale d'alerte personnalisée (à la place de window.alert)
+         */
+        window.showCustomModal = function(title, message) {
+            const modalId = 'custom-alert-modal';
+            document.getElementById(modalId)?.remove();
+
+            const modalHtml = `
+                <div id="${modalId}" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[999]">
+                    <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4">
+                        <h3 class="text-xl font-bold ${title.includes('Erreur') ? 'text-red-600' : 'text-blue-600'} mb-4">${title}</h3>
+                        <p class="text-gray-700 mb-6">${message}</p>
+                        <button onclick="document.getElementById('${modalId}').remove()" 
+                                class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+    </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .dashboard-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay de Chargement -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+        <p class="ml-4 text-gray-600 text-lg">Préparation du Gestionnaire de Commandes...</p>
+    </div>
+
+    <!-- Contenu du Gestionnaire de Commandes -->
+    <div id="orders-manager-container" class="hidden min-h-screen p-4 sm:p-8">
+        <div class="max-w-6xl mx-auto space-y-8">
+
+            <header class="text-center p-4 bg-white rounded-2xl shadow-lg">
+                <i class="fas fa-box-open text-4xl text-blue-600 mb-3"></i>
+                <h1 class="text-3xl font-extrabold text-[#032C4F]">Gestion des Commandes Clients</h1>
+                <p class="text-gray-600 mt-1">Traitez et mettez à jour le statut des commandes en temps réel.</p>
+                <p id="vendor-id-display" class="text-xs text-gray-400 mt-2 font-mono"></p>
+            </header>
+
+            <!-- Filtres et Statistiques Rapides -->
+            <section class="dashboard-card p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    
+                    <!-- Compteur de Commandes -->
+                    <div class="text-center sm:text-left">
+                        <p class="text-sm text-gray-500 font-medium">Commandes Affichées</p>
+                        <p class="text-4xl font-extrabold text-blue-600" id="order-count-display">0</p>
+                    </div>
+
+                    <!-- Sélecteur de Filtre -->
+                    <div class="w-full sm:w-auto">
+                        <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">Filtrer par Statut :</label>
+                        <select id="status-filter" class="w-full sm:w-60 py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition">
+                            <option value="all">Toutes les Commandes</option>
+                            <option value="pending">En Attente</option>
+                            <option value="shipped">Expédiée</option>
+                            <option value="delivered">Livrée</option>
+                            <option value="cancelled">Annulée</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Liste des Commandes -->
+            <section class="mt-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-receipt mr-2"></i> Commandes Récemment Filtrées
+                </h2>
+                <div id="order-list-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Les cartes de commandes seront rendues ici par JavaScript -->
+                    <div class="text-center py-10 text-gray-500 italic lg:col-span-2">Chargement des commandes...</div>
+                </div>
+            </section>
+            
+            <div class="text-center pt-4">
+                <a href="vendor_dashboard.html" class="text-sm text-gray-500 hover:text-gray-700 font-medium transition">
+                    <i class="fas fa-arrow-left mr-1"></i> Retour au Tableau de Bord
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
+

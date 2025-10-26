@@ -1,66 +1,395 @@
+<!-- 
+     - Tableau de Bord Principal de l'Affilié (avec logique NEY Premium)
+    
+    Affiche les métriques clés et le générateur de liens, dont l'accès est conditionnel au statut d'abonnement.
+-->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Affilié - JEOAH'S</title>
+    <title>Tableau de Bord Affilié</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, getDoc, collection, query, where, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db, auth, userId;
+        const DEFAULT_PROFILE = { 
+            name: 'Utilisateur', 
+            nickname: 'MonPseudoAffilié', 
+            profilePictureUrl: 'https://placehold.co/100x100/1D4ED8/ffffff?text=A' 
+        };
+        let affiliateData = { ...DEFAULT_PROFILE };
+        let userSubscriptionStatus = { isPremium: false };
 
-    <nav class="bg-white shadow-md sticky top-0 z-10">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex-shrink-0">
-                    <a href="index.html" class="text-2xl font-bold text-indigo-600">JEOAH'S Marketplace</a>
-                </div>
-                <div id="main-nav" class="flex items-center">
-                    <div id="role-links" class="flex space-x-4">
+        document.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+        });
+
+        async function initFirebase() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+
+            if (Object.keys(firebaseConfig).length === 0) {
+                // Mode Débogage sans Firebase : Simuler un utilisateur Premium pour voir les fonctionnalités NEY
+                userSubscriptionStatus.isPremium = true; 
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('dashboard-container').classList.remove('hidden');
+                updateUI(DEFAULT_PROFILE);
+                return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Erreur d'authentification:", error);
+                // Si l'auth échoue, on continue en mode non-connecté/gratuit
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('dashboard-container').classList.remove('hidden');
+
+                if (!user) {
+                    updateUI(DEFAULT_PROFILE);
+                    return;
+                }
+                userId = user.uid;
+                document.getElementById('user-id-display').textContent = `ID Affilié: ${userId}`;
+                
+                // 1. Charger les données du profil de l'affilié
+                const affiliateDocRef = doc(db, `artifacts/${appId}/users/${userId}/affiliate_data/profile`);
+                onSnapshot(affiliateDocRef, (docSnap) => {
+                    affiliateData = docSnap.exists() ? docSnap.data() : DEFAULT_PROFILE;
+                    updateUI(affiliateData);
+                }, (error) => {
+                    console.error("Erreur onSnapshot pour le profil affilié:", error);
+                    updateUI(DEFAULT_PROFILE);
+                });
+                
+                // 2. Charger le statut de l'abonnement
+                const subDocRef = doc(db, `artifacts/${appId}/users/${userId}/subscription_data/status`);
+                onSnapshot(subDocRef, (docSnap) => {
+                    userSubscriptionStatus = docSnap.exists() ? docSnap.data() : { isPremium: false };
+                    updateUI(affiliateData); // Mettre à jour l'UI après le statut d'abonnement
+                }, (error) => {
+                    console.error("Erreur onSnapshot pour l'abonnement:", error);
+                });
+            });
+        }
+        
+        /**
+         * Met à jour l'interface utilisateur avec les données de l'affilié et le statut premium.
+         */
+        function updateUI(profile) {
+            document.getElementById('welcome-message').textContent = `Bienvenue, ${profile.nickname || DEFAULT_PROFILE.nickname} !`;
+            document.getElementById('profile-picture').src = profile.profilePictureUrl || DEFAULT_PROFILE.profilePictureUrl;
+            
+            // Logique NEY Premium
+            const generatorContainer = document.getElementById('link-generator-container');
+            const isPremium = userSubscriptionStatus.isPremium;
+            
+            if (isPremium) {
+                // Afficher le générateur NEY Avancé
+                document.getElementById('premium-badge').classList.remove('hidden');
+                document.getElementById('generator-title').textContent = 'Générateur NEY Avancé (Multi-Sites)';
+                document.getElementById('premium-features-locked').classList.add('hidden');
+                document.getElementById('premium-features-unlocked').classList.remove('hidden');
+                generatorContainer.classList.remove('border-red-400');
+                generatorContainer.classList.add('border-green-400');
+                document.getElementById('subscription-link-text').textContent = 'Gérer mon Abonnement';
+
+            } else {
+                // Afficher le générateur de base avec blocage NEY
+                document.getElementById('premium-badge').classList.add('hidden');
+                document.getElementById('generator-title').textContent = 'Générateur de Liens Standard';
+                document.getElementById('premium-features-unlocked').classList.add('hidden');
+                document.getElementById('premium-features-locked').classList.remove('hidden');
+                generatorContainer.classList.remove('border-green-400');
+                generatorContainer.classList.add('border-red-400');
+                document.getElementById('subscription-link-text').textContent = 'Débloquer NEY Premium';
+            }
+            
+            // Mise à jour des statistiques (Valeurs simulées)
+            document.getElementById('commission-total').textContent = formatCurrency(2548.90);
+            document.getElementById('clicks-total').textContent = '14,567';
+            document.getElementById('sales-total').textContent = '452';
+            document.getElementById('balance-current').textContent = formatCurrency(560.00);
+        }
+
+        /**
+         * Simule la génération du lien.
+         */
+        window.generateLink = function() {
+            const inputUrl = document.getElementById('product-url-input').value.trim();
+            const isPremium = userSubscriptionStatus.isPremium;
+            
+            if (!inputUrl) {
+                showCustomModal("Erreur", "Veuillez coller une URL de produit valide.");
+                return;
+            }
+
+            const resultDiv = document.getElementById('generation-result');
+            
+            if (isPremium) {
+                // Logique NEY Premium (Agrégation et recherche automatique)
+                resultDiv.innerHTML = `
+                    <div class="bg-green-50 p-4 rounded-xl mt-4 border border-green-300">
+                        <p class="font-bold text-green-700 mb-2 flex items-center"><i class="fas fa-robot mr-2"></i> Analyse NEY Terminée</p>
+                        <p class="text-sm text-gray-700">NEY a agrégé ce produit et trouvé des correspondances chez 3 marchands :</p>
+                        <ul class="mt-2 space-y-1 text-sm">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Amazon: Prix 35.99€ (Votre lien généré)</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Temu: Prix 32.50€ (Votre lien généré)</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> eBay: Prix 39.00€ (Votre lien généré)</li>
+                        </ul>
+                        <p class="mt-3 font-semibold text-blue-600">Lien Public à Partager (Mène à la page comparatrice unique) :</p>
+                        <div class="bg-white border rounded p-2 overflow-auto text-xs whitespace-nowrap">
+                            https://mon-app.com/p/${userId}/${btoa(inputUrl).slice(0, 12)}
                         </div>
-                    <span class="border-r border-gray-300 h-6 mx-4"></span>
-                    <div id="auth-links" class="flex items-center space-x-4">
-                        <span class="text-gray-500 text-sm">Chargement...</span> 
+                        <button onclick="copyToClipboard('https://mon-app.com/p/${userId}/${btoa(inputUrl).slice(0, 12)}')" class="mt-2 w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                            <i class="fas fa-copy mr-2"></i> Copier le Lien NEY
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Logique standard (Simple transformation du lien)
+                const generatedLink = `${inputUrl}?affiliate_id=${userId}`;
+                resultDiv.innerHTML = `
+                    <div class="bg-yellow-50 p-4 rounded-xl mt-4 border border-yellow-300">
+                        <p class="font-bold text-yellow-700 mb-2 flex items-center"><i class="fas fa-link mr-2"></i> Lien Standard Généré</p>
+                        <p class="text-sm text-gray-700">Ce lien fonctionne pour le site d'origine. Mettez à niveau vers NEY pour la comparaison multi-sites.</p>
+                        <p class="mt-3 font-semibold text-gray-800">Votre Lien Affilié :</p>
+                        <div class="bg-white border rounded p-2 overflow-auto text-xs whitespace-nowrap">
+                            ${generatedLink}
+                        </div>
+                        <button onclick="copyToClipboard('${generatedLink}')" class="mt-2 w-full py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-sm">
+                            <i class="fas fa-copy mr-2"></i> Copier le Lien Standard
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Fonction utilitaire de formatage et de copie
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
+        }
+        
+        function copyToClipboard(text) {
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showCustomModal("Copié !", "Le lien a été copié dans votre presse-papiers.");
+        }
+
+        // Fonction pour afficher une modale personnalisée
+        window.showCustomModal = function(title, message) {
+            const modalId = 'custom-alert-modal';
+            document.getElementById(modalId)?.remove();
+
+            const modalHtml = `
+                <div id="${modalId}" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[999]">
+                    <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4">
+                        <h3 class="text-xl font-bold ${title.includes('Erreur') ? 'text-red-600' : 'text-blue-600'} mb-4">${title}</h3>
+                        <p class="text-gray-700 mb-6">${message}</p>
+                        <button onclick="document.getElementById('${modalId}').remove()" 
+                                class="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
+                            OK
+                        </button>
                     </div>
                 </div>
-            </div>
-        </div>
-    </nav>
-    <main class="container mx-auto p-8">
-        <h1 class="text-4xl font-bold text-gray-900 mb-6">Mon Tableau de Bord Affilié</h1>
-        
-        <div id="notificationContainer"></div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-xl shadow-lg">
-                <p class="text-sm font-medium text-gray-500">Commissions Totales</p>
-                <p class="text-3xl font-bold text-green-600 mt-1" id="totalCommissions">$0.00</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow-lg">
-                <p class="text-sm font-medium text-gray-500">Ventes Générées</p>
-                <p class="text-3xl font-bold text-indigo-600 mt-1" id="totalSales">0</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow-lg">
-                <p class="text-sm font-medium text-gray-500">Clics Trackés</p>
-                <p class="text-3xl font-bold text-yellow-600 mt-1" id="totalClicks">0</p>
-            </div>
-        </div>
-        
-        <div id="affiliateAdviceContainer" class="mb-8">
-            </div>
-
-        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Historique des Transactions (Commissions)</h2>
-        
-        <div class="bg-white p-6 rounded-xl shadow-lg">
-            <div id="affiliateTransactionsList" class="space-y-4">
-                <p class="text-center py-10 text-gray-500">Aucune transaction de commission trouvée...</p>
-            </div>
-        </div>
-    </main>
-
-    <script src="firebase-config.js"></script>
-    <script type="module" src="app.js"></script>
-    <script>
-        // Les fonctions displayAffiliateDashboard() et displayAffiliateTrendAnalysis() sont déclenchées dans app.js
     </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .stat-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .link-generator-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 3px solid; /* Bordure conditionnelle */
+            transition: border-color 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay de Chargement -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+        <p class="ml-4 text-gray-600 text-lg">Chargement du Tableau de Bord Affilié...</p>
+    </div>
+
+    <!-- Contenu du Tableau de Bord -->
+    <div id="dashboard-container" class="hidden min-h-screen p-4 sm:p-8">
+        <div class="max-w-6xl mx-auto space-y-8">
+
+            <!-- En-tête et Bienvenue -->
+            <header class="bg-white p-6 rounded-2xl shadow-lg flex flex-col sm:flex-row items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <img id="profile-picture" 
+                         src="https://placehold.co/100x100/1D4ED8/ffffff?text=A" 
+                         alt="Photo de profil" 
+                         class="w-16 h-16 object-cover rounded-full border-4 border-blue-500 shadow-md">
+                    <div>
+                        <h1 id="welcome-message" class="text-3xl font-extrabold text-[#032C4F]">Bienvenue !</h1>
+                        <p class="text-gray-600 mt-1 italic">Prêt à générer des commissions ?</p>
+                    </div>
+                </div>
+                <div class="mt-4 sm:mt-0 text-sm text-right">
+                    <p id="user-id-display" class="text-gray-400">ID Affilié: (Chargement...)</p>
+                    <a href="subscription_manager.html" class="text-blue-600 hover:text-blue-800 font-semibold transition mt-1 block flex items-center justify-end">
+                        <i class="fas fa-star mr-1 text-yellow-500"></i> <span id="subscription-link-text">Débloquer NEY Premium</span>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Section des Statistiques Clés -->
+            <section>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Statistiques Clés (30 derniers jours)</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+                    <!-- Carte 1: Commission Totale -->
+                    <div class="stat-card border-l-4 border-green-500">
+                        <i class="fas fa-dollar-sign text-3xl text-green-600 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Commission Totale</p>
+                        <p class="text-2xl font-extrabold text-gray-900 mt-1">
+                            <span id="commission-total">0,00 €</span>
+                        </p>
+                    </div>
+
+                    <!-- Carte 2: Clics Uniques -->
+                    <div class="stat-card border-l-4 border-blue-500">
+                        <i class="fas fa-mouse-pointer text-3xl text-blue-600 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Clics Uniques</p>
+                        <p class="text-2xl font-extrabold text-gray-900 mt-1">
+                            <span id="clicks-total">0</span>
+                        </p>
+                    </div>
+
+                    <!-- Carte 3: Ventes (Conversions) -->
+                    <div class="stat-card border-l-4 border-yellow-500">
+                        <i class="fas fa-shopping-cart text-3xl text-yellow-600 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Ventes Totales</p>
+                        <p class="text-2xl font-extrabold text-gray-900 mt-1">
+                            <span id="sales-total">0</span>
+                        </p>
+                    </div>
+
+                    <!-- Carte 4: Solde Retirable -->
+                    <div class="stat-card border-l-4 border-purple-500">
+                        <i class="fas fa-wallet text-3xl text-purple-600 mb-2"></i>
+                        <p class="text-sm font-medium text-gray-500">Solde Retirable</p>
+                        <p class="text-2xl font-extrabold text-gray-900 mt-1">
+                            <span id="balance-current">0,00 €</span>
+                        </p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Section Générateur de Liens (Cœur NEY) -->
+            <section id="link-generator-container" class="link-generator-card bg-white p-6 shadow-xl border-4 border-red-400">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 id="generator-title" class="text-2xl font-bold text-gray-800 flex items-center">
+                        Générateur de Liens Standard
+                    </h2>
+                    <span id="premium-badge" class="hidden bg-yellow-500 text-white text-xs font-bold py-1 px-3 rounded-full shadow-md transform rotate-1">
+                        NEY PREMIUM
+                    </span>
+                </div>
+                
+                <!-- Zone de Saisie -->
+                <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3">
+                    <input type="url" id="product-url-input" 
+                           placeholder="Collez ici l'URL du produit à promouvoir (Ex: https://amazon.fr/mon-produit)"
+                           class="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    <button onclick="generateLink()" class="py-3 px-6 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300 shadow-md flex-shrink-0">
+                        Générer le Lien
+                    </button>
+                </div>
+
+                <!-- Contenu de la Génération / Blocs Conditionnels NEY -->
+                <div id="generation-result" class="mt-4">
+                    <!-- Résultat de la génération apparaîtra ici -->
+                </div>
+
+                <!-- Explication des fonctionnalités NEY Premium -->
+                <div id="premium-features-unlocked" class="hidden mt-6 bg-green-50 p-4 rounded-xl border border-green-200">
+                    <p class="font-bold text-green-700">Fonctionnalités NEY Actives :</p>
+                    <ul class="text-sm text-gray-600 mt-2 list-disc list-inside">
+                        <li>**Agrégation Multi-Affiliée :** Recherche et comparaison automatique des prix sur tous vos sites.</li>
+                        <li>**Page Produit Unique :** Génération d'une page comparatrice pour votre public.</li>
+                        <li>**Tendances :** Suggestion automatique des produits en forte demande.</li>
+                    </ul>
+                </div>
+                
+                <div id="premium-features-locked" class="mt-6 bg-red-50 p-4 rounded-xl border border-red-200">
+                    <p class="font-bold text-red-700 flex items-center">
+                        <i class="fas fa-lock mr-2"></i> Fonctionnalité NEY Verrouillée
+                    </p>
+                    <p class="text-sm text-gray-600 mt-2">Passez à **NEY Premium** pour débloquer l'agrégation multi-sites et les alertes de réduction en temps réel. <a href="subscription_manager.html" class="font-semibold text-blue-600 hover:underline">Voir les plans</a>.</p>
+                </div>
+
+            </section>
+            
+            <!-- Autres sections du tableau de bord (simulées) -->
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Historique des Gains -->
+                <div class="stat-card border-l-4 border-gray-400">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-history mr-2"></i> Historique des Gains
+                    </h3>
+                    <p class="text-gray-600 text-sm">Consultez, filtrez et téléchargez les rapports détaillés de vos commissions passées.</p>
+                    <button class="mt-3 py-2 px-4 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition">
+                        Voir les Transactions
+                    </button>
+                </div>
+                
+                <!-- Mes Programmes Affiliés -->
+                <div class="stat-card border-l-4 border-gray-400">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center">
+                        <i class="fas fa-code-branch mr-2"></i> Mes Programmes
+                    </h3>
+                    <p class="text-gray-600 text-sm">Ajoutez, modifiez ou désactivez vos identifiants pour chaque plateforme d'affiliation.</p>
+                    <button class="mt-3 py-2 px-4 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition">
+                        Gérer les Partenaires
+                    </button>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
 </body>
 </html>
+

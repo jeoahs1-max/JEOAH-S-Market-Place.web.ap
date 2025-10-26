@@ -20,74 +20,98 @@
     <main class="flex-grow flex items-center justify-center p-4">
         <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl">
             <h2 class="text-3xl font-bold text-gray-900 text-center mb-6">Créer un Compte</h2>
-            
-            <div id="notificationContainer" class="mb-4"></div>
 
             <form id="registrationForm" class="space-y-6">
-                
-                <div>
-                    <label for="fullName" class="block text-sm font-medium text-gray-700">Nom Complet</label>
-                    <input id="fullName" name="fullName" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
-
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Adresse Email</label>
-                    <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
-
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Mot de Passe (Min 6 caractères)</label>
-                    <div class="mt-1 relative rounded-md shadow-sm">
-                        <input id="password" name="password" type="password" autocomplete="new-password" required class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10">
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" onclick="togglePasswordVisibility('password')">
-                            <i id="eye-password" class="fas fa-eye text-gray-400 hover:text-indigo-600"></i>
-                        </div>
+                <!-- Étape 1 -->
+                <div class="form-step active">
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-gray-700">Nom Complet</label>
+                        <input id="fullName" name="fullName" type="text" required
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                            focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
-                </div>
-                
-                <div>
-                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmer le Mot de Passe</label>
-                    <div class="mt-1 relative rounded-md shadow-sm">
-                        <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10">
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" onclick="togglePasswordVisibility('confirmPassword')">
-                            <i id="eye-confirmPassword" class="fas fa-eye text-gray-400 hover:text-indigo-600"></i>
-                        </div>
+
+                    <div class="flex justify-end mt-6">
+                        <button type="button" class="next-step px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                            Suivant
+                        </button>
                     </div>
                 </div>
 
-                <div>
-                    <label for="role" class="block text-sm font-medium text-gray-700">Je suis...</label>
-                    <select id="role" name="role" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                        <option value="acheteur">Acheteur/Utilisateur Simple</option>
-                        <option value="vendeur">Vendeur (Propose des produits)</option>
-                        <option value="affilié">Affilié (Fait la promotion des produits)</option>
-                    </select>
+                <!-- Étape 2 -->
+                <div class="form-step hidden">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Adresse Email</label>
+                        <input id="email" name="email" type="email" autocomplete="email" required
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                            focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Mot de Passe</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <input id="password" name="password" type="password" required
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                                focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                                onclick="togglePasswordVisibility('password')">
+                                <i id="eye-password" class="fas fa-eye text-gray-400 hover:text-indigo-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmer le Mot de Passe</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <input id="confirmPassword" name="confirmPassword" type="password" required
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+                                focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                                onclick="togglePasswordVisibility('confirmPassword')">
+                                <i id="eye-confirmPassword" class="fas fa-eye text-gray-400 hover:text-indigo-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between mt-6">
+                        <button type="button" class="prev-step px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400">Précédent</button>
+                        <button type="button" class="next-step px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Suivant</button>
+                    </div>
                 </div>
 
-                <div>
-                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
-                        S'inscrire
-                    </button>
+                <!-- Étape 3 -->
+                <div class="form-step hidden">
+                    <div>
+                        <label for="role" class="block text-sm font-medium text-gray-700">Je suis...</label>
+                        <select id="role" name="role" required
+                            class="mt-1 block w-full pl-3 pr-10 py-2 border-gray-300 focus:outline-none
+                            focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option value="">-- Sélectionnez votre rôle --</option>
+                            <option value="acheteur">Acheteur / Utilisateur simple</option>
+                            <option value="vendeur">Vendeur (propose des produits)</option>
+                            <option value="affilié">Affilié (fait la promotion des produits)</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-between mt-6">
+                        <button type="button" class="prev-step px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400">Précédent</button>
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                            S'inscrire
+                        </button>
+                    </div>
                 </div>
             </form>
-
-            <div class="mt-6 text-center">
-                <p class="text-sm text-gray-600">
-                    Déjà un compte? 
-                    <a href="login.html" class="font-medium text-indigo-600 hover:text-indigo-500">Connectez-vous ici</a>
-                </p>
-            </div>
         </div>
     </main>
 
     <footer class="bg-gray-800 text-white py-4 mt-auto">
         <div class="container mx-auto px-4 text-center">
-            <p class="text-sm text-gray-400">&copy; 2024 JEOAH'S Marketplace. Tous droits réservés.</p>
+            <p class="text-sm text-gray-400">&copy; 2025 JEOAH'S Marketplace. Tous droits réservés.</p>
         </div>
     </footer>
 
     <script>
-        // Fonction pour basculer la visibilité du mot de passe
         function togglePasswordVisibility(fieldId) {
             const field = document.getElementById(fieldId);
             const eye = document.getElementById('eye-' + fieldId);
@@ -101,7 +125,33 @@
                 eye.classList.add('fa-eye');
             }
         }
+
+        const steps = document.querySelectorAll('.form-step');
+        const nextBtns = document.querySelectorAll('.next-step');
+        const prevBtns = document.querySelectorAll('.prev-step');
+        let currentStep = 0;
+
+        nextBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (currentStep < steps.length - 1) {
+                    steps[currentStep].classList.add('hidden');
+                    steps[currentStep + 1].classList.remove('hidden');
+                    currentStep++;
+                }
+            });
+        });
+
+        prevBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (currentStep > 0) {
+                    steps[currentStep].classList.add('hidden');
+                    steps[currentStep - 1].classList.remove('hidden');
+                    currentStep--;
+                }
+            });
+        });
     </script>
+
     <script src="firebase-config.js"></script>
     <script type="module" src="app.js"></script>
 </body>

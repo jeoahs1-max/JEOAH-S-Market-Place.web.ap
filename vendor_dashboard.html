@@ -1,0 +1,595 @@
+
+<!-- 
+    vendor_dashboard.html - Tableau de Bord du Vendeur JEOAH'S
+    
+    Ce fichier est la page principale de gestion pour les utilisateurs de rôle 'Vendeur'.
+    Il intègre les sections de gestion de produits, ventes, solde, et suivi.
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEOAH'S - Tableau de Bord Vendeur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        
+        // Variables globales
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, auth, db;
+        let userId = null;
+
+        // Données Simulées pour le Vendeur (En attendant la gestion complète des données)
+        const mockProducts = [
+            { id: 1, name: "Téléphone XYZ", price: 150.00, stock: 12, sales: 5 },
+            { id: 2, name: "Ordinateur portable Gamer", price: 500.00, stock: 3, sales: 2 },
+            { id: 3, name: "Écouteurs sans fil", price: 45.00, stock: 50, sales: 25 },
+        ];
+        
+        const mockBalance = 3450.00;
+        const mockCommissions = 45.00;
+        const mockClicks = 780;
+
+        /**
+         * Initialise Firebase et vérifie l'authentification et le rôle.
+         */
+        async function initFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase config is empty. Cannot initialize.");
+                return;
+            }
+            
+            setLogLevel('Debug');
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Erreur lors de l'authentification initiale:", error);
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                const loading = document.getElementById('loading-indicator');
+                const content = document.getElementById('dashboard-container');
+                
+                if (!user) {
+                    // Si déconnecté, redirection
+                    window.location.href = 'auth.html';
+                    return;
+                }
+                
+                userId = user.uid;
+                loading.classList.remove('hidden');
+                content.classList.add('hidden');
+
+                // 1. Charger le profil pour vérifier le rôle
+                const profileDocRef = doc(db, `artifacts/${appId}/users/${userId}/user_data/profile`);
+                const profileSnap = await getDoc(profileDocRef);
+
+                if (profileSnap.exists() && profileSnap.data().role === 'Vendeur') {
+                    const userData = profileSnap.data();
+                    
+                    // 2. Vérifier l'onboarding du vendeur
+                    const onboardingDocRef = doc(db, `artifacts/${appId}/users/${userId}/vendor_data/onboarding`);
+                    const onboardingSnap = await getDoc(onboardingDocRef);
+
+                    if (!onboardingSnap.exists() || onboardingSnap.data().isComplete !== true) {
+                        // Rediriger vers l'onboarding si non complété
+                        window.location.href = 'vendor_onboarding.html';
+                        return;
+                    }
+                    
+                    // 3. Charger et Afficher le Tableau de Bord
+                    document.getElementById('welcome-message').textContent = `Bienvenue, ${userData.fullName} !`;
+                    document.getElementById('referral-code-display').textContent = userData.referralCode || 'N/A';
+                    
+                    renderDashboardContent(userData); // Remplir les données simulées
+                    setupEventListeners(); // Attacher les gestionnaires d'événements
+                    
+                    loading.classList.add('hidden');
+                    content.classList.remove('hidden');
+                    
+                } else {
+                    // Si pas Vendeur ou profil manquant, redirection générale
+                    window.location.href = 'dashboard.html';
+                }
+            });
+        }
+        
+        /**
+         * Remplir le contenu du tableau de bord avec les données (simulées pour l'instant).
+         * @param {object} userData Les données de l'utilisateur.
+         */
+        function renderDashboardContent(userData) {
+            // Mise à jour de la zone de solde
+            document.getElementById('balance-amount').textContent = `$${mockBalance.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}`;
+
+            // Mise à jour de la zone d'affiliation
+            document.getElementById('affiliate-commissions').textContent = `$${mockCommissions.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('affiliate-clicks').textContent = mockClicks.toLocaleString('fr-FR');
+            
+            // Rendre la grille des produits
+            renderProductGrid();
+            
+            // Rendre le gestionnaire de produits (section détaillée)
+            renderProductManager();
+        }
+
+        /**
+         * Rendre la grille des 3 dernières ventes (simulées).
+         */
+        function renderProductGrid() {
+            const gridContainer = document.getElementById('sales-grid');
+            gridContainer.innerHTML = '';
+
+            mockProducts.slice(0, 3).forEach(product => {
+                gridContainer.innerHTML += `
+                    <div class="product-card bg-white p-5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition duration-300">
+                        <h3 class="text-lg font-semibold text-blue-600 mb-1">Produit en Stock</h3>
+                        <p class="text-gray-700 font-medium">${product.name}</p>
+                        <p class="text-sm text-gray-500 mt-2">Prix: <span class="font-bold text-green-600">$${product.price.toFixed(2)}</span></p>
+                        <p class="text-sm text-gray-500">Stock: ${product.stock} unités</p>
+                        <p class="text-sm text-gray-500">Ventes: ${product.sales}</p>
+                    </div>
+                `;
+            });
+        }
+        
+        /**
+         * Rendre le gestionnaire de produits (pour la section #produits).
+         */
+        function renderProductManager() {
+            const managerContainer = document.getElementById('product-manager-content');
+            managerContainer.innerHTML = `
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Gestion des Produits (${mockProducts.length} Actifs)</h3>
+                
+                <button onclick="showProductModal('add')" class="mb-6 px-5 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition shadow-md">
+                    <i class="fas fa-plus mr-2"></i> Ajouter un Nouveau Produit
+                </button>
+
+                <div class="space-y-4">
+                    ${mockProducts.map(product => `
+                        <div class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex-1">
+                                <p class="text-lg font-semibold text-gray-800">${product.name}</p>
+                                <p class="text-sm text-gray-500">Prix: <span class="font-bold text-green-600">$${product.price.toFixed(2)}</span> | Stock: ${product.stock} | Ventes: ${product.sales}</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="showProductModal('edit', ${product.id})" class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="showDeleteModal(${product.id})" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // --- Fonctions Modales (Ajout/Édition Produit) ---
+
+        window.showProductModal = function(mode, productId = null) {
+            const modal = document.getElementById('product-modal');
+            const title = document.getElementById('product-modal-title');
+            const form = document.getElementById('product-form');
+            
+            if (mode === 'add') {
+                title.textContent = "Ajouter un Nouveau Produit";
+                form.reset();
+                form.onsubmit = (e) => handleProductSubmit(e, 'add', null);
+            } else if (mode === 'edit' && productId) {
+                title.textContent = `Modifier Produit ID: ${productId}`;
+                const product = mockProducts.find(p => p.id === productId);
+                if (product) {
+                    document.getElementById('product-name').value = product.name;
+                    document.getElementById('product-price').value = product.price;
+                    document.getElementById('product-stock').value = product.stock;
+                    document.getElementById('product-description').value = "Ceci est la description simulée."; // Description simulée
+                    form.onsubmit = (e) => handleProductSubmit(e, 'edit', productId);
+                }
+            }
+            modal.classList.remove('hidden');
+        }
+
+        window.closeProductModal = function() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        async function handleProductSubmit(event, mode, productId) {
+            event.preventDefault();
+            const form = event.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sauvegarde...';
+
+            const data = {
+                name: document.getElementById('product-name').value,
+                price: parseFloat(document.getElementById('product-price').value),
+                stock: parseInt(document.getElementById('product-stock').value),
+                description: document.getElementById('product-description').value,
+            };
+
+            // Logique de simulation (à remplacer par Firestore pour la collection 'public/data/products')
+            console.log(`Action: ${mode} sur le produit ${productId || 'nouveau'}`, data);
+            
+            // Ici, vous feriez l'appel à Firestore (addDoc ou updateDoc)
+            // Exemple : await setDoc(doc(db, `artifacts/${appId}/public/data/products`, productId || 'new'), data);
+
+            // Simulation de succès
+            await new Promise(r => setTimeout(r, 1000));
+            
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Enregistrer les Modifications';
+            closeProductModal();
+            // Re-rendre pour voir le changement (même si c'est simulé)
+            renderProductManager();
+            renderProductGrid(); 
+        }
+
+        // --- Fonctions de Déconnexion ---
+
+        window.handleSignOut = async function() {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Erreur de déconnexion:", error);
+                // Utiliser une notification personnalisée ici
+                alert("Une erreur est survenue lors de la déconnexion."); 
+            }
+        }
+        
+        // --- Événements et Initialisation ---
+
+        function setupEventListeners() {
+            // Gérer les clics sur les liens de la sidebar
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const targetId = e.target.getAttribute('href').substring(1);
+                    if (targetId && targetId !== 'aide') {
+                        e.preventDefault();
+                        // Gérer l'état actif dans la sidebar
+                        document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active', 'bg-blue-600', 'text-white'));
+                        e.target.classList.add('active', 'bg-blue-600', 'text-white');
+                        
+                        // Défiler vers la section correspondante
+                        document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        }
+
+        initFirebase();
+    </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        
+        .dashboard-layout {
+            display: flex;
+            min-height: calc(100vh - 80px); /* Ajusté pour laisser de la place au header */
+            margin-top: 80px; /* Espace pour le header fixed */
+        }
+
+        /* Styles de la barre latérale */
+        .sidebar {
+            width: 250px;
+            background-color: #ffffff;
+            padding: 24px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+            position: fixed;
+            top: 80px;
+            height: calc(100% - 80px);
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #032C4F;
+            margin-bottom: 24px;
+        }
+        
+        .sidebar a {
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            color: #4b5563; /* text-gray-600 */
+            transition: all 0.2s;
+        }
+        
+        .sidebar a:hover:not(.active) {
+            background-color: #e5e7eb; /* bg-gray-200 */
+            color: #1f2937; /* text-gray-800 */
+        }
+
+        /* Style pour le lien actif */
+        .sidebar a.active {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: #ffffff;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Contenu du tableau de bord */
+        .dashboard-content {
+            flex-grow: 1;
+            padding: 24px;
+            margin-left: 250px; /* Décalage pour laisser la place à la sidebar */
+        }
+        
+        /* Grille des indicateurs */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        /* Carte de solde */
+        .balance-card {
+            background-color: #10b981; /* green-500 */
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .balance-card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .balance-card p {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        /* IA Chat Box (Ney) */
+        .ia-chat-box {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: #FDC830; /* Jaune JEOAH'S */
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: transform 0.2s;
+        }
+        .ia-chat-box:hover {
+            transform: scale(1.1);
+        }
+        .ia-chat-box i {
+            font-size: 1.8rem;
+            color: #032C4F;
+        }
+
+        /* Media Queries pour le mobile */
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                top: 0;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+                margin-bottom: 20px;
+            }
+            .dashboard-layout {
+                flex-direction: column;
+                margin-top: 0; 
+                min-height: auto;
+            }
+            .dashboard-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header (Navigation principale) -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-md z-50 px-4 py-4 lg:px-8 flex justify-between items-center">
+        <div class="text-2xl font-extrabold text-[#032C4F]">JEOAH'S</div>
+        <div class="flex items-center space-x-4">
+            <span id="welcome-message" class="text-gray-600 font-semibold text-sm hidden sm:block">Bienvenue, Vendeur !</span>
+            <button onclick="handleSignOut()" class="flex items-center px-4 py-2 bg-red-500 text-white font-semibold rounded-xl text-sm hover:bg-red-600 transition duration-300 shadow-md">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                Déconnexion
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-layout">
+        <!-- Barre Latérale -->
+        <div class="sidebar">
+            <h2 class="text-[#032C4F]">Tableau de Bord</h2>
+            <a href="#vue-ensemble" class="active">
+                <i class="fas fa-home mr-2"></i> Vue d'ensemble
+            </a>
+            <a href="#produits">
+                <i class="fas fa-box-open mr-2"></i> Gestion Produits
+            </a>
+            <a href="#paiements">
+                <i class="fas fa-dollar-sign mr-2"></i> Paiements & Solde
+            </a>
+            <a href="#affil">
+                <i class="fas fa-chart-line mr-2"></i> Suivi Affiliation
+            </a> 
+            <a href="#dialogue">
+                <i class="fas fa-comments mr-2"></i> Boîte de Dialogue
+            </a>
+            <a href="#aide" onclick="alert('Bienvenue ! Je suis Ney, l\'Assistant IA de JEOAH\'S. Je suis disponible pour répondre à vos questions 24/7. Le chat sera activé dès le lancement de la version Beta !');">
+                <i class="fas fa-robot mr-2"></i> Aide IA (Ney)
+            </a>
+        </div>
+
+        <!-- Contenu Principal -->
+        <div class="dashboard-content">
+            <h1 class="text-3xl font-extrabold text-[#032C4F] mb-6" id="overview-title">Tableau de Bord Vendeur</h1>
+            
+            <!-- Section Vue d'Ensemble -->
+            <section id="vue-ensemble" class="mb-10">
+                <!-- Code Parrainage / Lien Vendeur -->
+                <div class="bg-yellow-400 p-4 rounded-xl shadow-lg mb-8 text-center">
+                    <p class="font-bold text-[#032C4F] text-lg">Votre ID Vendeur / Lien de Parrainage (Code)</p>
+                    <code id="referral-code-display" class="block text-xl font-mono p-2 bg-white rounded-lg mt-2 text-gray-800 shadow-inner">JEOAHS-USER-7890</code>
+                </div>
+
+                <!-- Carte Solde -->
+                <div class="balance-card mb-8">
+                    <h2 class="text-white">Solde Actuel (USD)</h2>
+                    <p id="balance-amount">$0.00</p>
+                    <button class="px-5 py-2 bg-white text-[#032C4F] font-bold rounded-xl hover:bg-gray-100 transition duration-300 mt-4 shadow-md">
+                        Demander un Retrait <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+                
+                <!-- Grille des Ventes/Statut Produit -->
+                <h2 class="text-2xl font-bold text-[#032C4F] mb-4">Statut des Produits & Ventes</h2>
+                <div id="sales-grid" class="product-grid">
+                    <!-- Les cartes des produits simulées seront insérées ici par JS -->
+                </div>
+            </section>
+
+            <!-- Section Gestion Produits -->
+            <section id="produits" class="mb-10 pt-10 border-t border-gray-300">
+                <h1 class="text-3xl font-extrabold text-[#032C4F] mb-6">Gestion des Produits</h1>
+                <div id="product-manager-content">
+                    <!-- Le contenu détaillé de la gestion des produits sera inséré ici par JS -->
+                </div>
+            </section>
+
+            <!-- Section Paiements & Solde -->
+            <section id="paiements" class="mb-10 pt-10 border-t border-gray-300">
+                <h1 class="text-3xl font-extrabold text-[#032C4F] mb-6">Historique des Paiements</h1>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <p class="text-gray-600">L'historique détaillé des ventes et des transferts vers votre compte (MonCash, Virement, etc.) sera affiché ici. La section Solde ci-dessus est l'indicateur principal.</p>
+                </div>
+            </section>
+            
+            <!-- Section Suivi Affiliation / Clics -->
+            <section id="affil" class="mb-10 pt-10 border-t border-gray-300">
+                <h1 class="text-3xl font-extrabold text-[#032C4F] mb-6">Suivi des Clics & Affiliation</h1>
+                <div class="product-grid">
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-teal-500">
+                        <h3 class="text-xl font-semibold text-gray-800">Commissions d'Affiliation</h3>
+                        <p id="affiliate-commissions" class="text-3xl font-extrabold text-teal-600 mt-2">$0.00</p>
+                        <p class="text-sm text-gray-500 mt-1">En attente de versement.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-yellow-500">
+                        <h3 class="text-xl font-semibold text-gray-800">Suivi des Clics Uniques</h3>
+                        <p id="affiliate-clicks" class="text-3xl font-extrabold text-yellow-600 mt-2">0</p>
+                        <p class="text-sm text-gray-500 mt-1">Total des clics uniques sur votre lien.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-purple-500">
+                        <h3 class="text-xl font-semibold text-gray-800">Taux de Conversion</h3>
+                        <p class="text-3xl font-extrabold text-purple-600 mt-2">2.5%</p>
+                        <p class="text-sm text-gray-500 mt-1">Ventes générées par clic.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Boîte de Dialogue Client/Vendeur -->
+            <section id="dialogue" class="mb-10 pt-10 border-t border-gray-300">
+                <h1 class="text-3xl font-extrabold text-[#032C4F] mb-6">Boîte de Dialogue Client-Vendeur</h1>
+                <div class="bg-white p-6 rounded-xl shadow-lg h-96 overflow-y-auto border border-gray-200">
+                    <p class="text-gray-500 italic">
+                        Ceci est la zone de chat en temps réel pour répondre aux questions des clients sur vos produits ou commandes.
+                    </p>
+                    <div class="mt-4 p-3 bg-blue-50 rounded-lg max-w-xs ml-auto text-right">
+                        <p class="text-sm font-semibold text-blue-700">Moi</p>
+                        <p class="text-gray-800">Avez-vous le téléphone XYZ en couleur rouge ?</p>
+                        <p class="text-xs text-gray-400 mt-1">Il y a 2 minutes</p>
+                    </div>
+                    <div class="mt-4 p-3 bg-gray-100 rounded-lg max-w-xs">
+                        <p class="text-sm font-semibold text-gray-700">Client #1234</p>
+                        <p class="text-gray-800">Je suis intéressé, quel est le délai de livraison ?</p>
+                        <p class="text-xs text-gray-400 mt-1">Maintenant</p>
+                    </div>
+                    <div class="mt-8">
+                        <textarea class="w-full p-3 border border-gray-300 rounded-xl resize-none focus:ring-blue-500 focus:border-blue-500" rows="2" placeholder="Écrire un message..."></textarea>
+                        <button class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 float-right">
+                            Envoyer <i class="fas fa-paper-plane ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <!-- Modale d'Ajout/Édition de Produit -->
+    <div id="product-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-[9999]">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-6">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 id="product-modal-title" class="text-xl font-bold text-gray-800">Ajouter/Modifier Produit</h3>
+                <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <form id="product-form" class="space-y-4">
+                <div>
+                    <label for="product-name" class="block text-sm font-medium text-gray-700">Nom du Produit</label>
+                    <input type="text" id="product-name" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="product-price" class="block text-sm font-medium text-gray-700">Prix (USD)</label>
+                        <input type="number" step="0.01" id="product-price" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="product-stock" class="block text-sm font-medium text-gray-700">Stock</label>
+                        <input type="number" id="product-stock" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label for="product-description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea id="product-description" rows="3" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 resize-none"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-xl font-semibold hover:bg-green-700 transition shadow-md">
+                    Enregistrer les Modifications
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Indicateur de Chargement (pour l'initialisation) -->
+    <div id="loading-indicator" class="fixed inset-0 bg-white flex items-center justify-center z-[10000]">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+        <p class="ml-4 text-gray-600 text-lg">Préparation de votre espace Vendeur...</p>
+    </div>
+    
+    <!-- IA Chat Box (Ney) -->
+    <div class="ia-chat-box" onclick="alert('Bienvenue ! Je suis Ney, l\'Assistant IA de JEOAH\'S. Je suis disponible pour répondre à vos questions 24/7. Le chat sera activé dès le lancement de la version Beta !');">
+        <!-- Remplacer l'image par une icône FontAwesome pour un fichier unique -->
+        <i class="fas fa-robot"></i>
+    </div>
+
+</body>
+</html>
+

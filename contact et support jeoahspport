@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+        .navbar-shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
+        .text-jeoahs { color: #032C4F; }
+        .bg-jeoahs { background-color: #032C4F; }
+        .contact-card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Modal pour alert() -->
+    <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h4 id="modal-title" class="text-xl font-bold mb-3 text-jeoahs"></h4>
+            <p id="modal-content" class="text-gray-700 mb-4"></p>
+            <button id="modal-confirm" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" onclick="document.getElementById('custom-modal').classList.add('hidden')">
+                Fermer
+            </button>
+        </div>
+    </div>
+
+    <!-- Barre de Navigation (Header) -->
+    <header class="bg-white navbar-shadow sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <!-- Logo/Nom -->
+            <a href="index.html" class="text-2xl font-extrabold text-jeoahs tracking-tight">
+                JEOAH'S Market Place
+            </a>
+
+            <!-- Navigation Principale -->
+            <nav class="hidden md:flex space-x-6 lg:space-x-10 items-center">
+                <a href="index.html" class="text-gray-600 hover:text-jeoahs transition pb-1">Accueil</a>
+                <a href="fonctionnalites.html" class="text-gray-600 hover:text-jeoahs transition pb-1">Fonctionnalités</a>
+                <a href="plans.html" class="text-gray-600 hover:text-jeoahs transition pb-1">Plans & Tarifs</a>
+                <a href="contact.html" class="text-gray-900 font-semibold hover:text-jeoahs transition border-b-2 border-jeoahs pb-1">Contact</a>
+                
+                <!-- Sélecteur de Langue (simulé) -->
+                <div class="relative">
+                    <select id="lang-selector" class="py-1 px-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="en">🇺🇸 EN</option>
+                        <option value="es">🇪🇸 ES</option>
+                    </select>
+                </div>
+            </nav>
+
+            <!-- Bouton de Connexion/Déconnexion pour mobile et desktop -->
+            <div class="flex items-center space-x-3">
+                <span id="user-status" class="text-sm text-gray-500 hidden lg:block"></span>
+                <button id="auth-button" class="bg-jeoahs text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-[#021f38] transition">
+                    Se connecter
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenu Principal -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+        <header class="text-center mb-16">
+            <h1 class="text-5xl font-extrabold text-jeoahs mb-4">
+                Contactez le Support JEOAH'S
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Notre équipe est prête à vous aider. Remplissez le formulaire ci-dessous ou utilisez nos coordonnées.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+            <!-- Colonne 1: Coordonnées de l'Entreprise (Maquette fournie) -->
+            <div class="lg:col-span-1 space-y-8 p-6 bg-white rounded-2xl contact-card">
+                
+                <h2 class="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">Informations</h2>
+
+                <!-- Adresse du Siège (Simulée) -->
+                <div class="flex items-start space-x-4">
+                    <i class="fas fa-map-marker-alt text-2xl text-blue-600 mt-1"></i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Adresse du Siège</h3>
+                        <p class="text-gray-600">123 Market St, Suite 500, Global City, Terre</p>
+                    </div>
+                </div>
+
+                <!-- Support Email (Simulé) -->
+                <div class="flex items-start space-x-4">
+                    <i class="fas fa-envelope text-2xl text-red-500 mt-1"></i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Support Email</h3>
+                        <p class="text-gray-600">support@jeoahmarketplace.com</p>
+                    </div>
+                </div>
+
+                <!-- Numéro de Téléphone (Simulé) -->
+                <div class="flex items-start space-x-4">
+                    <i class="fas fa-phone text-2xl text-green-500 mt-1"></i>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Numéro de Téléphone</h3>
+                        <p class="text-gray-600">+1 (800) 555-0199</p>
+                    </div>
+                </div>
+                
+            </div>
+
+            <!-- Colonne 2: Formulaire de Contact -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-2xl contact-card">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Envoyez-nous un Message</h2>
+                <form id="contact-form" class="space-y-6">
+                    
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Nom Complet</label>
+                        <input type="text" id="name" name="name" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Adresse Email</label>
+                        <input type="email" id="email" name="email" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="subject" class="block text-sm font-medium text-gray-700">Sujet</label>
+                        <select id="subject" name="subject" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Sélectionnez un sujet</option>
+                            <option value="Abonnement">Question sur l'Abonnement</option>
+                            <option value="Technique">Problème Technique / Bug</option>
+                            <option value="Vente">Question Vendeur / Affiliation</option>
+                            <option value="General">Demande Générale</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+                        <textarea id="message" name="message" rows="5" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="w-full py-3 px-6 bg-jeoahs text-white font-bold rounded-xl shadow-lg hover:bg-[#021f38] transition transform hover:scale-[1.01]">
+                        <i class="fas fa-paper-plane mr-2"></i> Envoyer le Message
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer (Repris de index.html) -->
+    <footer class="bg-jeoahs text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-8 border-b border-gray-700 pb-10 mb-8">
+                
+                <div class="col-span-2 md:col-span-1">
+                    <h3 class="text-2xl font-extrabold mb-4">JEOAH'S</h3>
+                    <p class="text-sm text-gray-400 mb-4">Votre plateforme d'e-commerce innovante et centralisée.</p>
+                    <button id="pwa-install-btn-ft" class="flex items-center py-2 px-4 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition">
+                        <i class="fas fa-mobile-alt mr-2"></i> Installer l'App
+                    </button>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Navigation Rapide</h4>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-gray-400 hover:text-white transition text-sm">Accueil</a></li>
+                        <li><a href="fonctionnalites.html" class="text-gray-400 hover:text-white transition text-sm">Fonctionnalités</a></li>
+                        <li><a href="contact.html" class="text-gray-400 hover:text-white transition text-sm">Contact</a></li>
+                        <li><a href="plans.html" class="text-gray-400 hover:text-white transition text-sm">Plans & Tarifs</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Légal & Assistance</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition text-sm">Politique de Confidentialité</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition text-sm">Termes & Conditions</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition text-sm">Assistance (Ney)</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Réseaux Sociaux -->
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Réseaux Sociaux</h4>
+                    <p class="text-sm text-gray-400 mb-3">Suivez-nous sur :</p>
+                    <div class="flex flex-wrap gap-3 text-2xl">
+                        <i class="fab fa-twitter text-gray-400"></i>
+                        <i class="fab fa-facebook text-gray-400"></i>
+                        <i class="fab fa-youtube text-gray-400"></i>
+                        <i class="fab fa-instagram text-gray-400"></i>
+                        <i class="fab fa-linkedin text-gray-400"></i>
+                        <i class="fab fa-reddit text-gray-400"></i>
+                        <i class="fab fa-twitch text-gray-400"></i>
+                        <i class="fab fa-telegram text-gray-400"></i>
+                        <i class="fab fa-whatsapp text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- Modes de Paiement -->
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Modes de Paiement</h4>
+                    <p class="text-sm text-gray-400 mb-3">Nous acceptons :</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-yellow-500 text-gray-900 px-1 py-0.5 rounded-sm text-xs font-semibold">PayPal</span>
+                        <span class="bg-black text-white px-1 py-0.5 rounded-sm text-xs font-semibold">G Pay</span>
+                        <span class="bg-blue-600 text-white px-1 py-0.5 rounded-sm text-xs font-semibold">Alipay</span>
+                        <span class="bg-red-600 text-white px-1 py-0.5 rounded-sm text-xs font-semibold">MonCash</span>
+                        <span class="bg-purple-600 text-white px-1 py-0.5 rounded-sm text-xs font-semibold">NatCash</span>
+                        <span class="bg-green-600 text-white px-1 py-0.5 rounded-sm text-xs font-semibold">Cash App</span>
+                        <span class="bg-gray-300 text-gray-800 px-1 py-0.5 rounded-sm text-xs font-semibold">VISA</span>
+                        <span class="bg-gray-300 text-gray-800 px-1 py-0.5 rounded-sm text-xs font-semibold">Stripe</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Copyright -->
+            <div class="text-center text-sm text-gray-500">
+                &copy; 2025 JEOAH'S Marketplace. Tous droits réservés.
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        // Import des librairies Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+        // Variables globales Firebase
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let auth;
+        let db;
+        let currentUserId = null;
+
+        // --- Fonctions d'aide pour l'UI (Modal) ---
+        function showCustomModal(title, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').textContent = content;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        // --- Logique d'Authentification ---
+        function updateAuthUI(user) {
+            const authButton = document.getElementById('auth-button');
+            const userStatus = document.getElementById('user-status');
+            currentUserId = user ? user.uid : null;
+            if (user && user.uid) {
+                authButton.textContent = 'Déconnexion';
+                authButton.onclick = async () => { await signOut(auth); showCustomModal("Déconnexion", "Vous avez été déconnecté."); };
+                authButton.classList.replace('bg-jeoahs', 'bg-red-600');
+                userStatus.textContent = `Connecté: ${user.uid.substring(0, 8)}...`;
+            } else {
+                authButton.textContent = 'Se connecter';
+                authButton.onclick = () => { window.location.href = 'auth.html'; };
+                authButton.classList.replace('bg-red-600', 'bg-jeoahs');
+                userStatus.textContent = `Non connecté.`;
+            }
+        }
+        async function initAuth() {
+            if (Object.keys(firebaseConfig).length === 0) { return updateAuthUI(null); }
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            try {
+                if (initialAuthToken) { await signInWithCustomToken(auth, initialAuthToken); } else { await signInAnonymously(auth); }
+            } catch (error) { console.error("Erreur d'authentification initiale:", error); }
+            onAuthStateChanged(auth, updateAuthUI);
+        }
+
+        // --- Logique du Formulaire de Contact ---
+
+        document.getElementById('contact-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Envoi en cours...';
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+
+            // Déterminer l'ID de l'utilisateur (authentifié ou anonyme)
+            const userIdToLog = currentUserId || crypto.randomUUID();
+
+            const messageData = {
+                senderId: userIdToLog,
+                name: name,
+                email: email,
+                subject: subject,
+                message: message,
+                timestamp: new Date(),
+                status: 'Nouveau'
+            };
+
+            // Path: /artifacts/{appId}/public/data/contact_messages
+            const collectionPath = `artifacts/${appId}/public/data/contact_messages`;
+
+            try {
+                // Enregistrement du message dans une collection publique
+                await addDoc(collection(db, collectionPath), messageData);
+                
+                showCustomModal('Message Envoyé', "Merci de nous avoir contactés ! Votre message a été reçu. Nous vous répondrons bientôt.");
+                document.getElementById('contact-form').reset();
+
+            } catch (error) {
+                console.error("Erreur lors de l'envoi du message à Firestore:", error);
+                showCustomModal('Erreur', "Impossible d'envoyer le message. Veuillez vérifier la console ou réessayer.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Envoyer le Message';
+            }
+        });
+        
+        // Logique PWA et Langue
+        document.getElementById('pwa-install-btn-ft').addEventListener('click', () => {
+            showCustomModal("Installation de l'Application (Simulée)", "Ceci simule le bouton PWA.");
+        });
+        document.getElementById('lang-selector').addEventListener('change', () => {
+            showCustomModal("Changement de Langue (Simulé)", "Le contenu d'une application réelle serait mis à jour.");
+        });
+
+        // Démarrage de l'application
+        document.addEventListener('DOMContentLoaded', initAuth);
+    </script>
+</body>
+</html>
+

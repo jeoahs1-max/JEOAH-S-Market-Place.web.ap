@@ -1,100 +1,29 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Politique de confidentialité | JEOAH’S Market Place</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="assets/logo.png" />
-  <style>
-    body {
-      font-family: "Poppins", sans-serif;
-      background-color: #f8f9fb;
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }
-    header {
-      background-color: #032C4F;
-      color: white;
-      text-align: center;
-      padding: 1.5rem 0;
-    }
-    main {
-      max-width: 900px;
-      margin: 2rem auto;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      padding: 2rem;
-    }
-    h1, h2 {
-      color: #032C4F;
-    }
-    p {
-      line-height: 1.7;
-      margin-bottom: 1rem;
-    }
-    footer {
-      text-align: center;
-      margin-top: 3rem;
-      padding: 1rem;
-      background-color: #032C4F;
-      color: white;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Politique de Confidentialité - JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }</style>
 </head>
 <body>
-  <header>
-    <h1>Politique de Confidentialité</h1>
-  </header>
+    <div class="max-w-4xl mx-auto p-8 pt-16 bg-white shadow-lg rounded-xl mt-8 mb-8">
+        <h1 class="text-4xl font-extrabold text-blue-600 mb-6">Politique de Confidentialité</h1>
+        <p class="text-gray-500 mb-6">Dernière mise à jour : 28 Octobre 2025</p>
 
-  <main>
-    <h2>1. Introduction</h2>
-    <p>
-      Chez <strong>JEOAH’S Market Place</strong>, la confidentialité de vos données
-      personnelles est une priorité. Nous collectons uniquement les informations
-      nécessaires pour le bon fonctionnement du site et des services affiliés.
-    </p>
+        <h2 class="text-2xl font-bold text-gray-800 mb-3">1. Collecte et Utilisation des Informations</h2>
+        <p class="mb-4 text-gray-700">JEOAH'S s'engage à protéger la confidentialité de vos informations. Nous collectons votre nom, e-mail, rôle (Acheteur, Vendeur, Affilié) et les données de transaction pour vous fournir les services de la Marketplace. Vos données de rôle et de transactions sont stockées dans Firestore sous votre identifiant utilisateur unique (`/artifacts/{appId}/users/{userId}/...`).</p>
+        
+        <h2 class="text-2xl font-bold text-gray-800 mb-3">2. Sécurité des Données (Firebase)</h2>
+        <p class="mb-4 text-gray-700">Nous utilisons l'infrastructure Firebase pour l'authentification et le stockage de vos données. L'accès à vos données est sécurisé par les règles de sécurité Firebase, garantissant que seul vous (et les administrateurs avec un accès strict) pouvez consulter vos informations privées.</p>
 
-    <h2>2. Données collectées</h2>
-    <p>
-      Nous recueillons : nom, adresse e-mail, numéro de téléphone, préférences
-      d’achat et liens affiliés liés à votre compte.
-    </p>
-
-    <h2>3. Utilisation des données</h2>
-    <p>
-      Vos données sont utilisées pour :
-      <ul>
-        <li>Assurer la livraison et le suivi des commandes.</li>
-        <li>Optimiser vos expériences d’achat.</li>
-        <li>Améliorer nos services et offres affiliées.</li>
-      </ul>
-    </p>
-
-    <h2>4. Partage des informations</h2>
-    <p>
-      Nous ne partageons vos données qu’avec nos partenaires affiliés et prestataires
-      de paiement sécurisés (Google Pay, PayPal, MonCash, CashApp).
-    </p>
-
-    <h2>5. Sécurité</h2>
-    <p>
-      Toutes les transactions sont chiffrées via SSL et nous respectons les
-      réglementations internationales en matière de protection des données.
-    </p>
-
-    <h2>6. Contact</h2>
-    <p>
-      Pour toute question concernant notre politique de confidentialité, veuillez
-      nous écrire à :
-      <a href="mailto:contact@jeoahs-market.com">contact@jeoahs-market.com</a>.
-    </p>
-  </main>
-
-  <footer>
-    © 2025 JEOAH’S Market Place — Tous droits réservés
-  </footer>
+        <h2 class="text-2xl font-bold text-gray-800 mb-3">3. Code de Parrainage (JSMP-)</h2>
+        <p class="mb-4 text-gray-700">Votre code de parrainage JSMP- est unique et public. Il est utilisé pour le suivi des affiliations. L'utilisation de ce code ne révèle aucune information personnelle sur vous, uniquement qu'un affilié vous a référé.</p>
+        
+        <a href="./index.html" class="text-blue-600 hover:underline"><i class="fas fa-arrow-left mr-2"></i> Retour à l'Accueil</a>
+    </div>
 </body>
 </html>
+

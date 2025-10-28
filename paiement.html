@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paiement | JEOAH’S Market Place</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="assets/logo.png">
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background-color: #f8f9fb;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #032C4F;
+      color: white;
+      text-align: center;
+      padding: 1.5rem 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 2rem;
+      text-align: center;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 0.9rem;
+      margin: 0.8rem 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.3s;
+      color: white;
+    }
+    .googlepay { background-color: #000; }
+    .paypal { background-color: #ffc439; color: #111; }
+    .moncash { background-color: #E30613; }
+    .cashapp { background-color: #00C244; }
+    .alipay { background-color: #1677FF; }
+    button:hover { opacity: 0.85; }
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding: 1rem;
+      background-color: #032C4F;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Paiement Sécurisé</h1>
+  </header>
+
+  <div class="container">
+    <h2>Choisissez votre méthode de paiement</h2>
+
+    <button class="googlepay" onclick="window.location.href='https://pay.google.com'">Payer avec Google Pay</button>
+    <button class="paypal" onclick="window.location.href='https://www.paypal.com/paypalme/jeoahsmarket'">Payer avec PayPal</button>
+    <button class="moncash" onclick="window.location.href='https://moncash.com'">Payer avec MonCash</button>
+    <button class="cashapp" onclick="window.location.href='https://cash.app/$jeoahsmarket'">Payer avec Cash App</button>
+    <button class="alipay" onclick="window.location.href='https://intl.alipay.com'">Payer avec Alipay</button>
+  </div>
+
+  <footer>
+    © 2025 JEOAH’S Market Place — Transactions chiffrées et sécurisées
+  </footer>
+</body>
+</html>

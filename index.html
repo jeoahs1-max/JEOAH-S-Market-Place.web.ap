@@ -1,11 +1,9 @@
-<!DOCTYPE html>  
-<html lang="fr">  
+<!DOCTYPE html>  <html lang="fr">  
 <head>  
     <meta charset="UTF-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  
     <title>JEOAH'S Marketplace - Accueil Professionnel</title>  
     <script src="https://cdn.tailwindcss.com"></script>  
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />  
     <style>  
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; }  
@@ -28,10 +26,15 @@
             height: 48px; /* h-12 */  
             border-radius: 0.75rem; /* rounded-xl */  
         }  
+        .feature-icon {  
+            width: 24px; /* w-6 */  
+            height: 24px; /* h-6 */  
+            color: currentColor;  
+        }  
         /* Style pour le bouton clignotant */  
         @keyframes pulse-once {  
             0% { transform: scale(1); opacity: 1; }  
-            50% { transform: scale(1.05); opacity: 0.8; }  
+            50% { transform: scale(1.1); opacity: 0.8; }  
             100% { transform: scale(1); opacity: 1; }  
         }  
         .animate-pulse-once {  
@@ -39,299 +42,216 @@
         }  
     </style>  
 </head>  
-<body class="min-h-screen flex flex-col">  
-    
-    <!-- Modal pour les messages (à utiliser au lieu des alertes natives) -->
-    <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center z-50 transition-opacity duration-300 opacity-0">
-        <div class="bg-white rounded-xl p-8 max-w-sm w-full transform transition-all duration-300 scale-95" id="custom-modal-content">
-            <h3 class="text-2xl font-bold text-blue-600 mb-4" id="modal-title"></h3>
-            <p class="text-gray-700 mb-6" id="modal-message"></p>
-            <button onclick="closeCustomModal()" class="w-full px-4 py-2 bg-yellow-400 text-gray-900 font-semibold rounded-lg hover:bg-yellow-500">Fermer</button>
-        </div>
-    </div>
-    
-    <!-- Header / Navigation -->  
-    <header class="shadow-sm border-b border-gray-100 sticky top-0 bg-white z-20">  
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">  
-            <a href="./index.html" class="text-2xl font-extrabold text-gray-900">  
-                JEOAH'S <span class="text-blue-600">Market Place</span>  
-            </a>  
-            <nav class="hidden md:flex space-x-8 text-gray-600 font-medium">  
-                <a href="#hero" class="hover:text-blue-600 transition">Accueil</a>  
-                <a href="#features" class="hover:text-blue-600 transition">Fonctionnalités</a>  
-                <a href="./plan.html" class="hover:text-blue-600 transition">Plans & Tarifs</a>
-                <a href="./contact.html" class="hover:text-blue-600 transition">Contact</a>  
-            </nav>  
-            <a href="./auth.html" class="px-5 py-2 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-700 transition duration-300">  
-                Se connecter  
-            </a>  
-        </div>  
-    </header>  
+<body class="min-h-screen flex flex-col">  <!-- Header / Navigation -->  
+<header class="shadow-sm border-b border-gray-100 sticky top-0 bg-white z-20">  
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">  
+        <a href="./index.html" class="text-2xl font-extrabold text-gray-900">  
+            JEOAH'S <span class="text-blue-600">Market Place</span>  
+        </a>  
+        <nav class="hidden md:flex space-x-8 text-gray-600 font-medium">  
+            <a href="#hero" class="hover:text-blue-600 transition">Accueil</a>  
+            <a href="#features" class="hover:text-blue-600 transition">Fonctionnalités</a>  
+            <a href="#contact" class="hover:text-blue-600 transition">Contact</a>  
+        </nav>  
+        <a href="./auth.html" class="px-5 py-2 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-700 transition duration-300">  
+            Se connecter  
+        </a>  
+    </div>  
+</header>  
 
-    <!-- Section Héro (Maquette Principale) -->  
-    <section id="hero" class="pt-16 pb-24 lg:pt-24 lg:pb-32 bg-white">  
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">  
-            <div class="lg:grid lg:grid-cols-12 lg:gap-12 items-center">  
-                <div class="lg:col-span-6 xl:col-span-7 mb-12 lg:mb-0">  
-                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-900 leading-tight">  
-                        <span class="text-blue-600">JEOAH'S</span> Market Place  
-                    </h1>  
-                    <p class="mt-4 text-xl text-gray-600 max-w-lg">  
-                        Le meilleur endroit pour acheter et vendre des produits de vos détaillants préférés.  
-                    </p>  
-                    <div class="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">  
-                        <a href="./auth.html" class="btn-primary px-8 py-3 rounded-xl font-bold shadow-lg text-lg transform hover:scale-[1.02] transition duration-300 text-center">  
-                            Commencer  <!-- Bouton fonctionnel vers auth.html -->
-                        </a>  
-                    </div>  
-                </div>  
-
-                <!-- Illustration Téléphone (SVG) -->  
-                <div class="lg:col-span-6 xl:col-span-5 flex justify-center lg:justify-end">  
-                    <svg class="w-full max-w-xs md:max-w-md h-auto" viewBox="0 0 350 350" fill="none" xmlns="http://www.w3.org/2000/svg">  
-                        <rect x="50" y="50" width="250" height="300" rx="30" fill="#facc15" opacity="0.1"/>  
-                        <rect x="75" y="20" width="200" height="320" rx="25" fill="#ffffff" stroke="#3b82f6" stroke-width="4"/>  
-                        <rect x="85" y="30" width="180" height="300" rx="20" fill="#60a5fa"/>  
-                        <rect x="120" y="100" width="110" height="110" rx="10" fill="#facc15"/>  
-                        <path d="M 175 98 L 175 85 L 155 85 L 155 98 L 195 98 L 195 85 L 175 85 Z" fill="#facc15"/>  
-                        <g fill="#fde047" transform="translate(110, 220)">  
-                            <path d="M 0 0 L 3.5 10 L 0 20 L -3.5 10 Z" transform="rotate(18, 0, 0)"/>  
-                            <path d="M 15 0 L 18.5 10 L 15 20 L 11.5 10 Z" transform="rotate(18, 15, 0)"/>  
-                            <path d="M 30 0 L 33.5 10 L 30 20 L 26.5 10 Z" transform="rotate(18, 30, 0)"/>  
-                            <path d="M 45 0 L 48.5 10 L 45 20 L 41.5 10 Z" transform="rotate(18, 45, 0)"/>  
-                            <rect x="60" y="5" width="5" height="10" fill="#fde047"/>  
-                        </g>  
-                        <rect x="195" y="260" width="60" height="30" rx="15" fill="#3b82f6"/>  
-                        <text x="225" y="281" font-size="14" fill="white" text-anchor="middle" font-weight="bold">Acheter</text>  
-                        <circle cx="280" cy="80" r="20" fill="#3b82f6"/>  
-                        <path d="M 270 85 H 290 L 285 75 H 275 Z M 275 75 V 70 H 285 V 75" fill="#ffffff"/>  
-                        <circle cx="80" cy="180" r="20" fill="#3b82f6"/>  
-                        <path d="M 70 185 H 90 L 85 175 H 75 Z M 75 175 V 170 H 85 V 175" fill="#ffffff"/>  
-                        <circle cx="300" cy="270" r="20" fill="#22c55e"/>  
-                        <text x="300" y="278" font-size="20" fill="#ffffff" text-anchor="middle" font-weight="bold">$</text>  
-                    </svg>  
+<!-- Section Héro (Maquette Principale) -->  
+<section id="hero" class="pt-16 pb-24 lg:pt-24 lg:pb-32 bg-white">  
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">  
+        <div class="lg:grid lg:grid-cols-12 lg:gap-12 items-center">  
+            <div class="lg:col-span-6 xl:col-span-7 mb-12 lg:mb-0">  
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-900 leading-tight">  
+                    <span class="text-blue-600">JEOAH'S</span> Market Place  
+                </h1>  
+                <p class="mt-4 text-xl text-gray-600 max-w-lg">  
+                    Le meilleur endroit pour acheter et vendre des produits de vos détaillants préférés.  
+                </p>  
+                <div class="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">  
+                    <a href="./auth.html" class="btn-primary px-8 py-3 rounded-xl font-bold shadow-lg text-lg transform hover:scale-[1.02] transition duration-300 text-center">  
+                        Commencer  
+                    </a>  
                 </div>  
             </div>  
-        </div>  
-    </section>  
 
-    <!-- Section Fonctionnalités -->  
-    <section id="features" class="py-24 bg-gray-50 border-t border-b border-gray-100">  
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">  
-            <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-16">  
-                Pourquoi choisir JEOAH'S ?  
-            </h2>  
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">  
-                <div class="flex items-start space-x-4">  
-                    <div class="feature-icon-box bg-blue-100 text-blue-600">  
-                        <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>  
-                    </div>  
-                    <div>  
-                        <h3 class="text-xl font-semibold text-gray-900">Produits Centralisés</h3>  
-                        <p class="mt-2 text-gray-600">  
-                            Trouvez des produits de tous vos détaillants préférés en un seul endroit. Finie la chasse !  
-                        </p>  
-                    </div>  
-                </div>  
-                <div class="flex items-start space-x-4">  
-                    <div class="feature-icon-box bg-purple-100 text-purple-600">  
-                        <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1v-3.25m-6-8.5v5.5a2 2 0 002 2h2a2 2 0 002-2v-5.5m-6 0h6"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a5 5 0 00-5 5v2h10V7a5 5 0 00-5-5z"></path></svg>  
-                    </div>  
-                    <div>  
-                        <h3 class="text-xl font-semibold text-gray-900">Propulsé par l'IA</h3>  
-                        <p class="mt-2 text-gray-600">  
-                            Obtenez des mises à jour automatiques sur les nouvelles offres et les produits tendances grâce à notre système intelligent.  
-                        </p>  
-                    </div>  
-                </div>  
-                <div class="flex items-start space-x-4">  
-                    <div class="feature-icon-box bg-green-100 text-green-600">  
-                        <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>  
-                    </div>  
-                    <div>  
-                        <h3 class="text-xl font-semibold text-gray-900">Paiements Faciles</h3>  
-                        <p class="mt-2 text-gray-600">  
-                            Payez avec Google Pay, Alipay, PayPal, et bien plus. Une flexibilité totale pour vos achats.  
-                        </p>  
-                    </div>  
-                </div>  
-                <div class="flex items-start space-x-4">  
-                    <div class="feature-icon-box bg-yellow-100 text-yellow-600">  
-                        <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h7m-7 0a2 2 0 01-2-2v-1a2 2 0 00-2-2h-1.055M21 12v3m-3 3h3m0 0l-3-3m3 3l-3 3"></path></svg>  
-                    </div>  
-                    <div>  
-                        <h3 class="text-xl font-semibold text-gray-900">Accès Global</h3>  
-                        <p class="mt-2 text-gray-600">  
-                            Achetez auprès de détaillants du monde entier. Votre marché n'a plus de frontières.  
-                        </p>  
-                    </div>  
-                </div>  
+            <!-- Illustration Téléphone (SVG) -->  
+            <div class="lg:col-span-6 xl:col-span-5 flex justify-center lg:justify-end">  
+                <svg class="w-full max-w-xs md:max-w-md h-auto" viewBox="0 0 350 350" fill="none" xmlns="http://www.w3.org/2000/svg">  
+                    <rect x="50" y="50" width="250" height="300" rx="30" fill="#facc15" opacity="0.1"/>  
+                    <rect x="75" y="20" width="200" height="320" rx="25" fill="#ffffff" stroke="#3b82f6" stroke-width="4"/>  
+                    <rect x="85" y="30" width="180" height="300" rx="20" fill="#60a5fa"/>  
+                    <rect x="120" y="100" width="110" height="110" rx="10" fill="#facc15"/>  
+                    <path d="M 175 98 L 175 85 L 155 85 L 155 98 L 195 98 L 195 85 L 175 85 Z" fill="#facc15"/>  
+                    <g fill="#fde047" transform="translate(110, 220)">  
+                        <path d="M 0 0 L 3.5 10 L 0 20 L -3.5 10 Z" transform="rotate(18, 0, 0)"/>  
+                        <path d="M 15 0 L 18.5 10 L 15 20 L 11.5 10 Z" transform="rotate(18, 15, 0)"/>  
+                        <path d="M 30 0 L 33.5 10 L 30 20 L 26.5 10 Z" transform="rotate(18, 30, 0)"/>  
+                        <path d="M 45 0 L 48.5 10 L 45 20 L 41.5 10 Z" transform="rotate(18, 45, 0)"/>  
+                        <rect x="60" y="5" width="5" height="10" fill="#fde047"/>  
+                    </g>  
+                    <rect x="195" y="260" width="60" height="30" rx="15" fill="#3b82f6"/>  
+                    <text x="225" y="281" font-size="14" fill="white" text-anchor="middle" font-weight="bold">Acheter</text>  
+                    <circle cx="280" cy="80" r="20" fill="#3b82f6"/>  
+                    <path d="M 270 85 H 290 L 285 75 H 275 Z M 275 75 V 70 H 285 V 75" fill="#ffffff"/>  
+                    <circle cx="80" cy="180" r="20" fill="#3b82f6"/>  
+                    <path d="M 70 185 H 90 L 85 175 H 75 Z M 75 175 V 170 H 85 V 175" fill="#ffffff"/>  
+                    <circle cx="300" cy="270" r="20" fill="#22c55e"/>  
+                    <text x="300" y="278" font-size="20" fill="#ffffff" text-anchor="middle" font-weight="bold">$</text>  
+                </svg>  
             </div>  
         </div>  
-    </section>  
+    </div>  
+</section>  
 
-    <!-- Section CTA (Avec l'offre spéciale) -->  
-    <section class="py-20 bg-blue-600">  
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">  
-            <h2 class="text-3xl md:text-4xl font-extrabold text-white">  
-                Prêt à explorer la Marketplace ?  
-            </h2>  
-            <p class="mt-4 text-xl text-blue-100">  
-                Rejoignez-nous aujourd'hui et commencez à acheter, vendre ou affilier.  
-            </p>  
-            <div class="mt-8 flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <a href="./auth.html" class="inline-block px-10 py-4 bg-white text-blue-600 font-bold text-lg rounded-xl shadow-xl hover:bg-gray-100 transition duration-300 transform hover:scale-105">  
-                    S'inscrire Maintenant  <!-- Bouton fonctionnel vers auth.html -->
-                </a>  
-                <!-- Bouton de l'offre spéciale -->
-                <button onclick="checkLaunchOffer()" class="inline-block px-10 py-4 bg-yellow-400 text-gray-900 font-bold text-lg rounded-xl shadow-xl hover:bg-yellow-500 transition duration-300 transform hover:scale-105">
-                    Offre de Lancement : 15 Jours Gratuits
-                </button>
-            </div>
-        </div>  
-    </section>  
-
-    <!-- Footer -->  
-    <footer id="contact" class="bg-gray-800 text-white pt-12 pb-8 mt-auto">  
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">  
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">  
-                <div>  
-                    <h3 class="text-xl font-extrabold mb-4">JEOAH'S</h3>  
-                    <p class="text-sm text-gray-400">  
-                        Votre plateforme d'e-commerce innovante et centralisée.  
-                    </p>  
+<!-- Section Fonctionnalités -->  
+<section id="features" class="py-24 bg-gray-50 border-t border-b border-gray-100">  
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">  
+        <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-16">  
+            Pourquoi choisir JEOAH'S ?  
+        </h2>  
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">  
+            <div class="flex items-start space-x-4">  
+                <div class="feature-icon-box bg-blue-100 text-blue-600">  
+                    <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>  
                 </div>  
                 <div>  
-                    <h3 class="text-lg font-semibold mb-4 text-white">Navigation Rapide</h3>  
-                    <ul class="space-y-2 text-sm">  
-                        <li><a href="#hero" class="text-gray-400 hover:text-blue-400 transition">Accueil</a></li>  
-                        <li><a href="#features" class="text-gray-400 hover:text-blue-400 transition">Fonctionnalités</a></li>  
-                        <li><a href="./contact.html" class="text-gray-400 hover:text-blue-400 transition">Contact</a></li>  
-                        <li><a href="./confidentialite.html" class="text-gray-400 hover:text-blue-400 transition">Politique</a></li> <!-- Lien corrigé -->
-                    </ul>  
-                </div>  
-                
-                <div>
-                    <h3 class="text-lg font-semibold mb-4 text-white">Réseaux Sociaux</h3>
-                    <!-- Ajout de tous les réseaux sociaux demandés -->
-                    <div class="flex flex-wrap gap-3 text-2xl">
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-blue-400 transition" title="Twitter/X"><i class="fab fa-twitter"></i></a>  
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-blue-400 transition" title="Facebook"><i class="fab fa-facebook-f"></i></a>  
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-blue-400 transition" title="YouTube"><i class="fab fa-youtube"></i></a>  
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-blue-400 transition" title="Instagram"><i class="fab fa-instagram"></i></a>  
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-blue-400 transition" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-blue-400 transition" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-blue-400 transition" title="Reddit"><i class="fab fa-reddit-alien"></i></a>
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-blue-400 transition" title="Snapchat"><i class="fab fa-snapchat-ghost"></i></a>
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-blue-400 transition" title="Twitch"><i class="fab fa-twitch"></i></a>
-                        <!-- Quora et Leboncoin ne sont pas disponibles via Font Awesome, donc on utilise des icônes génériques -->
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-blue-400 transition" title="Quora"><i class="fab fa-quora"></i></a> 
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-blue-400 transition" title="Leboncoin"><i class="fas fa-store"></i></a> 
-                    </div>
-                </div>
-
-                <div>  
-                    <h3 class="text-lg font-semibold mb-4 text-white">Modes de Paiement</h3>  
-                    <p class="text-sm text-gray-400 mb-4">  
-                        Nous acceptons :  
+                    <h3 class="text-xl font-semibold text-gray-900">Produits Centralisés</h3>  
+                    <p class="mt-2 text-gray-600">  
+                        Trouvez des produits de tous vos détaillants préférés en un seul endroit. Finie la chasse !  
                     </p>  
-                    <!-- Ajout de tous les modes de paiement demandés -->
-                    <div class="flex flex-wrap gap-2 text-3xl">  
-                        <span class="text-gray-400" title="PayPal"><i class="fab fa-paypal"></i></span>  
-                        <span class="text-gray-400" title="Visa"><i class="fab fa-cc-visa"></i></span>  
-                        <span class="text-gray-400" title="Google Pay"><i class="fab fa-google-pay"></i></span>  
-                        <span class="text-gray-400" title="Alipay"><i class="fab fa-alipay"></i></span>
-                        <span class="text-gray-400" title="Mastercard"><i class="fab fa-cc-mastercard"></i></span>
-                        <span class="text-gray-400" title="Stripe"><i class="fab fa-cc-stripe"></i></span>
-                        <span class="text-gray-400" title="Zelle"><i class="fas fa-wallet"></i></span> <!-- Zelle/NatCash simiule -->
-                        <span class="text-gray-400" title="NatCash"><i class="fas fa-mobile-alt"></i></span> <!-- Zelle/NatCash simiule -->
-                        <span class="text-gray-400" title="Carte Bancaire"><i class="fas fa-credit-card"></i></span>
-                    </div>  
                 </div>  
             </div>  
-
-            <div class="mt-8 pt-6 border-t border-gray-700 text-center">  
-                <p class="text-sm text-gray-500">&copy; 2025 JEOAH'S Marketplace. Tous droits réservés.</p>  
+            <div class="flex items-start space-x-4">  
+                <div class="feature-icon-box bg-purple-100 text-purple-600">  
+                    <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1v-3.25m-6-8.5v5.5a2 2 0 002 2h2a2 2 0 002-2v-5.5m-6 0h6"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a5 5 0 00-5 5v2h10V7a5 5 0 00-5-5z"></path></svg>  
+                </div>  
+                <div>  
+                    <h3 class="text-xl font-semibold text-gray-900">Propulsé par l'IA</h3>  
+                    <p class="mt-2 text-gray-600">  
+                        Obtenez des mises à jour automatiques sur les nouvelles offres et les produits tendances grâce à notre système intelligent.  
+                    </p>  
+                </div>  
+            </div>  
+            <div class="flex items-start space-x-4">  
+                <div class="feature-icon-box bg-green-100 text-green-600">  
+                    <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>  
+                </div>  
+                <div>  
+                    <h3 class="text-xl font-semibold text-gray-900">Paiements Faciles</h3>  
+                    <p class="mt-2 text-gray-600">  
+                        Payez avec Google Pay, Alipay, PayPal, et bien plus. Une flexibilité totale pour vos achats.  
+                    </p>  
+                </div>  
+            </div>  
+            <div class="flex items-start space-x-4">  
+                <div class="feature-icon-box bg-yellow-100 text-yellow-600">  
+                    <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h7m-7 0a2 2 0 01-2-2v-1a2 2 0 00-2-2h-1.055M21 12v3m-3 3h3m0 0l-3-3m3 3l-3 3"></path></svg>  
+                </div>  
+                <div>  
+                    <h3 class="text-xl font-semibold text-gray-900">Accès Global</h3>  
+                    <p class="mt-2 text-gray-600">  
+                        Achetez auprès de détaillants du monde entier. Votre marché n'a plus de frontières.  
+                    </p>  
+                </div>  
             </div>  
         </div>  
-    </footer>  
+    </div>  
+</section>  
 
-    <!-- Icône de Chat Flottante (Bas à droite) -->  
-    <a href="./contact.html" class="fixed bottom-4 right-4 z-50 p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition transform hover:scale-105">  
-        <i class="fas fa-comments text-2xl"></i>  
-    </a>  
+<!-- Section CTA -->  
+<section class="py-20 bg-blue-600">  
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">  
+        <h2 class="text-3xl md:text-4xl font-extrabold text-white">  
+            Prêt à explorer la Marketplace ?  
+        </h2>  
+        <p class="mt-4 text-xl text-blue-100">  
+            Rejoignez-nous aujourd'hui et commencez à acheter, vendre ou affilier.  
+        </p>  
+        <a href="./auth.html" class="mt-8 inline-block px-10 py-4 bg-white text-blue-600 font-bold text-lg rounded-xl shadow-xl hover:bg-gray-100 transition duration-300 transform hover:scale-105">  
+            S'inscrire Maintenant  
+        </a>  
+    </div>  
+</section>  
 
-    <!-- Bouton PWA Clignotant (Bas à gauche) -->  
-    <button id="pwa-install-button" class="fixed bottom-4 left-4 z-50 px-4 py-2 bg-red-600 text-white font-bold rounded-full shadow-lg hover:bg-red-700 animate-pulse-once transition hidden">  
-        <i class="fas fa-mobile-alt mr-2"></i> Installer l'App  <!-- Bouton non fonctionnel (simulé) -->
-    </button>  
-    
-    <script>  
-        // État de l'offre de lancement (pour la démonstration)
-        let registeredUsers = 23; // Simule le nombre d'inscrits
-        const maxUsers = 25;
+<!-- Footer -->  
+<footer id="contact" class="bg-gray-800 text-white pt-12 pb-8 mt-auto">  
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">  
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">  
+            <div>  
+                <h3 class="text-xl font-extrabold mb-4">JEOAH'S</h3>  
+                <p class="text-sm text-gray-400">  
+                    Votre plateforme d'e-commerce innovante et centralisée.  
+                </p>  
+            </div>  
+            <div>  
+                <h3 class="text-lg font-semibold mb-4 text-white">Navigation Rapide</h3>  
+                <ul class="space-y-2 text-sm">  
+                    <li><a href="#hero" class="text-gray-400 hover:text-blue-400 transition">Accueil</a></li>  
+                    <li><a href="#features" class="text-gray-400 hover:text-blue-400 transition">Fonctionnalités</a></li>  
+                    <li><a href="#contact" class="text-gray-400 hover:text-blue-400 transition">Contact</a></li>  
+                    <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">Politique</a></li>  
+                </ul>  
+            </div>  
+            <div>  
+                <h3 class="text-lg font-semibold mb-4 text-white">Réseaux Sociaux</h3>  
+                <div class="flex space-x-4 text-2xl">  
+                    <a href="https://x.com" target="_blank" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter"></i></a>  
+                    <a href="https://facebook.com" target="_blank" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook-f"></i></a>  
+                    <a href="https://youtube.com" target="_blank" class="text-gray-400 hover:text-white transition"><i class="fab fa-youtube"></i></a>  
+                    <a href="https://instagram.com" target="_blank" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>  
+                </div>  
+            </div>  
+            <div>  
+                <h3 class="text-lg font-semibold mb-4 text-white">Modes de Paiement</h3>  
+                <p class="text-sm text-gray-400 mb-4">  
+                    Nous acceptons :  
+                </p>  
+                <div class="flex flex-wrap space-x-2 text-3xl">  
+                    <span class="text-gray-400" title="PayPal"><i class="fab fa-paypal"></i></span>  
+                    <span class="text-gray-400" title="Visa"><i class="fab fa-cc-visa"></i></span>  
+                    <span class="text-gray-400" title="Google Pay"><i class="fab fa-google-pay"></i></span>  
+                    <span class="text-gray-400" title="Stripe"><i class="fab fa-cc-stripe"></i></span>  
+                </div>  
+            </div>  
+        </div>  
 
-        const customModal = document.getElementById('custom-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalMessage = document.getElementById('modal-message');
+        <div class="mt-8 pt-6 border-t border-gray-700 text-center">  
+            <p class="text-sm text-gray-500">&copy; 2025 JEOAH'S Marketplace. Tous droits réservés.</p>  
+        </div>  
+    </div>  
+</footer>  
 
-        function openCustomModal(title, message) {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            customModal.classList.remove('hidden', 'opacity-0');
-            customModal.classList.add('opacity-100');
-            document.getElementById('custom-modal-content').classList.remove('scale-95');
-        }
+<!-- Icône de Chat Flottante (Bas à droite) -->  
+<button class="fixed bottom-4 right-4 z-50 p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition transform hover:scale-105">  
+    <i class="fas fa-comments text-2xl"></i>  
+</button>  
 
-        function closeCustomModal() {
-            document.getElementById('custom-modal-content').classList.add('scale-95');
-            setTimeout(() => {
-                customModal.classList.add('hidden', 'opacity-0');
-            }, 300);
-        }
+<!-- Bouton PWA Clignotant (Bas à gauche) -->  
+<button id="pwa-install-button" class="fixed bottom-4 left-4 z-50 px-4 py-2 bg-red-600 text-white font-bold rounded-full shadow-lg hover:bg-red-700 animate-pulse-once transition hidden">  
+    <i class="fas fa-mobile-alt mr-2"></i> Installer l'App  
+</button>  
+  
+<script>  
+    // Logique pour le bouton PWA (simulé)  
+    document.addEventListener('DOMContentLoaded', () => {  
+        const installButton = document.getElementById('pwa-install-button');  
+        // Logique simple: montrer le bouton après 2 secondes pour simuler l'invite PWA.  
+        setTimeout(() => {  
+            installButton.classList.remove('hidden');  
+        }, 2000);  
 
-        // Logique pour l'offre des 15 jours gratuits
-        function checkLaunchOffer() {
-            if (registeredUsers < maxUsers) {
-                const remaining = maxUsers - registeredUsers;
-                openCustomModal(
-                    "Offre de Lancement Expirant !",
-                    `Félicitations ! Il ne reste que ${remaining} places pour bénéficier de 15 jours gratuits. Inscrivez-vous vite ! Vous serez redirigé vers la page d'inscription. (Redirection vers auth.html)`
-                );
-                // Simuler une incrémentation après confirmation (ou juste après l'affichage)
-                registeredUsers++;
-                setTimeout(() => {
-                    window.location.href = './auth.html';
-                }, 3000);
-            } else {
-                openCustomModal(
-                    "Offre Expirée",
-                    "Désolé, les 25 premières places pour l'offre de 15 jours gratuits ont déjà été prises. Veuillez consulter nos plans tarifaires réguliers sur la page Plans & Tarifs."
-                );
-            }
-        }
-        
-        // Logique pour le bouton PWA (simulé)  
-        document.addEventListener('DOMContentLoaded', () => {  
-            const installButton = document.getElementById('pwa-install-button');  
-            
-            // Simuler l'affichage du bouton PWA après un court délai pour l'expérience mobile
-            setTimeout(() => {  
-                installButton.classList.remove('hidden');  
-            }, 3000);  
-
-            installButton.addEventListener('click', () => {  
-                // Ceci n'est qu'une simulation. La logique PWA réelle nécessite un Service Worker.
-                openCustomModal(
-                    "Installation PWA",
-                    "L'application est prête à être installée sur votre écran d'accueil. Suivez les instructions de votre navigateur (fonctionnalité simulée)."
-                );
-                installButton.innerHTML = '<i class="fas fa-check mr-2"></i> Installé !';
-                installButton.classList.remove('animate-pulse-once');
-                setTimeout(() => installButton.classList.add('hidden'), 5000);  
-            });  
+        installButton.addEventListener('click', () => {  
+            // Remplacer par la logique d'installation PWA si le manifeste est inclus  
+            console.log("Installation PWA demandée...");  
+            installButton.innerHTML = '<i class="fas fa-check mr-2"></i> Installé !';  
+            setTimeout(() => installButton.classList.add('hidden'), 3000);  
         });  
-    </script>
-</body>  
-</html>
+    });  
+</script>
 
+</body>  
+</html>  
+Je doit ramplacer ce code index

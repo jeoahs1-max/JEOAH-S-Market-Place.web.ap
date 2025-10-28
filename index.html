@@ -3,479 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JEOAH'S Marketplace - Accueil Professionnel</title>
+    <title>JEOAH'S Market Place - Achat, Vente & Affiliation Centralisés</title>
+    
+    <meta name="theme-color" content="#1f2937"/>
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/000/fff?text=J">
+    <link rel="manifest" href="/manifest.json">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Mise à jour pour inclure les dernières icônes Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; }
-        .btn-primary {
-            background-color: #facc15; /* Yellow-400 */
-            color: #1f2937; /* Gray-800 */
-            transition: all 0.2s;
-        }
-        .btn-primary:hover {
-            background-color: #eab308; /* Yellow-500 */
-        }
-        .bg-blue-gradient {
-            background: linear-gradient(to right, #4F46E5, #3B82F6);
-        }
-        .feature-icon-box {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px; /* w-12 */
-            height: 48px; /* h-12 */
-            border-radius: 0.75rem; /* rounded-xl */
-        }
-        .feature-icon {
-            width: 24px; /* w-6 */
-            height: 24px; /* h-6 */
-            color: currentColor;
-        }
-        /* Style pour le bouton clignotant */
-        @keyframes pulse-once {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.9; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-pulse-once {
-            animation: pulse-once 1.5s infinite;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .hero-section { background-color: #1f2937; color: white; }
+        .cta-button { transition: all 0.3s ease; }
+        .feature-card { transition: transform 0.2s; }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
     </style>
+    
+    <script type="module">
+        // Logique PWA: Enregistrement du Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('SW enregistré:', registration.scope);
+                }).catch(err => {
+                    console.error('Échec enregistrement SW:', err);
+                });
+            });
+        }
+    </script>
 </head>
-<body class="min-h-screen flex flex-col">
-    <!-- Header / Navigation -->
-    <header class="shadow-sm border-b border-gray-100 sticky top-0 bg-white z-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <a href="./index.html" class="text-2xl font-extrabold text-gray-900">
-                JEOAH'S <span class="text-blue-600">Market Place</span>
-            </a>
-            <nav class="hidden md:flex space-x-8 text-gray-600 font-medium">
-                <a href="#hero" class="hover:text-blue-600 transition">Accueil</a>
-                <a href="#features" class="hover:text-blue-600 transition">Fonctionnalités</a>
-                <a href="#contact" class="hover:text-blue-600 transition">Contact</a>
+<body>
+
+    <div id="payment-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm transform transition-all duration-300 scale-95">
+            <h3 class="text-xl font-bold text-center mb-4">Choisissez votre moyen de paiement</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <button class="flex items-center justify-center p-3 rounded-xl bg-yellow-400 text-gray-900 font-semibold hover:bg-yellow-500">
+                    <i class="fab fa-paypal mr-2"></i> PayPal
+                </button>
+                <button class="flex items-center justify-center p-3 rounded-xl bg-black text-white font-semibold hover:bg-gray-800">
+                    <i class="fab fa-google-pay mr-2"></i> Google Pay
+                </button>
+                <button class="flex items-center justify-center p-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700">
+                    <i class="fas fa-qrcode mr-2"></i> Alipay
+                </button>
+                <button class="flex items-center justify-center p-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700">
+                    <i class="fas fa-wallet mr-2"></i> MonCash
+                </button>
+                <button class="flex items-center justify-center p-3 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700">
+                    <i class="fas fa-money-bill-wave mr-2"></i> Cash App
+                </button>
+                <button class="flex items-center justify-center p-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700">
+                    <i class="fas fa-credit-card mr-2"></i> NatCash
+                </button>
+            </div>
+            <button id="close-modal" class="mt-4 w-full text-sm text-gray-500 hover:text-gray-700">Fermer</button>
+        </div>
+    </div>
+    
+    <header class="bg-gray-900 text-white sticky top-0 z-40 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <a href="./index.html" class="text-2xl font-extrabold tracking-tight text-blue-400">JEOAH'S Market Place</a>
+            <nav class="hidden md:flex space-x-6">
+                <a href="./index.html" class="hover:text-blue-400 transition">Accueil</a>
+                <a href="#fonctionnalites" class="hover:text-blue-400 transition">Fonctionnalités</a>
+                <a href="./plan.html" class="hover:text-blue-400 transition">Plans & Tarifs</a>
+                <a href="./contact.html" class="hover:text-blue-400 transition">Contact</a>
             </nav>
-            <a id="btn-header-login" href="./auth.html" class="px-5 py-2 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-700 transition duration-300 interactive-btn">
-                Se connecter
-            </a>
+            <a href="./auth.html" class="bg-blue-600 px-4 py-2 rounded-xl font-semibold hover:bg-blue-700 transition duration-300 shadow-md">Se connecter</a>
         </div>
     </header>
 
-    <!-- Section Héro (Maquette Principale) -->
-    <section id="hero" class="pt-16 pb-24 lg:pt-24 lg:pb-32 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="lg:grid lg:grid-cols-12 lg:gap-12 items-center">
-                <div class="lg:col-span-6 xl:col-span-7 mb-12 lg:mb-0">
-                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-900 leading-tight">
-                        <span class="text-blue-600">JEOAH'S</span> Market Place
-                    </h1>
-                    <p class="mt-4 text-xl text-gray-600 max-w-lg">
-                        Le meilleur endroit pour acheter et vendre des produits de vos détaillants préférés.
-                    </p>
-                    
-                    <!-- NOUVELLE: Offre Spéciale -->
-                    <div class="mt-6 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg shadow-md max-w-md">
-                        <p class="text-lg font-bold text-yellow-800">
-                            <i class="fas fa-gift mr-2"></i> OFFRE SPÉCIALE : 15 jours gratuits pour les 25 premiers inscrits !
-                        </p>
-                    </div>
-
-                    <div class="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                        <a id="btn-hero-start" href="./auth.html" class="btn-primary px-8 py-3 rounded-xl font-bold shadow-lg text-lg transform hover:scale-[1.02] transition duration-300 text-center interactive-btn">
-                            Commencer
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Illustration Téléphone (SVG) -->
-                <div class="lg:col-span-6 xl:col-span-5 flex justify-center lg:justify-end">
-                    <svg class="w-full max-w-xs md:max-w-md h-auto" viewBox="0 0 350 350" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="50" y="50" width="250" height="300" rx="30" fill="#facc15" opacity="0.1"/>
-                        <rect x="75" y="20" width="200" height="320" rx="25" fill="#ffffff" stroke="#3b82f6" stroke-width="4"/>
-                        <rect x="85" y="30" width="180" height="300" rx="20" fill="#60a5fa"/>
-                        <rect x="120" y="100" width="110" height="110" rx="10" fill="#facc15"/>
-                        <path d="M 175 98 L 175 85 L 155 85 L 155 98 L 195 98 L 195 85 L 175 85 Z" fill="#facc15"/>
-                        <g fill="#fde047" transform="translate(110, 220)">
-                            <path d="M 0 0 L 3.5 10 L 0 20 L -3.5 10 Z" transform="rotate(18, 0, 0)"/>
-                            <path d="M 15 0 L 18.5 10 L 15 20 L 11.5 10 Z" transform="rotate(18, 15, 0)"/>
-                            <path d="M 30 0 L 33.5 10 L 30 20 L 26.5 10 Z" transform="rotate(18, 30, 0)"/>
-                            <path d="M 45 0 L 48.5 10 L 45 20 L 41.5 10 Z" transform="rotate(18, 45, 0)"/>
-                            <rect x="60" y="5" width="5" height="10" fill="#fde047"/>
-                        </g>
-                        <rect x="195" y="260" width="60" height="30" rx="15" fill="#3b82f6"/>
-                        <text x="225" y="281" font-size="14" fill="white" text-anchor="middle" font-weight="bold">Acheter</text>
-                        <circle cx="280" cy="80" r="20" fill="#3b82f6"/>
-                        <path d="M 270 85 H 290 L 285 75 H 275 Z M 275 75 V 70 H 285 V 75" fill="#ffffff"/>
-                        <circle cx="80" cy="180" r="20" fill="#3b82f6"/>
-                        <path d="M 70 185 H 90 L 85 175 H 75 Z M 75 175 V 170 H 85 V 175" fill="#ffffff"/>
-                        <circle cx="300" cy="270" r="20" fill="#22c55e"/>
-                        <text x="300" y="278" font-size="20" fill="#ffffff" text-anchor="middle" font-weight="bold">$</text>
-                    </svg>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section Fonctionnalités -->
-    <section id="features" class="py-24 bg-gray-50 border-t border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-16">
-                Pourquoi choisir JEOAH'S ?
+    <section class="hero-section text-center py-20 px-4">
+        <div class="max-w-4xl mx-auto">
+            
+            <img src="URL_DE_VOTRE_LOGO_JEOAHS.png" alt="Logo JEOAH'S" class="mx-auto w-32 h-auto mb-6">
+            <h2 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
+                Votre plateforme de <span class="text-blue-400">e-commerce</span> innovante et centralisée.
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
-                <div class="flex items-start space-x-4">
-                    <div class="feature-icon-box bg-blue-100 text-blue-600">
-                        <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900">Produits Centralisés</h3>
-                        <p class="mt-2 text-gray-600">
-                            Trouvez des produits de tous vos détaillants préférés en un seul endroit. Finie la chasse !
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-start space-x-4">
-                    <div class="feature-icon-box bg-purple-100 text-purple-600">
-                        <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1v-3.25m-6-8.5v5.5a2 2 0 002 2h2a2 2 0 002-2v-5.5m-6 0h6"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a5 5 0 00-5 5v2h10V7a5 5 0 00-5-5z"></path></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900">Propulsé par l'IA</h3>
-                        <p class="mt-2 text-gray-600">
-                            Obtenez des mises à jour automatiques sur les nouvelles offres et les produits tendances grâce à notre système intelligent.
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-start space-x-4">
-                    <div class="feature-icon-box bg-green-100 text-green-600">
-                        <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900">Paiements Faciles</h3>
-                        <p class="mt-2 text-gray-600">
-                            Payez avec Google Pay, Alipay, PayPal, et bien plus. Une flexibilité totale pour vos achats.
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-start space-x-4">
-                    <div class="feature-icon-box bg-yellow-100 text-yellow-600">
-                        <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h7m-7 0a2 2 0 01-2-2v-1a2 2 0 00-2-2h-1.055M21 12v3m-3 3h3m0 0l-3-3m3 3l-3 3"></path></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-semibold text-gray-900">Accès Global</h3>
-                        <p class="mt-2 text-gray-600">
-                            Achetez auprès de détaillants du monde entier. Votre marché n'a plus de frontières.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section CTA -->
-    <section class="py-20 bg-blue-600">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-extrabold text-white">
-                Prêt à explorer la Marketplace ?
-            </h2>
-            <p class="mt-4 text-xl text-blue-100">
-                Rejoignez-nous aujourd'hui et commencez à acheter, vendre ou affilier.
+            <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                Le meilleur endroit pour acheter, vendre et promouvoir les produits de vos détaillants préférés.
             </p>
-            <a id="btn-cta-register" href="./auth.html" class="mt-8 inline-block px-10 py-4 bg-white text-blue-600 font-bold text-lg rounded-xl shadow-xl hover:bg-gray-100 transition duration-300 transform hover:scale-105 interactive-btn">
-                S'inscrire Maintenant
+            <a href="./auth.html" class="cta-button bg-yellow-400 text-gray-900 px-8 py-3 rounded-xl font-bold text-lg hover:bg-yellow-500 shadow-xl inline-block">
+                Commencer Maintenant
             </a>
+            <div class="mt-8">
+                <img src="https://placehold.co/400x300/2563eb/ffffff?text=Illustration+JEOAH'S" alt="Illustration de la plateforme JEOAH'S" class="mx-auto mt-8 rounded-xl shadow-2xl">
+            </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer id="contact" class="bg-gray-800 text-white pt-12 pb-8 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                <div>
-                    <h3 class="text-xl font-extrabold mb-4">JEOAH'S</h3>
-                    <p class="text-sm text-gray-400">
-                        Votre plateforme d'e-commerce innovante et centralisée.
-                    </p>
+    <section id="fonctionnalites" class="py-16 px-4">
+        <div class="max-w-7xl mx-auto">
+            <h3 class="text-3xl font-bold text-gray-900 text-center mb-12">Pourquoi choisir JEOAH'S ?</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                
+                <div class="feature-card bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                    <i class="fas fa-th-large text-3xl text-blue-600 mb-4"></i>
+                    <h4 class="font-semibold text-xl mb-2">Produits Centralisés</h4>
+                    <p class="text-gray-600">Trouvez des produits de tous vos détaillants préférés en un seul endroit. Finie la chasse !</p>
                 </div>
-                <div>
-                    <h3 class="text-lg font-semibold mb-4 text-white">Navigation Rapide</h3>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#hero" class="text-gray-400 hover:text-blue-400 transition">Accueil</a></li>
-                        <li><a href="#features" class="text-gray-400 hover:text-blue-400 transition">Fonctionnalités</a></li>
-                        <li><a href="#contact" class="text-gray-400 hover:text-blue-400 transition">Contact</a></li>
-                        <li><a href="./pages/paiement.html">Paiement</a></li>
-                        <!-- AJOUT: Plan du Site et FAQ -->
-                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">Plan du Site</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">FAQ</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-blue-400 transition">Politique</a></li>
-                    </ul>
+                
+                <div class="feature-card bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                    <i class="fas fa-robot text-3xl text-purple-600 mb-4"></i>
+                    <h4 class="font-semibold text-xl mb-2">Propulsé par l'IA (Ney)</h4>
+                    <p class="text-gray-600">Obtenez des mises à jour automatiques sur les tendances et les meilleures offres grâce à notre système intelligent.</p>
                 </div>
 
-                <!-- Mise à jour: Réseaux Sociaux étendus -->
+                <div class="feature-card bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                    <i class="fas fa-credit-card text-3xl text-green-600 mb-4"></i>
+                    <h4 class="font-semibold text-xl mb-2">Paiements Faciles</h4>
+                    <p class="text-gray-600">Payez avec Google Pay, Alipay, PayPal, et bien plus. Une flexibilité totale pour vos achats.</p>
+                </div>
+
+                <div class="feature-card bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                    <i class="fas fa-globe-americas text-3xl text-yellow-600 mb-4"></i>
+                    <h4 class="font-semibold text-xl mb-2">Accès Global</h4>
+                    <p class="text-gray-600">Achetez auprès de détaillants du monde entier. Votre marché n'a plus de frontières.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-blue-600 text-white py-16 px-4 text-center">
+        <div class="max-w-4xl mx-auto">
+            <h3 class="text-3xl font-bold mb-4">Prêt à explorer la Marketplace ?</h3>
+            <p class="text-xl mb-8">Rejoignez-nous aujourd'hui et commencez à acheter, vendre ou affilier.</p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="./auth.html" class="bg-white text-blue-600 px-8 py-3 rounded-xl font-bold text-lg hover:bg-gray-100 transition shadow-xl">
+                    S'inscrire Maintenant
+                </a>
+                <button onclick="document.getElementById('payment-modal').classList.remove('hidden', 'opacity-0'); document.getElementById('payment-modal').classList.add('opacity-100', 'scale-100');" class="bg-yellow-400 text-gray-900 px-8 py-3 rounded-xl font-bold text-lg hover:bg-yellow-500 transition shadow-xl">
+                    Offre de Lancement : 15 Jours Gratuits
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-gray-300 py-12 px-4">
+        <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8">
+            
+            <div class="col-span-2 md:col-span-1">
+                <img src="URL_DE_VOTRE_LOGO_JEOAHS_BLANC.png" alt="Logo JEOAH'S Footer" class="w-24 h-auto mb-3">
+                <p class="text-sm">Votre plateforme d'e-commerce innovante et centralisée.</p>
+                <button id="install-app-btn" class="mt-4 bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-700 flex items-center shadow-md">
+                    <i class="fas fa-mobile-alt mr-2"></i> Installer l'App
+                </button>
+            </div>
+            
+            <div>
+                <h5 class="font-bold text-white mb-3">Navigation Rapide</h5>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="./index.html" class="hover:text-blue-400 transition">Accueil</a></li>
+                    <li><a href="#fonctionnalites" class="hover:text-blue-400 transition">Fonctionnalités</a></li>
+                    <li><a href="./contact.html" class="hover:text-blue-400 transition">Contact</a></li>
+                    <li><a href="./plan.html" class="hover:text-blue-400 transition">Plans</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <h5 class="font-bold text-white mb-3">Légal & Assistance</h5>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="./confidentialite.html" class="hover:text-blue-400 transition">Politique de Confidentialité</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">Termes & Conditions</a></li>
+                    <li><a href="./contact.html" class="hover:text-blue-400 transition">Assistance (Ney)</a></li>
+                </ul>
+            </div>
+
+            <div class="col-span-2 md:col-span-2 grid grid-cols-2 gap-8 md:gap-4">
+                
                 <div>
-                    <h3 class="text-lg font-semibold mb-4 text-white">Réseaux Sociaux</h3>
-                    <div class="flex flex-wrap gap-4 text-2xl">
-                        <!-- Déjà existants -->
-                        <a href="https://x.com" target="_blank" class="text-gray-400 hover:text-white transition" title="Twitter/X"><i class="fab fa-twitter"></i></a>
-                        <a href="https://facebook.com" target="_blank" class="text-gray-400 hover:text-white transition" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://youtube.com" target="_blank" class="text-gray-400 hover:text-white transition" title="Youtube"><i class="fab fa-youtube"></i></a>
-                        <a href="https://instagram.com" target="_blank" class="text-gray-400 hover:text-white transition" title="Instagram"><i class="fab fa-instagram"></i></a>
-                        
-                        <!-- Nouveaux Réseaux Sociaux -->
-                        <a href="https://reddit.com" target="_blank" class="text-gray-400 hover:text-white transition" title="Reddit"><i class="fab fa-reddit-alien"></i></a>
-                        <a href="https://snapchat.com" target="_blank" class="text-gray-400 hover:text-white transition" title="Snapchat"><i class="fab fa-snapchat-ghost"></i></a>
-                        <a href="https://twitch.tv" target="_blank" class="text-gray-400 hover:text-white transition" title="Twitch"><i class="fab fa-twitch"></i></a>
-                        <a href="https://telegram.org" target="_blank" class="text-gray-400 hover:text-white transition" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
-                        <a href="https://linkedin.com" target="_blank" class="text-gray-400 hover:text-white transition" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="https://quora.com" target="_blank" class="text-gray-400 hover:text-white transition" title="Quora"><i class="fab fa-quora"></i></a>
-                        <!-- Le Bon Coin n'a pas d'icône FA spécifique, on utilise une icône de marqueur de marché générique -->
-                        <a href="#" target="_blank" class="text-gray-400 hover:text-white transition" title="Marketplace locale"><i class="fas fa-store-alt"></i></a>
+                    <h5 class="font-bold text-white mb-3">Réseaux Sociaux & Lives</h5>
+                    <p class="text-sm mb-3">Suivez-nous pour ne manquer aucun de nos lives !</p>
+                    <div class="flex flex-wrap gap-3 text-2xl">
+                        <a href="#" class="hover:text-blue-400 transition" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition" title="Twitter/X"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition" title="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition" title="TikTok"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition" title="Reddit"><i class="fab fa-reddit-alien"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition" title="Snapchat"><i class="fab fa-snapchat-ghost"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition" title="Twitch"><i class="fab fa-twitch"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition" title="WeChat"><i class="fas fa-comments"></i></a> 
                     </div>
                 </div>
 
-                <!-- Mise à jour: Modes de Paiement étendus -->
                 <div>
-                    <h3 class="text-lg font-semibold mb-4 text-white">Modes de Paiement</h3>
-                    <p class="text-sm text-gray-400 mb-4">
-                        Nous acceptons :
-                    </p>
-                    <div class="flex flex-wrap gap-3 text-3xl">
-                        <!-- Paiements Mobile / Digital -->
-                        <span class="text-gray-400" title="Google Pay"><i class="fab fa-google-pay"></i></span>
-                        <span class="text-gray-400" title="Apple Pay"><i class="fab fa-cc-apple-pay"></i></span>
-                        <span class="text-gray-400" title="Alipay"><i class="fab fa-alipay"></i></span>
-                        <span class="text-gray-400" title="PayPal"><i class="fab fa-paypal"></i></span>
-                        
-                        <!-- Cartes Bancaires -->
-                        <span class="text-gray-400" title="Visa"><i class="fab fa-cc-visa"></i></span>
-                        <span class="text-gray-400" title="Mastercard"><i class="fab fa-cc-mastercard"></i></span>
-                        <span class="text-gray-400" title="Stripe"><i class="fab fa-cc-stripe"></i></span>
-                        
-                        <!-- Paiements Locaux / Virement (Simulés pour Zelle/Natcash) -->
-                        <span class="text-gray-400" title="Virement/Zelle/Natcash"><i class="fas fa-money-check-alt"></i></span>
-                        <span class="text-gray-400" title="Carte Bancaire"><i class="fas fa-credit-card"></i></span>
+                    <h5 class="font-bold text-white mb-3">Modes de Paiement</h5>
+                    <p class="text-sm mb-2">Nous acceptons :</p>
+                    <div class="flex flex-wrap gap-2 text-2xl">
+                        <i class="fab fa-google-pay text-white" title="Google Pay"></i>
+                        <i class="fab fa-apple-pay text-white" title="Apple Pay"></i>
+                        <i class="fab fa-alipay text-white" title="Alipay"></i>
+                        <i class="fab fa-paypal text-white" title="PayPal"></i>
+                        <i class="fab fa-cc-visa text-gray-400" title="Visa"></i>
+                        <i class="fab fa-cc-mastercard text-gray-400" title="Mastercard"></i>
+                        <i class="fab fa-cc-stripe text-white" title="Stripe"></i>
+                        <i class="fas fa-wallet text-gray-400" title="MonCash/NatCash/Autres"></i> 
                     </div>
                 </div>
             </div>
 
-            <div class="mt-8 pt-6 border-t border-gray-700 text-center">
-                <p class="text-sm text-gray-500">&copy; 2025 JEOAH'S Marketplace. Tous droits réservés.</p>
-            </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-gray-800 text-center">
+            <p class="text-sm">&copy; 2025 JEOAH'S Marketplace. Tous droits réservés.</p>
         </div>
     </footer>
+    
     <script>
-  // Redirections simples vers les pages principales
-  document.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', e => {
-      const href = link.getAttribute('href');
-      if (href && href.endsWith('.html')) {
-        e.preventDefault();
-        window.location.href = href;
-      }
-    });
-  });
-</script>
-    
-    <!-- Section Paiement -->
-<section id="paiement" class="bg-gray-50 py-10 px-6 text-center">
-  <h2 class="text-2xl font-bold text-gray-800 mb-6">Choisissez votre moyen de paiement</h2>
-  <div class="flex flex-wrap justify-center gap-4">
-    <!-- PayPal -->
-    <button class="bg-yellow-400 text-gray-900 font-semibold px-5 py-3 rounded-2xl shadow hover:bg-yellow-500 transition" onclick="ouvrirLienPaiement('paypal')">
-      <i class="fab fa-paypal mr-2"></i> PayPal
-    </button>
-
-    <!-- Google Pay -->
-    <button class="bg-black text-white font-semibold px-5 py-3 rounded-2xl shadow hover:bg-gray-800 transition" onclick="ouvrirLienPaiement('googlepay')">
-      <i class="fab fa-google-pay mr-2"></i> Google Pay
-    </button>
-
-    <!-- Alipay -->
-    <button class="bg-blue-600 text-white font-semibold px-5 py-3 rounded-2xl shadow hover:bg-blue-700 transition" onclick="ouvrirLienPaiement('alipay')">
-      <i class="fab fa-alipay mr-2"></i> Alipay
-    </button>
-
-    <!-- MonCash -->
-    <button class="bg-red-600 text-white font-semibold px-5 py-3 rounded-2xl shadow hover:bg-red-700 transition" onclick="ouvrirLienPaiement('moncash')">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/MonCash_Logo.png/120px-MonCash_Logo.png" alt="MonCash" class="inline w-6 h-6 mr-2"> MonCash
-    </button>
-
-    <!-- Cash App -->
-    <button class="bg-green-600 text-white font-semibold px-5 py-3 rounded-2xl shadow hover:bg-green-700 transition" onclick="ouvrirLienPaiement('cashapp')">
-      <i class="fab fa-cc-visa mr-2"></i> Cash App
-    </button>
-
-    <!-- NatCash -->
-    <button class="bg-indigo-600 text-white font-semibold px-5 py-3 rounded-2xl shadow hover:bg-indigo-700 transition" onclick="ouvrirLienPaiement('natcash')">
-      <i class="fas fa-wallet mr-2"></i> NatCash
-    </button>
-  </div>
-</section>
-
-<script>
-  function ouvrirLienPaiement(methode) {
-    let liens = {
-      paypal: "https://www.paypal.com/paypalme/jeoahs",
-      googlepay: "https://pay.google.com",
-      alipay: "https://www.alipay.com",
-      moncash: "https://www.moncash.ht",
-      cashapp: "https://cash.app/$JEOAHSMARKET",
-      natcash: "https://natcash.ht"
-    };
-    window.open(liens[methode], "_blank");
-  }
-</script>
-
-    <!-- Icône de Chat Flottante (Bas à droite) -->
-    <button class="fixed bottom-4 right-4 z-50 p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition transform hover:scale-105">
-        <i class="fas fa-comments text-2xl"></i>
-    </button>
-
-    <!-- Bouton PWA Clignotant (Bas à gauche) -->
-    <button id="pwa-install-button" class="fixed bottom-4 left-4 z-50 px-4 py-2 bg-red-600 text-white font-bold rounded-full shadow-lg hover:bg-red-700 animate-pulse-once transition hidden">
-        <i class="fas fa-mobile-alt mr-2"></i> Installer l'App
-    </button>
-
-    <div id="status-message" class="fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-3 bg-green-500 text-white font-semibold rounded-lg shadow-xl z-50 transition-opacity duration-300 opacity-0 pointer-events-none">
-        <!-- Message de statut dynamique -->
-    </div>
-
-<script>
-    // Variable pour stocker l'événement d'installation PWA
-    let deferredPrompt;
-
-    // Références DOM
-    const installButton = document.getElementById('pwa-install-button');
-    const statusMessage = document.getElementById('status-message');
-    const interactiveButtons = document.querySelectorAll('.interactive-btn');
-
-    // --- Fonction d'affichage de message (remplace alert()) ---
-    function showStatusMessage(message, isSuccess = true) {
-        statusMessage.textContent = message;
-        statusMessage.className = `fixed top-0 left-1/2 transform -translate-x-1/2 mt-4 p-3 font-semibold rounded-lg shadow-xl z-50 transition-opacity duration-300 opacity-100 pointer-events-auto ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`;
-
-        setTimeout(() => {
-            statusMessage.classList.add('opacity-0');
-            statusMessage.classList.remove('opacity-100');
-        }, 3000);
-    }
-
-    // --- Logique PWA (Installation simulée) ---
-
-    // Écoute de l'événement beforeinstallprompt (pour une vraie PWA)
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installButton.classList.remove('hidden');
-        console.log("Événement beforeinstallprompt stocké. Bouton PWA affiché.");
-    });
-
-    // Gestion du clic sur le bouton PWA
-    installButton.addEventListener('click', async () => {
-        console.log("Installation PWA demandée par l'utilisateur.");
-        
-        // Simuler l'invite si l'événement n'est pas disponible (comme dans cet environnement)
-        if (!deferredPrompt) {
-            // Simulation d'une installation réussie
-            installButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Installation...';
-            installButton.classList.remove('animate-pulse-once');
-            
-            setTimeout(() => {
-                showStatusMessage("L'application est installée ! Vous pouvez la lancer depuis votre appareil.", true);
-                installButton.innerHTML = '<i class="fas fa-check mr-2"></i> Installé !';
-                setTimeout(() => installButton.classList.add('hidden'), 3000);
-            }, 1500);
-
-            return;
-        }
-        
-        // Logique PWA réelle (décommenter dans un vrai environnement PWA)
-        // deferredPrompt.prompt();
-        // const { outcome } = await deferredPrompt.userChoice;
-        
-        // Cacher le bouton après le clic
-        // deferredPrompt = null;
-        // installButton.classList.add('hidden');
-    });
-    
-    // Si l'événement beforeinstallprompt n'a pas été déclenché (souvent dans cet environnement), on simule l'apparition
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            if (installButton.classList.contains('hidden') && !deferredPrompt) {
-                 installButton.classList.remove('hidden');
-            }
-        }, 2000);
-        
-        // --- Rendre les boutons "Commencer" et "S'inscrire" fonctionnels (Interactive) ---
-        interactiveButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                // Empêcher la navigation réelle (pour montrer qu'ils sont interactifs)
-                e.preventDefault(); 
-                const buttonText = this.textContent.trim();
-                showStatusMessage(`Redirection vers la page "${buttonText}" simulée. (Lien: ${this.href})`, true);
-                console.log(`Action: Le bouton "${buttonText}" a été cliqué. Redirection simulée vers l'URL d'authentification.`);
-                
-                // Dans un environnement réel, on ferait: window.location.href = this.href;
-            });
+        // Gestion de la modal de paiement
+        document.getElementById('install-app-btn').addEventListener('click', () => {
+            const modal = document.getElementById('payment-modal');
+            modal.classList.remove('hidden', 'opacity-0', 'scale-95');
+            modal.classList.add('opacity-100', 'scale-100');
         });
-    });
-</script>
-  // Redirections simples vers les pages principales
-  document.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', e => {
-      const href = link.getAttribute('href');
-      if (href && href.endsWith('.html')) {
-        e.preventDefault();
-        window.location.href = href;
-      }
-    });
-  });
+        
+        document.getElementById('close-modal').addEventListener('click', () => {
+            const modal = document.getElementById('payment-modal');
+            modal.classList.remove('opacity-100', 'scale-100');
+            modal.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300); // Cacher après la transition
+        });
+        
+        // Fermer si on clique en dehors
+        document.getElementById('payment-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'payment-modal') {
+                document.getElementById('close-modal').click();
+            }
+        });
     </script>
-    <button id="installBtn" style="
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #032C4F;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 12px 18px;
-  font-weight: bold;
-  cursor: pointer;
-  z-index: 1000;">
-Installer JEOAH’S Market Place
-</button>
-
-<script>
-  let deferredPrompt;
-  const installBtn = document.getElementById('installBtn');
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = 'block';
-  });
-
-  installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        console.log('L’installation a été acceptée ✅');
-      }
-      deferredPrompt = null;
-      installBtn.style.display = 'none';
-    }
-  });
-</script>
-
 </body>
-   </html> 
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
-    .then(() => console.log('Service Worker enregistré ✅'))
-    .catch(err => console.error('Erreur SW:', err));
-  }
-</script>
 </html>
+```eof
+
+J'ai maintenant corrigé les points suivants dans `index.html`:
+
+1.  **Logo JEOAH'S :** J'ai inséré des balises `<img>` pour le logo au centre du Hero et dans le Footer, avec le texte `URL_DE_VOTRE_LOGO_JEOAHS.png` pour vous rappeler de le remplacer par l'URL de votre image réelle.
+2.  **Modes de Paiement :** J'ai rétabli l'affichage complet des icônes de paiement dans une colonne dédiée du pied de page.
+
+Nous sommes maintenant prêts à vérifier la fonctionnalité de connexion et le tableau de bord des différents rôles.
+
+Que souhaitez-vous faire maintenant : passer au test de la connexion/redirection (`auth.html` vers `dashboard.html`) ou développer les fonctionnalités spécifiques du **Vendeur** ou de l'**Affilié** ?

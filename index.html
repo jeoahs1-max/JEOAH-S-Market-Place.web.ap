@@ -262,6 +262,55 @@
             </div>
         </div>
     </footer>
+    <!-- Section Paiement -->
+<section id="paiement" class="bg-gray-50 py-10 px-6 text-center">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6">Choisissez votre moyen de paiement</h2>
+  <div class="flex flex-wrap justify-center gap-4">
+    <!-- PayPal -->
+    <button class="bg-yellow-400 text-gray-900 font-semibold px-5 py-3 rounded-2xl shadow hover:bg-yellow-500 transition" onclick="ouvrirLienPaiement('paypal')">
+      <i class="fab fa-paypal mr-2"></i> PayPal
+    </button>
+
+    <!-- Google Pay -->
+    <button class="bg-black text-white font-semibold px-5 py-3 rounded-2xl shadow hover:bg-gray-800 transition" onclick="ouvrirLienPaiement('googlepay')">
+      <i class="fab fa-google-pay mr-2"></i> Google Pay
+    </button>
+
+    <!-- Alipay -->
+    <button class="bg-blue-600 text-white font-semibold px-5 py-3 rounded-2xl shadow hover:bg-blue-700 transition" onclick="ouvrirLienPaiement('alipay')">
+      <i class="fab fa-alipay mr-2"></i> Alipay
+    </button>
+
+    <!-- MonCash -->
+    <button class="bg-red-600 text-white font-semibold px-5 py-3 rounded-2xl shadow hover:bg-red-700 transition" onclick="ouvrirLienPaiement('moncash')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/MonCash_Logo.png/120px-MonCash_Logo.png" alt="MonCash" class="inline w-6 h-6 mr-2"> MonCash
+    </button>
+
+    <!-- Cash App -->
+    <button class="bg-green-600 text-white font-semibold px-5 py-3 rounded-2xl shadow hover:bg-green-700 transition" onclick="ouvrirLienPaiement('cashapp')">
+      <i class="fab fa-cc-visa mr-2"></i> Cash App
+    </button>
+
+    <!-- NatCash -->
+    <button class="bg-indigo-600 text-white font-semibold px-5 py-3 rounded-2xl shadow hover:bg-indigo-700 transition" onclick="ouvrirLienPaiement('natcash')">
+      <i class="fas fa-wallet mr-2"></i> NatCash
+    </button>
+  </div>
+</section>
+
+<script>
+  function ouvrirLienPaiement(methode) {
+    let liens = {
+      paypal: "https://www.paypal.com/paypalme/jeoahs",
+      googlepay: "https://pay.google.com",
+      alipay: "https://www.alipay.com",
+      moncash: "https://www.moncash.ht",
+      cashapp: "https://cash.app/$JEOAHSMARKET",
+      natcash: "https://natcash.ht"
+    };
+    window.open(liens[methode], "_blank");
+  }
+</script>
 
     <!-- Icône de Chat Flottante (Bas à droite) -->
     <button class="fixed bottom-4 right-4 z-50 p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition transform hover:scale-105">

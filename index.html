@@ -263,6 +263,19 @@
             </div>
         </div>
     </footer>
+    <script>
+  // Redirections simples vers les pages principales
+  document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', e => {
+      const href = link.getAttribute('href');
+      if (href && href.endsWith('.html')) {
+        e.preventDefault();
+        window.location.href = href;
+      }
+    });
+  });
+</script>
+    
     <!-- Section Paiement -->
 <section id="paiement" class="bg-gray-50 py-10 px-6 text-center">
   <h2 class="text-2xl font-bold text-gray-800 mb-6">Choisissez votre moyen de paiement</h2>
@@ -347,7 +360,6 @@
         }, 3000);
     }
 
-
     // --- Logique PWA (Installation simulée) ---
 
     // Écoute de l'événement beforeinstallprompt (pour une vraie PWA)
@@ -408,7 +420,62 @@
         });
     });
 </script>
+  // Redirections simples vers les pages principales
+  document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', e => {
+      const href = link.getAttribute('href');
+      if (href && href.endsWith('.html')) {
+        e.preventDefault();
+        window.location.href = href;
+      }
+    });
+  });
+    </script>
+    <button id="installBtn" style="
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #032C4F;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1000;">
+Installer JEOAH’S Market Place
+</button>
+
+<script>
+  let deferredPrompt;
+  const installBtn = document.getElementById('installBtn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('L’installation a été acceptée ✅');
+      }
+      deferredPrompt = null;
+      installBtn.style.display = 'none';
+    }
+  });
+</script>
 
 </body>
+   </html> 
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+    .then(() => console.log('Service Worker enregistré ✅'))
+    .catch(err => console.error('Erreur SW:', err));
+  }
+</script>
 </html>
-

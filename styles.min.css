@@ -355,3 +355,23 @@ footer {
     width: 18px;
     height: 18px;
 }
+.payment-section {
+  text-align: center;
+  padding: 40px;
+}
+
+.payment-buttons button {
+  margin: 10px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ff6b81;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.payment-buttons button:hover {
+  background-color: #ff3366;
+}

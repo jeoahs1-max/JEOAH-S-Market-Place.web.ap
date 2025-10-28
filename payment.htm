@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEOAH'S - Finalisation du Paiement</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f9; }
+        .card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <!-- Modal pour remplacer alert() -->
+    <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h4 id="modal-title" class="text-xl font-bold mb-3 text-[#032C4F]"></h4>
+            <p id="modal-content" class="text-gray-700 mb-4"></p>
+            <button class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" onclick="document.getElementById('custom-modal').classList.add('hidden')">
+                Fermer
+            </button>
+        </div>
+    </div>
+    
+    <main class="max-w-4xl mx-auto py-10">
+        <h1 class="text-4xl font-extrabold text-[#032C4F] mb-2 text-center">
+            Finaliser votre Abonnement
+        </h1>
+        <p class="text-center text-gray-600 mb-8">Veuillez vérifier votre commande avant de payer.</p>
+
+        <!-- Loading State / Non-Auth State -->
+        <div id="status-message" class="text-center py-10 px-6 bg-white rounded-xl card border border-gray-200">
+            <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-3" id="loading-spinner"></i>
+            <p class="text-gray-600 text-lg" id="loading-text">Vérification de l'authentification et du plan...</p>
+        </div>
+
+        <!-- Conteneur Principal de Paiement -->
+        <div id="payment-container" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Colonne 1: Récapitulatif de la Commande -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-xl card h-fit order-2 lg:order-1">
+                <h2 class="text-2xl font-bold text-[#032C4F] mb-4 border-b pb-2">Votre Commande</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center text-gray-700">
+                        <span class="font-medium">Plan Sélectionné</span>
+                        <span id="plan-name-display" class="font-semibold text-blue-600"></span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center text-gray-700">
+                        <span class="font-medium">Durée</span>
+                        <span id="plan-duration-display" class="font-semibold"></span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center text-gray-700">
+                        <span class="font-medium">Frais de Vente</span>
+                        <span class="font-semibold text-green-600">0%</span>
+                    </div>
+
+                    <div class="border-t border-gray-300 pt-4 flex justify-between items-center">
+                        <span class="text-xl font-bold">Total à Payer</span>
+                        <span id="plan-price-display" class="text-2xl font-extrabold text-blue-600"></span>
+                    </div>
+                </div>
+
+                <p class="text-sm text-gray-500 mt-6 p-3 bg-gray-100 rounded-lg">
+                    <i class="fas fa-shield-alt mr-1 text-green-500"></i> Paiement sécurisé. Votre abonnement sera actif immédiatement après validation.
+                </p>
+                
+                <a href="plans.html" class="mt-4 block text-sm text-center text-blue-500 hover:text-blue-700">
+                    <i class="fas fa-arrow-left mr-1"></i> Changer de plan
+                </a>
+            </div>
+
+            <!-- Colonne 2: Formulaire de Paiement -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl card order-1 lg:order-2">
+                <h2 class="text-2xl font-bold text-[#032C4F] mb-4 border-b pb-2">Choisissez votre Méthode</h2>
+
+                <!-- Sélecteur de Méthode -->
+                <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button type="button" id="method-card" class="payment-method-btn bg-blue-600 text-white font-semibold py-3 rounded-xl border-2 border-blue-600 hover:bg-blue-700 transition">
+                        <i class="fas fa-credit-card mr-2"></i> Carte Bancaire
+                    </button>
+                    <button type="button" id="method-paypal" class="payment-method-btn bg-white text-gray-700 font-semibold py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 transition">
+                        <i class="fab fa-paypal mr-2 text-blue-800"></i> PayPal / Autres
+                    </button>
+                </div>
+
+                <form id="payment-form" class="space-y-4">
+                    
+                    <!-- Conteneur: Paiement par Carte -->
+                    <div id="card-payment-fields">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-800 border-b pb-2">Détails de la Carte</h3>
+                        
+                        <div>
+                            <label for="card-number" class="block text-sm font-medium text-gray-700">Numéro de Carte (Simulé)</label>
+                            <div class="relative mt-1">
+                                <input type="text" id="card-number" required placeholder="XXXX XXXX XXXX XXXX" maxlength="19" class="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 pr-10">
+                                <i class="fas fa-credit-card absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"></i>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="card-name" class="block text-sm font-medium text-gray-700">Nom sur la Carte</label>
+                            <input type="text" id="card-name" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="expiry-date" class="block text-sm font-medium text-gray-700">Date d'Expiration (MM/AA)</label>
+                                <input type="text" id="expiry-date" required placeholder="MM/AA" maxlength="5" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="cvc" class="block text-sm font-medium text-gray-700">CVC</label>
+                                <input type="text" id="cvc" required placeholder="123" maxlength="4" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conteneur: Paiement par PayPal/Autres -->
+                    <div id="other-payment-fields" class="hidden p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
+                        <i class="fas fa-tools text-5xl text-gray-400 mb-3"></i>
+                        <p class="font-semibold text-gray-700">Simulation de Paiement Externe</p>
+                        <p class="text-sm text-gray-500">
+                            Cliquer sur le bouton ci-dessous simule la redirection vers PayPal/Google Pay et la validation de votre transaction.
+                        </p>
+                        <button type="button" id="simulate-external-payment" class="mt-4 bg-yellow-400 text-yellow-900 py-2 px-6 rounded-xl font-bold hover:bg-yellow-500 transition">
+                             Simuler Paiement PayPal/Autre
+                        </button>
+                    </div>
+
+                    <!-- Code de Parrainage (Optionnel) -->
+                    <div class="pt-4 border-t border-gray-200">
+                        <label for="referral-code-input" class="block text-sm font-medium text-gray-700">Code de Parrainage (Optionnel)</label>
+                        <div class="flex space-x-2 mt-1">
+                            <input type="text" id="referral-code-input" placeholder="JSMP-XXXXXX" class="block flex-grow px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500">
+                            <button type="button" id="apply-referral-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-semibold hover:bg-gray-300 transition">
+                                Appliquer
+                            </button>
+                        </div>
+                        <p id="referral-status" class="text-sm mt-1"></p>
+                    </div>
+
+                    <!-- Bouton de Soumission Global -->
+                    <div class="pt-4">
+                        <button type="submit" id="submit-payment-btn" class="w-full bg-green-600 text-white py-3 rounded-xl font-extrabold hover:bg-green-700 transition duration-300 shadow-lg flex items-center justify-center">
+                            <i class="fas fa-lock mr-2"></i> Payer <span id="submit-price-display"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        // Import des librairies Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+        // IMPORTANT : Utilisation des variables globales fournies par l'environnement
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let auth;
+        let db;
+        let currentUserId = null;
+        let selectedPlan = null;
+        let planDetails = {};
+        let currentPaymentMethod = 'card'; // 'card' or 'paypal'
+
+        // Définition des plans avec leurs prix et noms pour la mise à jour
+        const PLANS_DATA = {
+            'mensuel': { name: 'Mensuel', price: 19.99, duration: '1 Mois', status: 'Mensuel Actif', discount: 0 },
+            'trimestriel': { name: 'Trimestriel', price: 59.97, duration: '3 Mois', status: 'Trimestriel Actif', discount: 0 },
+            'semestriel': { name: 'Semestriel', price: 119.94, duration: '6 Mois', status: 'Semestriel Actif', discount: 0 },
+            'annuel': { name: 'Annuel', price: 250.00, duration: '1 An', status: 'Annuel Actif', discount: 0 }
+        };
+
+        // --- Fonctions d'aide pour l'UI ---
+
+        function showCustomModal(title, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').textContent = content;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status-message');
+            const spinner = document.getElementById('loading-spinner');
+            const text = document.getElementById('loading-text');
+
+            // Reset classes
+            statusDiv.className = 'text-center py-10 px-6 bg-white rounded-xl card border border-gray-200';
+
+            if (type === 'info') {
+                statusDiv.classList.add('border-blue-400');
+                spinner.classList.remove('hidden');
+                text.classList.remove('text-red-600');
+            } else if (type === 'error') {
+                statusDiv.classList.add('bg-red-100', 'text-red-700', 'border-red-400');
+                spinner.classList.add('hidden');
+                text.classList.add('text-red-600');
+            } else if (type === 'success') {
+                statusDiv.classList.add('bg-green-100', 'text-green-700', 'border-green-400');
+                spinner.classList.add('hidden');
+            }
+            text.textContent = message;
+        }
+
+        function parseUrlPlan() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const planKey = urlParams.get('plan');
+            
+            if (planKey && PLANS_DATA[planKey]) {
+                selectedPlan = planKey;
+                planDetails = { ...PLANS_DATA[planKey] }; // Copie pour la modification du prix
+                return true;
+            } else {
+                // Message d'erreur plus convivial et lien vers la page des plans
+                updateStatus(
+                    `Erreur: Le plan sélectionné est invalide ou manquant. Veuillez revenir à la page des <a href="plans.html" class="text-blue-600 font-bold hover:text-blue-800">Plans</a>.`, 
+                    'error'
+                );
+                document.getElementById('loading-text').innerHTML = `Erreur: Le plan sélectionné est invalide ou manquant. Veuillez revenir à la page des <a href="plans.html" class="text-blue-600 font-bold hover:text-blue-800">Plans</a>.`;
+                document.getElementById('payment-container').classList.add('hidden');
+                return false;
+            }
+        }
+
+        function displayPlanDetails() {
+            const finalPrice = (planDetails.price - planDetails.discount).toFixed(2);
+            document.getElementById('plan-name-display').textContent = planDetails.name;
+            document.getElementById('plan-duration-display').textContent = planDetails.duration;
+            document.getElementById('plan-price-display').textContent = `$${finalPrice}`;
+            document.getElementById('submit-price-display').textContent = `$${finalPrice}`;
+        }
+        
+        function switchPaymentMethod(method) {
+            currentPaymentMethod = method;
+            const cardFields = document.getElementById('card-payment-fields');
+            const otherFields = document.getElementById('other-payment-fields');
+            const btnCard = document.getElementById('method-card');
+            const btnPaypal = document.getElementById('method-paypal');
+
+            // Reset button styles
+            btnCard.className = 'payment-method-btn bg-white text-gray-700 font-semibold py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 transition';
+            btnPaypal.className = 'payment-method-btn bg-white text-gray-700 font-semibold py-3 rounded-xl border-2 border-gray-300 hover:bg-gray-100 transition';
+
+            if (method === 'card') {
+                cardFields.classList.remove('hidden');
+                otherFields.classList.add('hidden');
+                btnCard.className = 'payment-method-btn bg-blue-600 text-white font-semibold py-3 rounded-xl border-2 border-blue-600 hover:bg-blue-700 transition';
+                // Rendre les champs requis pour la soumission par carte
+                document.getElementById('card-number').required = true;
+                document.getElementById('expiry-date').required = true;
+                document.getElementById('cvc').required = true;
+                document.getElementById('submit-payment-btn').type = 'submit';
+
+            } else { // 'paypal' or 'other'
+                cardFields.classList.add('hidden');
+                otherFields.classList.remove('hidden');
+                btnPaypal.className = 'payment-method-btn bg-blue-600 text-white font-semibold py-3 rounded-xl border-2 border-blue-600 hover:bg-blue-700 transition';
+                // Désactiver les champs pour la soumission par carte
+                document.getElementById('card-number').required = false;
+                document.getElementById('expiry-date').required = false;
+                document.getElementById('cvc').required = false;
+                document.getElementById('submit-payment-btn').type = 'button'; // Le bouton submit ne fonctionne plus pour le formulaire, on utilise le bouton de simulation
+            }
+        }
+
+
+        // --- Logique de Paiement et Firebase ---
+
+        async function initFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                updateStatus("Firebase config est vide. Impossible d'initialiser.", 'error');
+                return;
+            }
+            
+            setLogLevel('Debug'); 
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            // Tente d'authentifier l'utilisateur
+            if (initialAuthToken) {
+                await signInWithCustomToken(auth, initialAuthToken);
+            } else {
+                await signInAnonymously(auth);
+            }
+            
+            // Écoute l'état d'authentification
+            onAuthStateChanged(auth, (user) => {
+                if (user && !user.isAnonymous) {
+                    currentUserId = user.uid;
+                    console.log("Utilisateur connecté:", currentUserId);
+                    if (parseUrlPlan()) {
+                        displayPlanDetails();
+                        document.getElementById('status-message').classList.add('hidden');
+                        document.getElementById('payment-container').classList.remove('hidden');
+                    }
+                } else {
+                    updateStatus('Veuillez vous connecter pour procéder au paiement.', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'auth.html'; // Redirection vers la page de connexion
+                    }, 3000);
+                }
+            });
+        }
+        
+        async function applyReferralCode() {
+            const codeInput = document.getElementById('referral-code-input').value.trim();
+            const statusElement = document.getElementById('referral-status');
+            statusElement.className = 'text-sm mt-1';
+            
+            if (!codeInput) {
+                statusElement.textContent = "Veuillez entrer un code.";
+                statusElement.classList.add('text-red-500');
+                return;
+            }
+
+            // Path: /artifacts/{appId}/public/data/user_profiles
+            const referralRef = collection(db, `artifacts/${appId}/public/data/user_profiles`); 
+            
+            // On cherche un utilisateur dont le champ referralCode correspond au code entré
+            const q = query(referralRef, where("referralCode", "==", codeInput));
+
+            try {
+                const querySnapshot = await getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                    const referrerDoc = querySnapshot.docs[0];
+                    const referrerData = referrerDoc.data();
+
+                    if (referrerData.uid === currentUserId) {
+                        statusElement.textContent = "Vous ne pouvez pas parrainer vous-même.";
+                        statusElement.classList.add('text-red-500');
+                        return;
+                    }
+
+                    // SIMULATION : Appliquer une réduction de 10%
+                    const discountRate = 0.10;
+                    planDetails.discount = planDetails.price * discountRate; 
+                    
+                    statusElement.textContent = `Code valide ! Réduction de ${(discountRate * 100).toFixed(0)}% appliquée.`;
+                    statusElement.classList.add('text-green-600');
+                    displayPlanDetails(); // Mettre à jour l'affichage du prix
+
+                } else {
+                    planDetails.discount = 0; // Réinitialiser si le code n'est pas trouvé
+                    statusElement.textContent = "Code de parrainage invalide.";
+                    statusElement.classList.add('text-red-500');
+                    displayPlanDetails();
+                }
+            } catch (error) {
+                console.error("Erreur lors de la vérification du code de parrainage:", error);
+                statusElement.textContent = "Erreur de vérification du code.";
+                statusElement.classList.add('text-red-500');
+            }
+        }
+
+        async function processPayment() {
+            if (!currentUserId) {
+                 showCustomModal('Erreur', 'L\'utilisateur n\'est pas connecté. Veuillez vous reconnecter.');
+                 return;
+            }
+            
+            const submitBtn = document.getElementById('submit-payment-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Traitement...';
+            
+            // SIMULATION DE PAIEMENT (3 secondes)
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
+            try {
+                // 1. Mise à jour du statut d'abonnement dans Firestore
+                // Path: /artifacts/{appId}/users/{userId}/user_data/profile
+                const userDocRef = doc(db, `artifacts/${appId}/users/${currentUserId}/user_data/profile`);
+                
+                const updatePayload = {
+                    subscriptionStatus: planDetails.status,
+                    lastSubscriptionDate: new Date(),
+                    subscriptionPrice: planDetails.price - planDetails.discount,
+                };
+
+                await updateDoc(userDocRef, updatePayload);
+
+                // 2. Succès et Redirection
+                showCustomModal(
+                    'Paiement Réussi !', 
+                    `Félicitations ! Votre abonnement "${planDetails.name}" est maintenant actif. Vous êtes redirigé vers votre tableau de bord.`
+                );
+
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 5000); 
+
+            } catch (error) {
+                console.error("Erreur de mise à jour Firestore:", error);
+                showCustomModal('Erreur Critique', `Le paiement a été validé, mais la mise à jour du profil a échoué. Veuillez contacter le support. Erreur: ${error.message}`);
+                
+                // Réactiver le bouton après erreur
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fas fa-lock mr-2"></i> Payer $${(planDetails.price - planDetails.discount).toFixed(2)}`;
+            }
+        }
+
+
+        async function handlePayment(event) {
+            event.preventDefault(); // Empêche la soumission du formulaire par défaut
+
+            if (currentPaymentMethod === 'card') {
+                // Validation des champs de carte (simulée)
+                if (!document.getElementById('card-number').value || !document.getElementById('expiry-date').value || !document.getElementById('cvc').value) {
+                    showCustomModal('Erreur de Paiement', 'Veuillez remplir tous les champs de la carte.');
+                    return;
+                }
+                await processPayment();
+            } else {
+                // Si la méthode n'est pas 'card', le bouton submit est désactivé, 
+                // et nous nous attendons à ce que l'utilisateur clique sur le bouton de simulation.
+                showCustomModal('Erreur', 'Veuillez sélectionner et utiliser le bouton de paiement externe simulé.');
+            }
+        }
+        
+        async function handleExternalSimulation() {
+            // Cette fonction est appelée par le bouton "Simuler Paiement PayPal/Autre"
+            await processPayment();
+        }
+
+        // --- Initialisation et Écouteurs d'événements ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            
+            // Événements du formulaire
+            document.getElementById('payment-form').addEventListener('submit', handlePayment);
+            document.getElementById('apply-referral-btn').addEventListener('click', applyReferralCode);
+            document.getElementById('simulate-external-payment').addEventListener('click', handleExternalSimulation);
+
+            // Événements pour le changement de méthode de paiement
+            document.getElementById('method-card').addEventListener('click', () => switchPaymentMethod('card'));
+            document.getElementById('method-paypal').addEventListener('click', () => switchPaymentMethod('paypal'));
+            
+            // Initialisation de la méthode par défaut
+            switchPaymentMethod('card'); 
+
+            // Formatage des champs de carte (UX)
+            document.getElementById('card-number').addEventListener('input', function() {
+                this.value = this.value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
+            });
+            document.getElementById('expiry-date').addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '').replace(/^(\d{2})(\d{2})$/, '$1/$2').replace(/^(\d{2})/, '$1/').substring(0, 5);
+            });
+        });
+        
+    </script>
+</body>
+</html>
+

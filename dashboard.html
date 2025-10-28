@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEOAH'S - Mon Tableau de Bord</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f9; }
+        .card {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+        .ia-chat-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Header -->
+    <header class="shadow-md bg-white sticky top-0 z-10">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <span class="text-2xl font-extrabold text-[#032C4F]">JEOAH'S</span>
+            <div class="hidden md:flex space-x-6 text-gray-700 font-medium">
+                <a href="index.html" class="hover:text-blue-600">Accueil</a>
+                <a href="plans.html" class="hover:text-blue-600">Plans</a>
+                <a href="#" id="dashboard-link" class="text-blue-600 border-b-2 border-blue-600 pb-1">Dashboard</a>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button id="logout-button" class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition duration-300">
+                    Déconnexion
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        
+        <!-- Loading State / Unauthorized State -->
+        <div id="loading-state" class="text-center py-20">
+            <i class="fas fa-spinner fa-spin text-5xl text-blue-600 mb-4"></i>
+            <p class="text-gray-600 text-xl">Chargement du tableau de bord...</p>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div id="dashboard-content" class="hidden">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-[#032C4F] mb-8">
+                Bienvenue, <span id="user-full-name" class="text-blue-600"></span> !
+            </h1>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <!-- Carte 1: Rôle de l'utilisateur -->
+                <div class="card bg-white p-6 rounded-xl border-l-4 border-blue-500">
+                    <h2 class="text-lg font-semibold text-gray-500 mb-2">Mon Rôle</h2>
+                    <p id="user-role" class="text-3xl font-extrabold text-gray-900"></p>
+                </div>
+                
+                <!-- Carte 2: Statut de l'abonnement -->
+                <div class="card bg-white p-6 rounded-xl border-l-4 border-green-500">
+                    <h2 class="text-lg font-semibold text-gray-500 mb-2">Abonnement</h2>
+                    <p id="subscription-status" class="text-3xl font-extrabold text-green-600"></p>
+                </div>
+
+                <!-- Carte 3: Code de Parrainage (Clé pour Affilié/Vendeur) -->
+                <div class="card bg-white p-6 rounded-xl border-l-4 border-yellow-500">
+                    <h2 class="text-lg font-semibold text-gray-500 mb-2">Code de Parrainage</h2>
+                    <div class="flex items-center justify-between">
+                        <p id="referral-code" class="text-2xl font-extrabold text-yellow-700 truncate mr-2"></p>
+                        <button id="copy-referral-btn" class="text-gray-500 hover:text-yellow-600 transition" title="Copier le code">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Infos Privées -->
+            <div class="bg-white p-6 rounded-xl card">
+                <h2 class="text-2xl font-bold text-[#032C4F] border-b pb-2 mb-4">Informations du Compte</h2>
+                <div class="space-y-3 text-gray-700">
+                    <p><strong>E-mail:</strong> <span id="user-email"></span></p>
+                    <p><strong>UID (Identifiant Unique):</strong> <span id="user-uid" class="break-all"></span></p>
+                    <!-- Le userId complet est affiché comme requis pour les apps collaboratives -->
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <a href="plans.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition duration-300 inline-block shadow-lg">
+                    <i class="fas fa-arrow-right mr-2"></i> Gérer mon Abonnement
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ASSISTANT IA (NEY) - Reste présent sur toutes les pages -->
+    <div class="ia-chat-box bg-blue-600 hover:bg-blue-700" onclick="showCustomModal('Assistant IA (Ney)', 'Bienvenue sur votre tableau de bord ! Je suis Ney, votre Assistant IA. Si vous avez des questions sur votre abonnement ou votre compte, n\'hésitez pas.');">
+        <i class="fas fa-robot text-white text-3xl"></i>
+    </div>
+
+    <!-- Modal pour remplacer alert() -->
+    <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h4 id="modal-title" class="text-xl font-bold mb-3 text-[#032C4F]"></h4>
+            <p id="modal-content" class="text-gray-700 mb-4"></p>
+            <button class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" onclick="document.getElementById('custom-modal').classList.add('hidden')">
+                Fermer
+            </button>
+        </div>
+    </div>
+    
+    <script type="module">
+        // Import des librairies Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+        // IMPORTANT : Utilisation des variables globales fournies par l'environnement
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let auth;
+        let db;
+        let userId = null;
+
+        // --- Fonctions d'aide pour l'UI ---
+
+        function showCustomModal(title, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').textContent = content;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        // --- Logique Firebase ---
+
+        async function initFirebase() {
+            try {
+                if (Object.keys(firebaseConfig).length === 0) {
+                    console.error("Firebase config is empty. Cannot initialize.");
+                    return;
+                }
+                
+                setLogLevel('Debug'); 
+
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Initialiser l'authentification (nécessaire pour onAuthStateChanged)
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Écouteur de changement d'état d'authentification
+                onAuthStateChanged(auth, (user) => {
+                    if (user && !user.isAnonymous) {
+                        userId = user.uid;
+                        console.log("Utilisateur connecté:", userId);
+                        loadUserProfile(userId);
+                    } else {
+                        // Utilisateur non connecté ou seulement anonyme
+                        console.warn("Utilisateur non authentifié. Redirection vers la page de connexion.");
+                        // Afficher l'état de chargement en dernier recours, puis rediriger
+                        document.getElementById('loading-state').innerHTML = `<p class="text-red-500 text-xl font-bold">Accès refusé. Veuillez vous connecter.</p>`;
+                        document.getElementById('dashboard-content').classList.add('hidden');
+                        setTimeout(() => {
+                             // Rediriger vers la page d'authentification
+                            window.location.href = 'auth.html';
+                        }, 3000);
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erreur lors de l'initialisation de Firebase:", error);
+                showCustomModal("Erreur", `Impossible d'initialiser le service : ${error.message}`);
+            }
+        }
+        
+        function loadUserProfile(uid) {
+            // Chemin d'accès : /artifacts/{appId}/users/{userId}/user_data/profile
+            const docPath = `artifacts/${appId}/users/${uid}/user_data/profile`;
+            const userDocRef = doc(db, docPath);
+
+            // Utilisation de onSnapshot pour les mises à jour en temps réel
+            onSnapshot(userDocRef, (docSnap) => {
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    console.log("Données de profil chargées:", data);
+                    
+                    // Remplissage des éléments de l'UI
+                    document.getElementById('user-full-name').textContent = data.fullName || 'Utilisateur';
+                    document.getElementById('user-role').textContent = data.role || 'Inconnu';
+                    document.getElementById('subscription-status').textContent = data.subscriptionStatus || 'N/A';
+                    document.getElementById('referral-code').textContent = data.referralCode || 'Non généré';
+                    document.getElementById('user-email').textContent = auth.currentUser.email || 'N/A';
+                    document.getElementById('user-uid').textContent = uid; // Afficher l'UID complet
+
+                } else {
+                    console.warn("Profil utilisateur non trouvé dans Firestore.");
+                    showCustomModal("Attention", "Vos données de profil n'ont pas été trouvées. Veuillez contacter le support.");
+                    // On affiche quand même le tableau de bord avec les infos d'Auth minimales
+                    document.getElementById('user-full-name').textContent = auth.currentUser?.email || 'Utilisateur';
+                    document.getElementById('user-uid').textContent = uid; 
+                }
+            }, (error) => {
+                console.error("Erreur de lecture Firestore:", error);
+                showCustomModal("Erreur de Données", `Impossible de charger votre profil : ${error.message}`);
+                // Afficher le tableau de bord avec un message d'erreur
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+            });
+        }
+        
+        async function handleLogout() {
+            try {
+                if (auth) {
+                    await signOut(auth);
+                    console.log("Déconnexion réussie.");
+                    window.location.href = 'auth.html'; // Redirection vers la page de connexion
+                }
+            } catch (error) {
+                console.error("Erreur de déconnexion:", error);
+                showCustomModal("Erreur de Déconnexion", `Impossible de vous déconnecter : ${error.message}`);
+            }
+        }
+
+        function handleCopyReferralCode() {
+            const code = document.getElementById('referral-code').textContent;
+            // Utilisation de document.execCommand('copy') pour la compatibilité dans l'iframe
+            const textArea = document.createElement("textarea");
+            textArea.value = code;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showCustomModal('Succès', `Le code de parrainage "${code}" a été copié dans votre presse-papiers !`);
+            } catch (err) {
+                showCustomModal('Erreur', 'Impossible de copier le code automatiquement. Veuillez le sélectionner et le copier manuellement.');
+            }
+            document.body.removeChild(textArea);
+        }
+
+
+        // --- Initialisation et Écouteurs d'événements ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            document.getElementById('logout-button').addEventListener('click', handleLogout);
+            document.getElementById('copy-referral-btn').addEventListener('click', handleCopyReferralCode);
+        });
+        
+    </script>
+</body>
+</html>
+

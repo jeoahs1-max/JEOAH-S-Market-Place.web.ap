@@ -41,6 +41,12 @@
             animation: pulse-once 1.5s infinite;  
         }  
     </style>  
+    <script>
+  // Redirection automatique si l'utilisateur est connecté ou non
+  function navigateTo(page) {
+    window.location.href = page;
+  }
+    </script>
 </head>  
 <body class="min-h-screen flex flex-col">  <!-- Header / Navigation -->  
 <header class="shadow-sm border-b border-gray-100 sticky top-0 bg-white z-20">  
@@ -251,7 +257,9 @@
         });  
     });  
 </script>
+    <button id="installBtn" class="hidden bg-indigo-600 text-white px-4 py-2 rounded mt-4">
+  📲 Installer JEOAH’S App
+    </button>
 
 </body>  
 </html>  
-Je doit ramplacer ce code index

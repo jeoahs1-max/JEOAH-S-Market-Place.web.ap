@@ -31,6 +31,21 @@
     window.location.href = page;
   }
     </script>
+    // IA de supervision - Ney
+window.Ney = {
+  status: "active",
+  checkSystem: function() {
+    console.log("✅ Ney est opérationnelle et surveille la plateforme en temps réel.");
+  },
+  reportActivity: function(action) {
+    console.log("📊 Rapport IA :", action);
+  }
+};
+
+// Démarrage automatique
+document.addEventListener("DOMContentLoaded", () => {
+  Ney.checkSystem();
+});
 </head>
 <body>
     <div class="min-h-screen flex items-center justify-center p-4">

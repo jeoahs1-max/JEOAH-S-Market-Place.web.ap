@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contactez-Nous - JEOAH'S</title>
+
+    <!-- Config & Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+
+    <!-- Script Multilingue -->
+    <script>
+        function setLang(l){ localStorage.setItem("lang", l); location.reload(); }
+        const TEXT = { fr: { title: "Contactez-Nous", subtitle: "Une question ? Une suggestion ? N'hésitez pas.", send: "Envoyer le Message" }, 
+                     en: { title: "Contact Us", subtitle: "A question? A suggestion? Don't hesitate.", send: "Send Message" }, 
+                     es: { title: "Contáctenos", subtitle: "¿Una pregunta? ¿Una sugerencia? No lo dude.", send: "Enviar Mensaje" } };
+        const L = TEXT[ localStorage.getItem("lang") || "fr" ];
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+    <!-- Header (Optionnel, mais bon pour la consistance) -->
+    <header class="bg-white shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="/index.html" class="flex items-center text-2xl font-extrabold text-gray-900">
+                <img src="/assets/logo.png" alt="JEOAH'S Logo" class="h-8 mr-3">
+                <span>JEOAH'S</span>
+            </a>
+            <a href="/auth.html" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-full hover:bg-purple-700 transition">Portail</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-6 py-12">
+        <div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-md">
+            <div class="text-center mb-8">
+                <h1 id="t-title" class="text-4xl font-extrabold text-gray-900"></h1>
+                <p id="t-subtitle" class="mt-2 text-gray-600"></p>
+            </div>
+
+            <form action="#" method="POST">
+                <div class="space-y-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Nom complet</label>
+                        <input type="text" name="name" id="name" autocomplete="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Adresse e-mail</label>
+                        <input type="email" name="email" id="email" autocomplete="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+                        <textarea id="message" name="message" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"></textarea>
+                    </div>
+                    <div>
+                        <button type="submit" id="t-send" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- DIV pour le footer -->
+    <div id="footer-container"></div>
+
+    <!-- DIV pour le widget Ney -->
+    <div id="ney-widget-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Appliquer les textes de langue
+            document.getElementById('t-title').innerText = L.title;
+            document.getElementById('t-subtitle').innerText = L.subtitle;
+            document.getElementById('t-send').innerText = L.send;
+
+            // Charger le footer et le widget
+            fetch('/footer.html').then(res => res.text()).then(data => document.getElementById('footer-container').innerHTML = data);
+            fetch('/ney-widget.html').then(res => res.text()).then(data => {
+                document.getElementById('ney-widget-container').innerHTML = data;
+                const scriptEl = document.querySelector('#ney-widget-container script');
+                if (scriptEl) {
+                    const newScript = document.createElement('script');
+                    newScript.innerHTML = scriptEl.innerHTML;
+                    document.body.appendChild(newScript);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

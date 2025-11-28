@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration des Réseaux Sociaux - JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-gray-900">Vos Réseaux Sociaux</h2>
+            <p class="mt-2 text-sm text-gray-600">Ajoutez vos liens pour que vos clients puissent vous suivre.</p>
+        </div>
+        <form id="social-links-form" class="mt-8 space-y-6">
+            <div id="links-container" class="space-y-4">
+                <!-- Les champs de liens seront ajoutés ici par JS -->
+            </div>
+            <div class="flex justify-between items-center">
+                <button type="button" id="add-link-btn" class="text-sm text-blue-600 hover:underline">
+                    <i class="fas fa-plus-circle mr-1"></i>Ajouter un lien (5 max)
+                </button>
+            </div>
+            <div>
+                <button type="submit" class="w-full px-4 py-2 text-lg font-semibold text-white bg-purple-600 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                    Terminer
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAt0NRbbszX8MSikgsYJngdmWzdfYLoBB0",
+          authDomain: "jeoahs1-max-03326376-49b27.firebaseapp.com",
+          projectId: "jeoahs1-max-03326376-49b27",
+          storageBucket: "jeoahs1-max-03326376-49b27.appspot.com",
+          messagingSenderId: "893693678979",
+          appId: "1:893693678979:web:3243772acee2fde171d2b6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const linksContainer = document.getElementById('links-container');
+        const addLinkBtn = document.getElementById('add-link-btn');
+        const form = document.getElementById('social-links-form');
+        let linkCount = 0;
+
+        const createLinkInput = () => {
+            if (linkCount >= 5) {
+                addLinkBtn.disabled = true;
+                addLinkBtn.classList.add('opacity-50');
+                return;
+            }
+            linkCount++;
+            const inputId = `social-link-${linkCount}`;
+            const div = document.createElement('div');
+            div.classList.add('relative');
+            div.innerHTML = `
+                <input id="${inputId}" name="social_link" type="url" required class="w-full px-4 py-2 text-gray-900 bg-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="https://exemplesite.com">
+                <button type="button" class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-red-500 remove-link-btn">&times;</button>
+            `;
+            linksContainer.appendChild(div);
+        };
+
+        linksContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-link-btn')) {
+                e.target.parentElement.remove();
+                linkCount--;
+                if (linkCount < 5) {
+                    addLinkBtn.disabled = false;
+                    addLinkBtn.classList.remove('opacity-50');
+                }
+            }
+        });
+
+        addLinkBtn.addEventListener('click', createLinkInput);
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) {
+                // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            const links = Array.from(form.elements.social_link)
+                               .map(input => input.value.trim())
+                               .filter(link => link); // Filtrer les liens vides
+
+            try {
+                // Enregistrer les liens dans la sous-collection 'profile' de l'utilisateur
+                const userDocRef = doc(db, 'users', user.uid);
+                await setDoc(userDocRef, { socialLinks: links }, { merge: true });
+
+                // Rediriger vers le tableau de bord
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                console.error("Erreur lors de l'enregistrement des liens :", error);
+                alert("Une erreur s'est produite. Veuillez réessayer.");
+            }
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // L'utilisateur est connecté, initialiser le premier champ
+                createLinkInput();
+            } else {
+                // L'utilisateur n'est pas connecté, le rediriger
+                window.location.href = 'auth.html';
+            }
+        });
+    </script>
+</body>
+</html>

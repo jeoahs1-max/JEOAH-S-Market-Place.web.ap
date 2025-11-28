@@ -1,16 +1,14 @@
 {
   "hosting": {
-    "public": ".",
+    "site": "jeoahs1-max-03326376-49b27",
+    "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
     ]
+  },
+  "functions": {
+    "source": "functions"
   }
 }

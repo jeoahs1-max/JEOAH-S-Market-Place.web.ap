@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails du Produit - JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+        .swiper-button-next, .swiper-button-prev { color: #1f2937; }
+        .swiper-pagination-bullet-active { background: #1f2937; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="marketplace.html" class="text-2xl font-extrabold text-gray-900">JEOAH'S</a>
+            <div>
+                <a href="dashboard.html" class="text-sm font-semibold text-gray-600 hover:text-blue-600">Mon Espace</a>
+                <a href="marketplace.html" class="ml-4 text-sm font-semibold text-gray-600 hover:text-blue-600">Marketplace</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main id="product-container" class="container mx-auto px-6 py-12 hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <!-- Image Carousel -->
+            <div class="swiper-container w-full rounded-lg shadow-lg">
+                <div id="product-images" class="swiper-wrapper">
+                    <!-- Images will be injected here -->
+                </div>
+                <!-- Add Pagination -->
+                <div class="swiper-pagination"></div>
+                <!-- Add Navigation -->
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="flex flex-col h-full">
+                <h1 id="product-name" class="text-4xl font-extrabold text-gray-900 mb-2"></h1>
+                <div id="seller-info" class="mb-4"></div>
+                
+                <p id="product-description" class="text-gray-700 text-lg leading-relaxed mb-6"></p>
+
+                <div class="mt-auto">
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="text-5xl font-extrabold text-gray-900" id="product-price"></span>
+                        <span id="product-category" class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded"></span>
+                    </div>
+                    <button class="w-full bg-gray-900 text-white font-bold py-4 px-8 rounded-lg hover:bg-gray-800 transition flex items-center justify-center">
+                        <i class="fas fa-shopping-cart mr-3"></i> Ajouter au Panier
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div id="loader" class="text-center py-40">
+        <i class="fas fa-spinner fa-spin text-5xl text-blue-600"></i>
+    </div>
+
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAt0NRbbszX8MSikgsYJngdmWzdfYLoBB0",
+          authDomain: "jeoahs1-max-03326376-49b27.firebaseapp.com",
+          projectId: "jeoahs1-max-03326376-49b27",
+          storageBucket: "jeoahs1-max-03326376-49b27.appspot.com",
+          messagingSenderId: "893693678979",
+          appId: "1:893693678979:web:3243772acee2fde171d2b6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function getSellerInfo(sellerId) {
+            const sellerDoc = await getDoc(doc(db, "users", sellerId));
+            return sellerDoc.exists() ? sellerDoc.data().shop : null;
+        }
+
+        async function loadProductDetails() {
+            const params = new URLSearchParams(window.location.search);
+            const productId = params.get('id');
+            
+            const loader = document.getElementById('loader');
+            const container = document.getElementById('product-container');
+
+            if (!productId) {
+                loader.innerHTML = '<p class="text-red-500">Aucun produit spécifié.</p>';
+                return;
+            }
+
+            try {
+                const productRef = doc(db, "products", productId);
+                const productSnap = await getDoc(productRef);
+
+                if (!productSnap.exists()) {
+                    loader.innerHTML = '<p class="text-red-500">Produit non trouvé.</p>';
+                    return;
+                }
+
+                const product = productSnap.data();
+                const seller = await getSellerInfo(product.sellerId);
+
+                // Populate product details
+                document.getElementById('product-name').textContent = product.name;
+                document.getElementById('product-description').textContent = product.description;
+                document.getElementById('product-price').textContent = `${product.price.toFixed(2)} €`;
+                document.getElementById('product-category').textContent = product.category;
+
+                // Populate seller info
+                if (seller) {
+                    document.getElementById('seller-info').innerHTML = `<p class="text-md text-gray-600">Vendu par <strong class="text-gray-800">${seller.name}</strong></p>`;
+                }
+                
+                // Populate images
+                const imagesContainer = document.getElementById('product-images');
+                product.imageUrls.forEach(url => {
+                    imagesContainer.innerHTML += `<div class="swiper-slide"><img src="${url}" class="w-full h-full object-cover"></div>`;
+                });
+
+                // Initialize Swiper
+                new Swiper('.swiper-container', {
+                    loop: true,
+                    pagination: { el: '.swiper-pagination', clickable: true },
+                    navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+                });
+
+                loader.style.display = 'none';
+                container.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Error loading product:", error);
+                loader.innerHTML = '<p class="text-red-500">Une erreur est survenue.</p>';
+            }
+        }
+
+        loadProductDetails();
+    </script>
+</body>
+</html>

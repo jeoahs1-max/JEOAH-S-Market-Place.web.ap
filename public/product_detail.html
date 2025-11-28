@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détail du Produit - JEOAH'S Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <header class="bg-white shadow-sm sticky top-0 z-20">
+        <!-- La même navigation que index.html pour la cohérence -->
+    </header>
+
+    <main class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            
+            <!-- Colonne de l'image du produit -->
+            <div>
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <img id="product-image" src="https://via.placeholder.com/600x600.png?text=Casque+Audio+Pro" alt="Image principale du produit" class="w-full h-auto object-cover">
+                </div>
+            </div>
+
+            <!-- Colonne des détails du produit -->
+            <div class="flex flex-col justify-center">
+                <h1 id="product-name" class="text-4xl font-extrabold text-gray-900 mb-2">Casque Audio Pro</h1>
+                <p id="product-category" class="text-lg text-gray-500 mb-4">Électronique</p>
+                
+                <p id="product-description" class="text-gray-700 leading-relaxed mb-6">
+                    Une expérience sonore immersive avec une réduction de bruit de pointe. Idéal pour les professionnels et les audiophiles qui exigent une clarté sonore sans compromis.
+                </p>
+
+                <div class="mb-6">
+                    <span id="product-price" class="text-5xl font-bold text-blue-600">249.99€</span>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button class="flex-grow bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300">
+                        <i class="fas fa-shopping-cart mr-2"></i> Ajouter au Panier
+                    </button>
+                    <button class="bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition duration-300">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+
+                <div class="mt-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Partager ce produit</h3>
+                    <div class="flex gap-4 text-2xl text-gray-500">
+                        <a href="#" class="hover:text-blue-600"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="hover:text-blue-400"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-red-600"><i class="fab fa-pinterest"></i></a>
+                        <a href="#" class="hover:text-green-500"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        // Logique pour charger dynamiquement les détails du produit à l'avenir
+    </script>
+
+</body>
+</html>

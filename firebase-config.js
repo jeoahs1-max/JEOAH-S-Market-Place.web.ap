@@ -1,40 +1,33 @@
 // Importations nécessaires de Firebase (version 11.6.1 obligatoire pour la compatibilité CDN)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 
 // --- CONFIGURATION FIREBASE (MANDATORY) ---
-// Récupération des variables globales de l'environnement Canvas
-// Ceci est la méthode OBLIGATOIRE
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+const firebaseConfig = {
+  apiKey: "AIzaSyAt0NRbbszX8MSikgsYJngdmWzdfYLoBB0",
+  authDomain: "jeoahs1-max-03326376-49b27.firebaseapp.com",
+  projectId: "jeoahs1-max-03326376-49b27",
+  storageBucket: "jeoahs1-max-03326376-49b27.firebasestorage.app",
+  messagingSenderId: "893693678979",
+  appId: "1:893693678979:web:3243772acee2fde171d2b6"
+};
 
 // Initialisation de Firebase
 let app, db, auth;
 
-if (firebaseConfig) {
+if (firebaseConfig && firebaseConfig.apiKey) {
     setLogLevel('Debug');
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
-    
-    // Tentative de connexion (Authentification)
-    if (initialAuthToken) {
-        signInWithCustomToken(auth, initialAuthToken)
-            .then(() => console.log("Connexion Firebase réussie avec le token personnalisé."))
-            .catch(error => {
-                console.error("Erreur de connexion avec le token personnalisé :", error);
-                signInAnonymously(auth);
-            });
-    } else {
-        signInAnonymously(auth)
-            .then(() => console.log("Connexion Firebase anonyme réussie."))
-            .catch(error => console.error("Erreur de connexion anonyme :", error));
-    }
+
+    signInAnonymously(auth)
+        .then(() => console.log("Connexion Firebase anonyme réussie."))
+        .catch(error => console.error("Erreur de connexion anonyme :", error));
 } else {
-    console.error("Firebase n'a pas pu être initialisé : configuration manquante.");
+    console.error("Firebase n'a pas pu être initialisé : configuration manquante ou invalide.");
 }
 
 
@@ -59,7 +52,7 @@ onAuthStateChanged(auth, (user) => {
 
 // Chemin vers la collection des plans utilisateurs (chemin privé obligatoire)
 function getUserPlanRef(uid) {
-    return doc(db, `artifacts/${appId}/users/${uid}/plans/current`);
+    return doc(db, `artifacts/default-app-id/users/${uid}/plans/current`);
 }
 
 /**
@@ -131,7 +124,7 @@ function updateUI() {
 
 // --- LOGIQUE GEMINI (GÉNÉRATEUR DE SLOGANS) ---
 
-const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
+const GEMINI_MODEL = "gemini-1.5-flash-preview-0514";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 const API_KEY = ""; // La clé est gérée par l'environnement Canvas
 
@@ -260,5 +253,3 @@ window.onload = function () {
         updateUI();
     }
 };
-
-

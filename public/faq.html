@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - JEOAH'S</title>
+
+    <!-- Config & Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+
+    <!-- Script Multilingue -->
+    <script>
+        function setLang(l){ localStorage.setItem("lang", l); location.reload(); }
+        const TEXT = { 
+            fr: { title: "Foire Aux Questions", subtitle: "Trouvez les réponses à vos questions les plus fréquentes." }, 
+            en: { title: "Frequently Asked Questions", subtitle: "Find answers to your most common questions." }, 
+            es: { title: "Preguntas Frecuentes", subtitle: "Encuentre respuestas a sus preguntas más comunes." } 
+        };
+        const L = TEXT[ localStorage.getItem("lang") || "fr" ];
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="/index.html" class="flex items-center text-2xl font-extrabold text-gray-900">
+                <img src="/assets/logo.png" alt="JEOAH'S Logo" class="h-8 mr-3">
+                <span>JEOAH'S</span>
+            </a>
+            <a href="/auth.html" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-full hover:bg-purple-700 transition">Portail</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-6 py-12">
+        <div class="text-center mb-12">
+            <h1 id="t-title" class="text-4xl font-extrabold text-gray-900 sm:text-5xl"></h1>
+            <p id="t-subtitle" class="mt-4 text-xl text-gray-600"></p>
+        </div>
+
+        <div class="max-w-3xl mx-auto" x-data="{ open: null }">
+            <!-- FAQ Item 1 -->
+            <div class="border-b border-gray-200 py-4">
+                <button @click="open = open === 1 ? null : 1" class="w-full flex justify-between items-center text-lg font-semibold text-gray-800 text-left">
+                    <span>Qu'est-ce que JEOAH'S exactement ?</span>
+                    <i class="fas" :class="{ 'fa-chevron-down': open !== 1, 'fa-chevron-up': open === 1 }"></i>
+                </button>
+                <div x-cloak x-show="open === 1" class="mt-4 text-gray-600">
+                    <p>JEOAH'S est une plateforme tout-en-un qui sert d'écosystème pour les vendeurs, les affiliés et les acheteurs. Les vendeurs peuvent créer leur propre boutique en ligne, les affiliés peuvent promouvoir des produits pour gagner des commissions, et les acheteurs peuvent découvrir des produits de confiance en un seul endroit.</p>
+                </div>
+            </div>
+            <!-- FAQ Item 2 -->
+            <div class="border-b border-gray-200 py-4">
+                <button @click="open = open === 2 ? null : 2" class="w-full flex justify-between items-center text-lg font-semibold text-gray-800 text-left">
+                    <span>Dois-je payer pour m'inscrire ?</span>
+                    <i class="fas" :class="{ 'fa-chevron-down': open !== 2, 'fa-chevron-up': open === 2 }"></i>
+                </button>
+                <div x-cloak x-show="open === 2" class="mt-4 text-gray-600">
+                    <p>L'inscription sur JEOAH'S est gratuite ! Vous pouvez créer un compte, découvrir la plateforme et participer au programme de parrainage sans abonnement. Un abonnement payant est nécessaire pour débloquer les fonctionnalités de vente et pour retirer les commissions.</p>
+                </div>
+            </div>
+            <!-- ... Add more FAQ items here ... -->
+        </div>
+    </main>
+
+    <!-- DIV pour le footer -->
+    <div id="footer-container"></div>
+
+    <!-- DIV pour le widget Ney -->
+    <div id="ney-widget-container"></div>
+
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Appliquer les textes de langue
+            document.getElementById('t-title').innerText = L.title;
+            document.getElementById('t-subtitle').innerText = L.subtitle;
+
+            // Charger le footer et le widget
+            fetch('/footer.html').then(res => res.text()).then(data => document.getElementById('footer-container').innerHTML = data);
+            fetch('/ney-widget.html').then(res => res.text()).then(data => {
+                document.getElementById('ney-widget-container').innerHTML = data;
+                const scriptEl = document.querySelector('#ney-widget-container script');
+                if (scriptEl) {
+                    const newScript = document.createElement('script');
+                    newScript.innerHTML = scriptEl.innerHTML;
+                    document.body.appendChild(newScript);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

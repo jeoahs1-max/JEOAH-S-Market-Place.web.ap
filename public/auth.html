@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription & Connexion - JEOAH'S</title>
+
+    <!-- META SEO & OPEN GRAPH -->
+    <meta name="description" content="Rejoignez JEOAH'S en tant qu'acheteur, vendeur ou affilié. L'inscription est simple et rapide.">
+
+    <!-- Firebase SDK (Ancienne version pour compatibilité globale) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <!-- Config & Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+    
+    <!-- Script Multilingue -->
+    <script>
+        function setLang(l){ localStorage.setItem("lang", l); location.reload(); }
+        const TEXT = { fr: { title: "Créez votre compte" }, en: { title: "Create your account" }, es: { title: "Crea tu cuenta" } };
+        const L = TEXT[ localStorage.getItem("lang") || "fr" ];
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .role-option:checked + label {
+            border-color: #8b5cf6; /* purple-500 */
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+    <main class="flex-grow flex items-center justify-center py-12 px-4">
+        <div class="max-w-md w-full bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+            <div class="text-center mb-6">
+                <a href="index.html" class="text-3xl font-extrabold text-gray-900">JEOAH'S</a>
+                <p id="t-title" class="mt-2 text-sm text-gray-600">Choisissez votre rôle pour commencer.</p>
+            </div>
+
+            <form id="auth-form">
+                <p id="auth-error" class="text-red-500 text-sm hidden text-center mb-4"></p>
+                
+                <div class="space-y-4 mb-6">
+                    <h3 class="text-sm font-semibold text-gray-700 text-center">Je suis un...</h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <input type="radio" name="role" id="role-buyer" value="acheteur" class="hidden role-option">
+                        <label for="role-buyer" class="block text-center p-4 border rounded-lg cursor-pointer hover:border-purple-400 transition">
+                            <span class="font-semibold text-sm">Acheteur</span>
+                        </label>
+
+                        <input type="radio" name="role" id="role-seller" value="vendeur" class="hidden role-option">
+                        <label for="role-seller" class="block text-center p-4 border rounded-lg cursor-pointer hover:border-purple-400 transition">
+                            <span class="font-semibold text-sm">Vendeur</span>
+                        </label>
+
+                        <input type="radio" name="role" id="role-affiliate" value="affilie" class="hidden role-option">
+                        <label for="role-affiliate" class="block text-center p-4 border rounded-lg cursor-pointer hover:border-purple-400 transition">
+                            <span class="font-semibold text-sm">Affilié</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="button" id="google-signin-btn" class="w-full flex items-center justify-center bg-gray-200 text-gray-500 font-semibold py-3 rounded-lg transition cursor-not-allowed" disabled>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" class="w-6 h-6 mr-3">
+                        Continuer avec Google
+                    </button>
+                </div>
+            </form>
+            
+            <div class="text-center mt-6">
+                <p class="text-xs text-gray-500">En continuant, vous acceptez nos <a href="/terms.html" class="underline hover:text-blue-600">Conditions</a>.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- DIV pour le footer -->
+    <div id="footer-container"></div>
+
+    <!-- DIV pour le widget Ney -->
+    <div id="ney-widget-container"></div>
+
+    <script>
+      // ******************************************************
+      // METTRE VOS CONFIGS FIREBASE ICI
+      // ******************************************************
+      const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+      };
+
+      const app = firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      const errorElement = document.getElementById('auth-error');
+      const googleBtn = document.getElementById('google-signin-btn');
+      const authForm = document.getElementById('auth-form');
+
+      // --- Redirection pour l'utilisateur déjà connecté ---
+      auth.onAuthStateChanged(async (user) => {
+          if (user) {
+              const userDocRef = db.collection("users").doc(user.uid);
+              const userDoc = await userDocRef.get();
+              if (userDoc.exists()) {
+                  const role = userDoc.data().role;
+                  window.location.href = (role === 'vendeur' || role === 'affilie') ? '/dashboard.html' : '/index.html';
+              } 
+          }
+      });
+
+      let selectedRole = null;
+      authForm.addEventListener('change', (e) => {
+          if (e.target.name === 'role') {
+              selectedRole = e.target.value;
+              googleBtn.disabled = false;
+              googleBtn.classList.remove('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+              googleBtn.classList.add('bg-white', 'text-gray-700', 'border', 'border-gray-300', 'hover:bg-gray-50');
+              errorElement.classList.add('hidden');
+          }
+      });
+
+      googleBtn.addEventListener('click', async () => {
+          if (!selectedRole) {
+              errorElement.textContent = "Veuillez sélectionner un rôle.";
+              errorElement.classList.remove('hidden');
+              return;
+          }
+
+          const provider = new firebase.auth.GoogleAuthProvider();
+          try {
+              const result = await auth.signInWithPopup(provider);
+              const user = result.user;
+              const userDocRef = db.collection("users").doc(user.uid);
+              const userDoc = await userDocRef.get();
+
+              if (!userDoc.exists()) {
+                  await userDocRef.set({
+                      uid: user.uid,
+                      fullname: user.displayName,
+                      email: user.email,
+                      role: selectedRole,
+                      createdAt: new Date()
+                  });
+                  
+                  let redirectUrl = '/index.html';
+                  if(selectedRole === 'vendeur') redirectUrl = '/onboarding_social.html';
+                  if(selectedRole === 'affilie') redirectUrl = '/onboarding_affiliate_links.html';
+                  window.location.href = redirectUrl;
+              }
+
+          } catch (error) {
+              console.error("Google Sign-In Error:", error);
+              if (error.code !== 'auth/popup-closed-by-user') {
+                errorElement.textContent = "Une erreur est survenue. Veuillez réessayer.";
+                errorElement.classList.remove('hidden');
+              }
+          }
+      });
+
+      // Appliquer le texte de la langue
+      document.getElementById('t-title').innerText = L.title;
+
+      // Charger le footer et le widget
+      fetch('/footer.html').then(res => res.text()).then(data => document.getElementById('footer-container').innerHTML = data);
+      fetch('/ney-widget.html').then(res => res.text()).then(data => {
+            document.getElementById('ney-widget-container').innerHTML = data;
+            const scriptEl = document.querySelector('#ney-widget-container script');
+            if (scriptEl) {
+                const newScript = document.createElement('script');
+                newScript.innerHTML = scriptEl.innerHTML;
+                document.body.appendChild(newScript);
+            }
+        });
+    </script>
+</body>
+</html>

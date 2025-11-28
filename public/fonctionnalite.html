@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fonctionnalités - JEOAH'S</title>
+
+    <!-- Config & Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+
+    <!-- Script Multilingue -->
+    <script>
+        function setLang(l){ localStorage.setItem("lang", l); location.reload(); }
+        const TEXT = { 
+            fr: { title: "Fonctionnalités Clés", subtitle: "Découvrez tout ce que JEOAH'S peut faire pour vous." }, 
+            en: { title: "Key Features", subtitle: "Discover everything JEOAH'S can do for you." }, 
+            es: { title: "Características Clave", subtitle: "Descubra todo lo que JEOAH'S puede hacer por usted." } 
+        };
+        const L = TEXT[ localStorage.getItem("lang") || "fr" ];
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="/index.html" class="flex items-center text-2xl font-extrabold text-gray-900">
+                <img src="/assets/logo.png" alt="JEOAH'S Logo" class="h-8 mr-3">
+                <span>JEOAH'S</span>
+            </a>
+            <a href="/auth.html" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-full hover:bg-purple-700 transition">Portail</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-6 py-12">
+        <div class="text-center mb-12">
+            <h1 id="t-title" class="text-4xl font-extrabold text-gray-900 sm:text-5xl"></h1>
+            <p id="t-subtitle" class="mt-4 text-xl text-gray-600"></p>
+        </div>
+
+        <!-- Contenu spécifique à la page fonctionnalités ici -->
+
+    </main>
+
+    <!-- DIV pour le footer -->
+    <div id="footer-container"></div>
+
+    <!-- DIV pour le widget Ney -->
+    <div id="ney-widget-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('t-title').innerText = L.title;
+            document.getElementById('t-subtitle').innerText = L.subtitle;
+
+            fetch('/footer.html').then(res => res.text()).then(data => document.getElementById('footer-container').innerHTML = data);
+            fetch('/ney-widget.html').then(res => res.text()).then(data => {
+                document.getElementById('ney-widget-container').innerHTML = data;
+                const scriptEl = document.querySelector('#ney-widget-container script');
+                if (scriptEl) {
+                    const newScript = document.createElement('script');
+                    newScript.innerHTML = scriptEl.innerHTML;
+                    document.body.appendChild(newScript);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .product-card { background-color: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; display: block; color: inherit; text-decoration: none;}
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        .product-image { aspect-ratio: 1 / 1; object-fit: cover; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-extrabold text-gray-900">JEOAH'S</a>
+            <div>
+                <a href="dashboard.html" class="text-sm font-semibold text-gray-600 hover:text-blue-600">Mon Espace</a>
+                <button id="logout-btn" class="ml-4 text-sm font-semibold text-red-600 hover:text-red-800">Déconnexion <i class="fas fa-sign-out-alt ml-1"></i></button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-8">Marketplace</h1>
+
+        <div id="loader" class="text-center py-20">
+            <i class="fas fa-spinner fa-spin text-4xl text-blue-600"></i>
+            <p class="mt-4 text-gray-600">Chargement des produits...</p>
+        </div>
+
+        <!-- Products Grid -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <!-- Products will be loaded here -->
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAt0NRbbszX8MSikgsYJngdmWzdfYLoBB0",
+          authDomain: "jeoahs1-max-03326376-49b27.firebaseapp.com",
+          projectId: "jeoahs1-max-03326376-49b27",
+          storageBucket: "jeoahs1-max-03326376-49b27.appspot.com",
+          messagingSenderId: "893693678979",
+          appId: "1:893693678979:web:3243772acee2fde171d2b6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const sellerCache = {}; // Cache for seller data to avoid repeated fetches
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) { window.location.href = 'auth.html'; }
+        });
+
+        async function getSellerInfo(sellerId) {
+            if (sellerCache[sellerId]) { return sellerCache[sellerId]; }
+            const sellerDoc = await getDoc(doc(db, "users", sellerId));
+            if (sellerDoc.exists()) {
+                sellerCache[sellerId] = sellerDoc.data().shop;
+                return sellerCache[sellerId];
+            }
+            return null;
+        }
+
+        async function loadProducts() {
+            const grid = document.getElementById('products-grid');
+            const loader = document.getElementById('loader');
+            const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+
+            try {
+                const querySnapshot = await getDocs(q);
+                loader.style.display = 'none';
+
+                if (querySnapshot.empty) {
+                    grid.innerHTML = '<p class="text-gray-500 col-span-full text-center">Aucun produit n\'est actuellement en vente.</p>';
+                    return;
+                }
+
+                for (const productDoc of querySnapshot.docs) {
+                    const product = productDoc.data();
+                    const sellerInfo = await getSellerInfo(product.sellerId);
+
+                    const cardLink = document.createElement('a');
+                    cardLink.href = `product_details.html?id=${productDoc.id}`;
+                    cardLink.className = 'product-card';
+                    
+                    cardLink.innerHTML = `
+                        <img src="${product.imageUrls[0]}" alt="${product.name}" class="w-full h-56 product-image">
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg text-gray-800 truncate">${product.name}</h3>
+                            <p class="text-sm text-gray-500 mb-2">Vendu par <strong class="text-gray-700">${sellerInfo ? sellerInfo.name : 'Vendeur inconnu'}</strong></p>
+                            <div class="text-xl font-extrabold text-gray-900 mt-4">${product.price.toFixed(2)} €</div>
+                        </div>
+                    `;
+                    grid.appendChild(cardLink);
+                }
+
+            } catch (error) {
+                console.error("Error loading products: ", error);
+                loader.innerHTML = '<p class="text-red-500">Erreur lors du chargement de la marketplace.</p>';
+            }
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            signOut(auth).then(() => { window.location.href = 'index.html'; });
+        });
+
+        loadProducts();
+
+    </script>
+</body>
+</html>

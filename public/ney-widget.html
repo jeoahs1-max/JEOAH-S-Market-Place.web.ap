@@ -1,0 +1,40 @@
+<!-- NEY WIDGET (injecter dans index.html) -->
+<div id="ney-widget" style="position:fixed; right:16px; bottom:16px; width:360px; max-width:90%; z-index:9999;">
+  <div id="ney-header" style="background:#032C4F;color:#fff;padding:12px;border-radius:12px 12px 0 0;display:flex;align-items:center;gap:8px;">
+    <img src="/assets/logo-ney.png" alt="Ney" style="width:36px;height:36px;border-radius:8px;" />
+    <div style="flex:1;font-weight:700;">Ney — Assistant JEOAH'S</div>
+    <button id="ney-close" style="background:transparent;border:none;color:#fff;font-weight:700;cursor:pointer">×</button>
+  </div>
+  <div id="ney-body" style="background:#fff;padding:12px;border-radius:0 0 12px 12px;box-shadow:0 6px 18px rgba(2,6,23,0.08);max-height:420px;overflow:auto;">
+    <div id="ney-messages" style="min-height:120px;"></div>
+    <textarea id="ney-input" placeholder="Pose ta question à Ney..." style="width:100%;height:70px;border:1px solid #e5e7eb;border-radius:8px;padding:8px;margin-top:8px;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button id="ney-send" style="flex:1;background:#facc15;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;">Envoyer</button>
+      <button id="ney-voice" title="Ecouter la réponse" style="background:#032C4F;color:#fff;padding:10px;border-radius:8px;border:none;cursor:pointer;">🔊</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const NEY_API_ENDPOINT = "/neyProxy"; // si deployé sur Firebase Functions, remplace par '/.netlify/functions/neyProxy' ou '/api/ney'
+  const messagesEl = document.getElementById('ney-messages');
+  const inputEl = document.getElementById('ney-input');
+  document.getElementById('ney-send').addEventListener('click', async () => {
+    const text = inputEl.value.trim(); if(!text) return;
+    appendUserMessage(text); inputEl.value = ''; appendBotMessage('Ney réfléchit...');
+    try {
+      const res = await fetch(NEY_API_ENDPOINT, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: text, uid: (window.userUid || 'guest') })
+      });
+      const data = await res.json();
+      replaceLastBotMessage(data.reply || 'Désolé, pas de réponse.');
+    } catch (e) {
+      replaceLastBotMessage('Erreur : impossible de joindre Ney.'); console.error(e);
+    }
+  });
+  function appendUserMessage(text){ const d=document.createElement('div'); d.style.textAlign='right'; d.style.margin='8px 0'; d.innerHTML=`<div style="display:inline-block;background:#e6f0ff;padding:10px;border-radius:12px;max-width:85%;">${escapeHtml(text)}</div>`; messagesEl.appendChild(d); messagesEl.scrollTop = messagesEl.scrollHeight; }
+  function appendBotMessage(text){ const d=document.createElement('div'); d.style.textAlign='left'; d.style.margin='8px 0'; d.innerHTML=`<div style="display:inline-block;background:#f3f4f6;padding:10px;border-radius:12px;max-width:85%;">${escapeHtml(text)}</div>`; messagesEl.appendChild(d); messagesEl.scrollTop = messagesEl.scrollHeight; }
+  function replaceLastBotMessage(text){ const nodes=messagesEl.querySelectorAll('div'); if(nodes.length){ nodes[nodes.length-1].innerHTML=`<div style="display:inline-block;background:#f3f4f6;padding:10px;border-radius:12px;max-width:85%;">${escapeHtml(text)}</div>`; messagesEl.scrollTop = messagesEl.scrollHeight; } }
+  function escapeHtml(s){ return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+</script>

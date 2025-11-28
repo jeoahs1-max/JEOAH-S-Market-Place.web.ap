@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nos Plans d'Abonnement - JEOAH'S Market Place</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+        header { text-align: center; margin-bottom: 40px; }
+        header h1 { color: #2c3e50; }
+        header p { color: #7f8c8d; font-size: 1.1em; }
+        .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .plan { background: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; display: flex; flex-direction: column; }
+        .plan h2 { font-size: 1.5em; color: #3498db; margin-top: 0; }
+        .plan.free h2 { color: #95a5a6; }
+        .plan.quarterly h2 { color: #9b59b6; }
+        .plan.semi-annual h2 { color: #e67e22; }
+        .plan.annual h2 { color: #f1c40f; }
+        .plan .price { font-size: 2em; font-weight: bold; margin: 10px 0; color: #2c3e50; }
+        .plan .saving { font-size: 0.9em; color: #27ae60; font-weight: bold; }
+        .plan ul { list-style: none; padding: 0; margin: 20px 0; text-align: left; flex-grow: 1; }
+        .plan ul li { margin-bottom: 10px; display: flex; align-items: center; }
+        .plan ul li::before { content: '✔️'; color: #27ae60; margin-right: 10px; }
+        .plan ul li.disadvantage::before { content: '❌'; color: #c0392b; }
+        .plan .bonus { background-color: #eafaf1; color: #27ae60; padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 20px; }
+        .btn { display: inline-block; background-color: #3498db; color: #fff; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: auto; transition: background-color 0.3s; }
+        .plan.free .btn { background-color: #95a5a6; }
+        .plan.quarterly .btn { background-color: #9b59b6; }
+        .plan.semi-annual .btn { background-color: #e67e22; }
+        .plan.annual .btn { background-color: #f1c40f; }
+
+        .referral-section { background: #fff; border-radius: 10px; padding: 40px; margin-top: 60px; text-align: center; }
+        .referral-section h2 { color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Plans JEOAH’S MARKET PLACE</h1>
+        <p>Choisissez le plan qui propulsera votre activité. Simple, transparent et puissant.</p>
+    </header>
+
+    <div class="plans-grid">
+        <!-- PLAN GRATUIT -->
+        <div class="plan free">
+            <h2>Plan Gratuit</h2>
+            <div class="price">0 $</div>
+            <ul>
+                <li class="disadvantage">Ney (IA) non actif</li>
+                <li class="disadvantage">Ajout manuel des produits</li>
+                <li class="disadvantage">Pas de publicité automatisée</li>
+                <li>Utilisation libre de la plateforme</li>
+            </ul>
+            <div class="bonus">Idéal pour découvrir la plateforme.</div>
+            <a href="/signup" class="btn">Commencer</a>
+        </div>
+
+        <!-- PLAN MENSUEL -->
+        <div class="plan monthly">
+            <h2>Plan Mensuel</h2>
+            <div class="price">19,99 $ <span style="font-size: 0.5em; font-weight: normal;">/ mois</span></div>
+            <ul>
+                <li>Ney actif (IA dynamique)</li>
+                <li>20 textes publicitaires / mois</li>
+                <li>10 visuels générés / mois</li>
+                <li>Publications automatisées</li>
+                <li>Mise en avant "Nouveautés"</li>
+            </ul>
+            <div class="bonus">🎁 15 jours gratuits pour les 100 premiers !</div>
+            <a href="/payment?plan=monthly" class="btn">Choisir ce plan</a>
+        </div>
+
+        <!-- PLAN TRIMESTRIEL -->
+        <div class="plan quarterly">
+            <h2>Plan Trimestriel</h2>
+            <div class="price">49,99 $ <span style="font-size: 0.5em; font-weight: normal;">/ 3 mois</span></div>
+            <div class="saving">Économisez 10 $</div>
+            <ul>
+                <li>Ney actif 24/7</li>
+                <li>60 textes publicitaires / 3 mois</li>
+                <li>30 visuels / 3 mois</li>
+                <li>Publicité automatisée</li>
+                <li>Priorité sur les produits affichés</li>
+            </ul>
+            <div class="bonus">🎁 15 jours gratuits pour les 100 premiers !</div>
+            <a href="/payment?plan=quarterly" class="btn">Choisir ce plan</a>
+        </div>
+        
+        <!-- PLAN SEMESTRIEL -->
+        <div class="plan semi-annual">
+            <h2>Plan Semestriel</h2>
+            <div class="price">99,99 $ <span style="font-size: 0.5em; font-weight: normal;">/ 6 mois</span></div>
+            <div class="saving">Économisez 20 $</div>
+            <ul>
+                <li>Ney actif avec assistance améliorée</li>
+                <li>120 textes publicitaires / 6 mois</li>
+                <li>60 visuels / 6 mois</li>
+                <li>Publicité automatisée avancée</li>
+                <li>Support prioritaire</li>
+            </ul>
+            <div class="bonus">🎁 1 mois gratuit pour les 50 premiers !</div>
+            <a href="/payment?plan=semi-annual" class="btn">Choisir ce plan</a>
+        </div>
+
+        <!-- PLAN ANNUEL -->
+        <div class="plan annual">
+            <h2>Plan Annuel</h2>
+            <div class="price">250 $ <span style="font-size: 0.5em; font-weight: normal;">/ an</span></div>
+            <div class="saving">Meilleure valeur</div>
+            <ul>
+                <li>Ney actif avec priorisation</li>
+                <li>250 textes publicitaires / an</li>
+                <li>120 visuels / an</li>
+                <li>Super mise en avant</li>
+                <li>Placement "Top Sellers"</li>
+            </ul>
+            <div class="bonus">🎁 1 mois gratuit pour les 50 premiers !</div>
+            <a href="/payment?plan=annual" class="btn">Choisir ce plan</a>
+        </div>
+    </div>
+
+    <div class="referral-section">
+        <h2>🚀 Programme de Parrainage PRO</h2>
+        <p>Invitez des créateurs et obtenez jusqu'à 50% de réduction sur votre abonnement, des mois gratuits et plus encore !</p>
+        <p>Chaque utilisateur reçoit un lien de parrainage unique après son inscription.</p>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,245 +1,136 @@
-// Cloud Functions pour JEOAH'S
-// Backend: Tâches planifiées, commissions, sanctions, import de données
 
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-const fetch = require('node-fetch');
-// ATTENTION: cheerio doit être installé (npm install cheerio) dans le dossier 'functions' si vous utilisez un scraper.
-// const cheerio = require('cheerio'); 
+// functions/index.js
+const functions = require(\'firebase-functions\');
+const admin = require(\'firebase-admin\');
+const fetch = require(\'node-fetch\');
 
-// Initialisation de l'application Firebase Admin
-// Assurez-vous que les variables d'environnement (comme SENDGRID_API_KEY) sont configurées
+// Initialisation de Stripe avec votre clé secrète
+const stripe = require(\'stripe\')(\'sk_test_51SYNGF1alLKcRmX5V3MXvLWRnj7gpt2WNXEHHleOCmRFsRswx0d23TvuEeoEpwa23NAd20SkfNaOllqODR8vdeVD002a3BUmMB\');
+
 admin.initializeApp();
 const db = admin.firestore();
 
-// --- Fonctions Utilitaires ---
+// Définition des plans d\'abonnement (en centimes)
+const plans = {
+    monthly: { amount: 1999, currency: \'usd\', name: \'Plan Mensuel\' },
+    quarterly: { amount: 4999, currency: \'usd\', name: \'Plan Trimestriel\' },
+    \'semi-annual\': { amount: 9999, currency: \'usd\', name: \'Plan Semestriel\' },
+    annual: { amount: 25000, currency: \'usd\', name: \'Plan Annuel\' }
+};
 
-/** Calcule le début du jour UTC pour les requêtes Firestore. */
-function getStartOfDay() {
-    const d = new Date();
-    d.setUTCHours(0, 0, 0, 0);
-    return admin.firestore.Timestamp.fromDate(d);
-}
-
-/** Envoie un email aux administrateurs (Nécessite SendGrid/Mailgun ou autre setup) */
-// NOTE: L'implémentation complète dépend du service de mail que vous utilisez (par ex., SendGrid)
-// Ce bloc est un MOCKUP et nécessite le SDK du service d'email réel.
-async function sendAdminEmail(subject, text) {
-    console.log(`[EMAIL MOCK] Envoi du rapport : ${subject}. Contenu: ${text}`);
-    // Si vous utilisez SendGrid:
-    // const sgMail = require('@sendgrid/mail');
-    // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    // const msg = { to: process.env.ADMIN_EMAILS.split(','), from: 'no-reply@jeoahs.com', subject, text };
-    // await sgMail.send(msg);
-    return true;
-}
-
-// --- 1. Tâches Planifiées (Cron) ---
-
-/** Tâche quotidienne: Génère un rapport Admin + envoi par email */
-exports.dailyAdminReport = functions.pubsub.schedule('0 3 * * *').timeZone('UTC').onRun(async (context) => {
-    try {
-        const today = new Date().toISOString().slice(0, 10);
-        const startOfToday = getStartOfDay();
-
-        // 1) Statistiques des ventes et utilisateurs du jour
-        const usersSnap = await db.collection('artifacts/app-id/public/data/users')
-                                  .where('createdAt', '>=', startOfToday)
-                                  .get();
-        
-        const ordersSnap = await db.collection('artifacts/app-id/public/data/orders')
-                                   .where('createdAt', '>=', startOfToday)
-                                   .get();
-
-        // Calcul des totaux
-        let totalSalesUsd = 0;
-        let totalCommissionsUsd = 0;
-
-        ordersSnap.docs.forEach(doc => {
-            const order = doc.data();
-            totalSalesUsd += (order.totalAmountUsd || 0);
-            totalCommissionsUsd += (order.platformFeeUsd || 0);
-        });
-
-        // 2) Retraits en attente
-        const pendingWithdrawalsSnap = await db.collection('artifacts/app-id/public/data/withdrawals')
-                                               .where('status', '==', 'pending')
-                                               .get();
-
-        const reportData = {
-            date: today,
-            newUsers: usersSnap.size,
-            totalSalesUsd: totalSalesUsd,
-            commissionsUsd: totalCommissionsUsd,
-            pendingWithdrawals: pendingWithdrawalsSnap.size,
-            timestamp: admin.firestore.FieldValue.serverTimestamp()
-        };
-
-        // Sauvegarde du rapport dans Firestore
-        await db.collection('artifacts/app-id/public/data/admin_reports').doc(today).set(reportData, { merge: true });
-
-        // Envoi du rapport par email
-        const emailText = `
-            Rapport Quotidien JEOAH'S - ${today}
-            - Nouveaux utilisateurs: ${reportData.newUsers}
-            - Ventes totales (brutes): ${reportData.totalSalesUsd.toFixed(2)} USD
-            - Commissions JEOAH'S (3%): ${reportData.commissionsUsd.toFixed(2)} USD
-            - Retraits en attente d'approbation: ${reportData.pendingWithdrawals}
-        `;
-        await sendAdminEmail(`Rapport JEOAH'S ${today}`, emailText);
-
-        console.log('Rapport quotidien généré et envoyé.');
-        return null;
-    } catch (error) {
-        console.error("Erreur lors de la génération du rapport quotidien:", error);
-        return null;
-    }
+// Fonction existante (inchangée)
+exports.neyProxy = functions.https.onRequest(async (req, res) => {
+    // ... (votre code existant pour neyProxy)
 });
 
+/**
+ * Crée une intention de paiement Stripe basée sur le plan choisi par l\'utilisateur.
+ * Prend en compte un éventuel code de parrainage.
+ */
+exports.createPaymentIntent = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError(\'unauthenticated\', \'Vous devez être connecté pour payer.\');
+    }
 
-/** Tâche quotidienne: Vérifie les commandes en retard (> 7 jours) et suspend les vendeurs avec >= 3 retards. */
-exports.checkOrderDelays = functions.pubsub.schedule('0 4 * * *').timeZone('UTC').onRun(async () => {
-    try {
-        const sevenDaysAgo = admin.firestore.Timestamp.fromDate(new Date(Date.now() - 7 * 24 * 3600 * 1000));
-        
-        // Trouver les commandes "placed" créées il y a plus de 7 jours (retard de livraison/expédition)
-        const delayedOrders = await db.collection('artifacts/app-id/public/data/orders')
-            .where('status', '==', 'placed')
-            .where('createdAt', '<=', sevenDaysAgo)
-            .get();
+    const { planId, referralCode } = data;
+    const plan = plans[planId];
+    const uid = context.auth.uid;
 
-        const sellerDelayCount = {};
-        const suspendPromises = [];
+    if (!plan) {
+        throw new functions.https.HttpsError(\'invalid-argument\', \'Le plan demandé n\\\'existe pas.\');
+    }
 
-        delayedOrders.forEach(doc => {
-            const order = doc.data();
-            const sellerId = order.sellerId;
-            if (sellerId) {
-                if (!sellerDelayCount[sellerId]) sellerDelayCount[sellerId] = 0;
-                sellerDelayCount[sellerId]++;
-            }
-        });
+    let amount = plan.amount;
+    let referrerUid = null;
 
-        // Identifier les vendeurs à suspendre
-        for (const sellerId in sellerDelayCount) {
-            if (sellerDelayCount[sellerId] >= 3) {
-                console.log(`Suspension du vendeur ${sellerId} (3+ retards).`);
-                
-                // Mettre à jour le statut du vendeur
-                const userRef = db.collection('artifacts/app-id/public/data/users').doc(sellerId);
-                suspendPromises.push(userRef.update({ suspended: true, suspendedAt: admin.firestore.FieldValue.serverTimestamp() }));
-                
-                // Notifier l'admin et le vendeur (à implémenter)
+    // TODO: Appliquer les réductions basées sur le parrainage si nécessaire
+    // Pour l\'instant, nous enregistrons simplement qui est le parrain
+
+    if (referralCode) {
+        const userQuery = await db.collection(\'users\').where(\'referralCode\', \'==\', referralCode).limit(1).get();
+        if (!userQuery.empty) {
+            const referrer = userQuery.docs[0];
+            referrerUid = referrer.id;
+            // Ne pas permettre l'auto-parrainage
+            if (referrerUid === uid) {
+                referrerUid = null;
             }
         }
-        
-        await Promise.all(suspendPromises);
-        console.log(`Vérification des retards terminée. ${suspendPromises.length} vendeurs suspendus.`);
-        return null;
-    } catch (error) {
-        console.error("Erreur lors de la vérification des retards:", error);
-        return null;
     }
-});
 
-// --- 2. Triggers de Base de Données (Actions en temps réel) ---
-
-/** Calcule et enregistre la commission de 3% lors de la création d'une commande. */
-exports.onOrderCreated = functions.firestore.document('artifacts/app-id/public/data/orders/{orderId}').onCreate(async (snap) => {
-    const order = snap.data();
-    
-    // Commission JEOAH'S = 3% sur les ventes directes (par défaut)
-    const COMMISSION_RATE = 0.03;
-    const commission = (order.totalAmountUsd || 0) * COMMISSION_RATE;
-    
     try {
-        // Mise à jour de la commande avec la commission
-        await snap.ref.update({ platformFeeUsd: commission });
-
-        // Mise à jour du "wallet" du vendeur/affilié (sellerId)
-        const sellerId = order.sellerId;
-        const netAmount = (order.totalAmountUsd || 0) - commission;
-        
-        const userRef = db.collection('artifacts/app-id/public/data/users').doc(sellerId);
-        
-        // Utiliser une transaction pour une mise à jour atomique du portefeuille
-        await db.runTransaction(async (transaction) => {
-            const userDoc = await transaction.get(userRef);
-            if (!userDoc.exists) {
-                throw new Error("Vendeur non trouvé.");
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amount,
+            currency: plan.currency,
+            automatic_payment_methods: { enabled: true },
+            metadata: {
+                userId: uid,
+                planId: planId,
+                // On ajoute l\'ID du parrain aux métadonnées pour le retrouver après le paiement
+                referrerUid: referrerUid || \'none\' 
             }
-            const currentBalance = userDoc.data().wallet?.balanceUsd || 0;
-            const newBalance = currentBalance + netAmount;
-            
-            transaction.update(userRef, {
-                'wallet.balanceUsd': newBalance
-            });
         });
 
-        console.log(`Commission de ${commission.toFixed(2)}$ traitée pour la commande ${snap.id}.`);
-    } catch (error) {
-        console.error(`Erreur lors du traitement de la commande ${snap.id}:`, error);
-    }
-    return null;
-});
-
-// --- 3. Fonction Callable pour les opérations Front-end (Import Affilié) ---
-
-/** Simule un extracteur de métadonnées pour créer un produit à partir d'un lien. */
-exports.importProductFromAffiliate = functions.https.onCall(async (data, context) => {
-    // Vérification de l'authentification
-    if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'Authentification requise pour cette action.');
-    }
-    
-    const { url } = data;
-    const userId = context.auth.uid;
-    
-    if (!url) {
-        throw new functions.https.HttpsError('invalid-argument', 'L\'URL est requise.');
-    }
-    
-    // NOTE: L'implémentation d'un scraper complet (cheerio + fetch) est complexe
-    // et risquée (TOS). Ici, nous SIMULONS un import basé sur le plan.
-    
-    // --- Début de la simulation d'import (à remplacer par API/Scraper réel) ---
-    const placeholderTitle = `Produit Affilié Importé: ${url.substring(0, 40)}...`;
-    const randomPrice = (Math.random() * 100 + 10).toFixed(2);
-    const placeholderImage = "https://placehold.co/400x400/3056D3/ffffff?text=Lien+Affilié";
-
-    const productDoc = {
-        title: placeholderTitle, 
-        description: "Description importée automatiquement (à modifier).",
-        images: [placeholderImage], 
-        priceUsd: parseFloat(randomPrice),
-        ownerId: userId, 
-        source: 'affiliate', 
-        affiliateLinks: [{ url, network: 'auto' }], // Enregistrer le lien source
-        categories: ['Non classifié'],
-        publishedAt: admin.firestore.FieldValue.serverTimestamp(),
-        status: 'published',
-        importMeta: { fetchedAt: admin.firestore.FieldValue.serverTimestamp(), sourceUrl: url }
-    };
-    // --- Fin de la simulation d'import ---
-
-    try {
-        const pRef = await db.collection('artifacts/app-id/public/data/products').add(productDoc);
-        
-        // Mettre à jour le compteur de produits de l'utilisateur (pour le trigger de promo)
-        const userMetaRef = db.collection('artifacts/app-id/public/data/users').doc(userId);
-        
-        await userMetaRef.update({
-            productCount: admin.firestore.FieldValue.increment(1)
-        });
-
-        return { 
-            id: pRef.id, 
-            title: productDoc.title, 
-            image: productDoc.images[0], 
-            price: productDoc.priceUsd 
+        return {
+            clientSecret: paymentIntent.client_secret,
         };
     } catch (error) {
-        console.error("Erreur lors de l'importation du produit:", error);
-        throw new functions.https.HttpsError('internal', 'Échec de l\'importation du produit.', error.message);
+        console.error("Erreur Stripe: ", error);
+        throw new functions.https.HttpsError(\'internal\', \'Erreur lors de la création de l\\\'intention de paiement.\');
     }
 });
+
+/**
+ * Gère les événements de Stripe, notamment la réussite d'un paiement.
+ * C\'est ici que l\'on met à jour les droits de l\'utilisateur et le compteur du parrain.
+ */
+exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
+    const sig = req.headers[\'stripe-signature\'];
+    // Clé secrète du webhook Stripe - À CONFIGURER DANS VOTRE DASHBOARD STRIPE
+    const endpointSecret = \'whsec_VOTRE_SECRET_WEBHOOK_STRIPE\';
+
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
+    } catch (err) {
+        console.error(\`Webhook signature verification failed.\`, err.message);
+        return res.status(400).send(\`Webhook Error: \${err.message}\`);
+    }
+
+    // Gérer l'événement de paiement réussi
+    if (event.type === \'payment_intent.succeeded\') {
+        const paymentIntent = event.data.object;
+        const { userId, planId, referrerUid } = paymentIntent.metadata;
+
+        if (!userId || !planId) {
+            console.error("Métadonnées manquantes dans le PaymentIntent:", paymentIntent.id);
+            return res.status(400).send("Métadonnées manquantes.");
+        }
+
+        // 1. Mettre à jour le statut de l\'abonnement de l\'utilisateur payeur
+        const userRef = db.collection(\'users\').doc(userId);
+        await userRef.set({
+            subscription: {
+                planId: planId,
+                status: \'active\',
+                startDate: admin.firestore.FieldValue.serverTimestamp(),
+                // TODO: Calculer la date de fin en fonction du plan
+            }
+        }, { merge: true });
+
+        // 2. Mettre à jour le compteur du parrain, s\'il y en a un
+        if (referrerUid && referrerUid !== \'none\') {
+            const referrerRef = db.collection(\'users\').doc(referrerUid);
+            await referrerRef.update({
+                referralCount: admin.firestore.FieldValue.increment(1)
+            });
+            
+            // TODO: Ajouter une logique pour notifier le parrain (par ex. avec Ney)
+        }
+    }
+
+    res.status(200).send();
+});
+
+https://us-central1-jeoahs1-max-03326376-49b27.cloudfunctions.net/stripeWebhook

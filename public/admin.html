@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Admin Paiements • JEOAH'S</title>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script>
+  // ******************************************************
+  // METTRE VOS CONFIGS FIREBASE ICI
+  // ******************************************************
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; background: #f0f2f5; }
+h2 { color: #333; }
+.card { border:1px solid #ddd; padding:15px; margin:10px 0; border-radius:8px; background:#fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+button { padding:10px 18px; margin:5px; border:none; color:white; border-radius:5px; cursor: pointer; font-weight: bold;}
+.validate { background:#28a745; } /* Vert */
+.refuse { background:#dc3545; } /* Rouge */
+.card img { max-width: 100%; height: auto; border-radius: 4px; margin-top: 10px; }
+.card p { margin: 5px 0; }
+</style>
+</head>
+
+<body>
+
+<h2>Admin – Paiements en attente de validation</h2>
+<div id="auth-prompt">
+  <p>Veuillez vous connecter pour voir cette page.</p>
+  <button id="loginBtn">Se connecter (Admin)</button>
+</div>
+
+<div id="payment-list" style="display:none;"></div>
+
+<script>
+const authPrompt = document.getElementById('auth-prompt');
+const loginBtn = document.getElementById('loginBtn');
+const paymentList = document.getElementById('payment-list');
+
+// Gérer l'état d'authentification
+firebase.auth().onAuthStateChanged(user => {
+  if (user) {
+    // Idéalement, vérifier si l'utilisateur est un admin via les custom claims de Firebase
+    console.log("Utilisateur connecté:", user.uid);
+    authPrompt.style.display = 'none';
+    paymentList.style.display = 'block';
+    displayPayments();
+  } else {
+    authPrompt.style.display = 'block';
+    paymentList.style.display = 'none';
+  }
+});
+
+// Connexion Admin
+loginBtn.addEventListener('click', () => {
+  const provider = new firebase.auth.GoogleAuthProvider(); // ou autre
+  firebase.auth().signInWithPopup(provider);
+});
+
+// Affiche les paiements depuis Firestore
+function displayPayments(){
+  const paymentsRef = db.collection('pending_payments').where('status', '==', 'pending');
+  
+  paymentsRef.onSnapshot(snapshot => {
+    let html = "";
+    if (snapshot.empty) {
+      html = "<p>Aucun paiement en attente.</p>";
+    }
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      html += `
+      <div class="card" id="payment-${doc.id}">
+        <p><b>ID Client :</b> ${p.userId || 'Non spécifié'}</p>
+        <p><b>Méthode :</b> ${p.method}</p>
+        <p><b>Date :</b> ${new Date(p.date).toLocaleString('fr-FR')}</p>
+        <p><b>Preuve de paiement :</b><br><a href="${p.proof}" target="_blank"><img src="${p.proof}" alt="Preuve" width="200"></a></p>
+        <button class="validate" onclick="updatePayment('${doc.id}', 'validated')">Valider</button>
+        <button class="refuse" onclick="updatePayment('${doc.id}', 'refused')">Refuser</button>
+      </div>`;
+    });
+    paymentList.innerHTML = html;
+  });
+}
+
+// Met à jour le statut du paiement
+function updatePayment(docId, newStatus) {
+  const paymentRef = db.collection('pending_payments').doc(docId);
+  paymentRef.update({ status: newStatus })
+    .then(() => {
+      console.log(`Paiement ${docId} marqué comme ${newStatus}`);
+      // La vue se mettra à jour automatiquement grâce au onSnapshot
+    })
+    .catch(error => {
+      console.error("Erreur de mise à jour: ", error);
+      alert("Erreur lors de la mise à jour.");
+    });
+}
+</script>
+
+</body>
+</html>

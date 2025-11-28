@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEOAH'S - Administration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+    </style>
+</head>
+<body>
+
+    <!-- Admin Login View -->
+    <div id="admin-login-view" class="min-h-screen flex items-center justify-center bg-gray-900">
+        <div class="max-w-md w-full bg-white p-8 rounded-lg shadow-xl">
+            <h2 class="text-3xl font-extrabold text-center text-gray-900 mb-6">Accès Administrateur</h2>
+            <form id="admin-login-form">
+                <div class="space-y-4">
+                    <div>
+                        <label for="admin-password" class="sr-only">Mot de passe</label>
+                        <input id="admin-password" name="password" type="password" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Mot de passe administrateur">
+                    </div>
+                    <button type="submit" class="w-full py-3 px-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">Connexion</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard View (hidden by default) -->
+    <div id="admin-dashboard-view" class="hidden">
+        <div class="flex h-screen bg-gray-100">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-gray-800 text-white flex flex-col">
+                <div class="text-2xl font-extrabold text-center py-6">JEOAH'S <span class="text-blue-400">Admin</span></div>
+                <nav class="flex-1 px-4 space-y-2">
+                    <a href="#" class="flex items-center px-4 py-2 text-lg font-semibold bg-gray-700 rounded-lg"><i class="fas fa-tachometer-alt mr-3"></i>Tableau de bord</a>
+                    <a href="#" class="flex items-center px-4 py-2 text-lg font-semibold hover:bg-gray-700 rounded-lg"><i class="fas fa-users mr-3"></i>Utilisateurs</a>
+                    <a href="#" class="flex items-center px-4 py-2 text-lg font-semibold hover:bg-gray-700 rounded-lg"><i class="fas fa-box-open mr-3"></i>Produits</a>
+                    <a href="#" class="flex items-center px-4 py-2 text-lg font-semibold hover:bg-gray-700 rounded-lg"><i class="fas fa-receipt mr-3"></i>Commandes</a>
+                    <a href="#" class="flex items-center px-4 py-2 text-lg font-semibold hover:bg-gray-700 rounded-lg"><i class="fas fa-cogs mr-3"></i>Paramètres</a>
+                </nav>
+                <div class="p-4">
+                    <button id="admin-logout-button" class="w-full py-2 px-4 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">Déconnexion</button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-10">
+                <h1 class="text-4xl font-extrabold text-gray-900 mb-8">Tableau de Bord Administrateur</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-bold text-gray-600">Utilisateurs Totaux</h3>
+                        <p id="total-users" class="text-4xl font-extrabold text-blue-600 mt-2">1,234</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-bold text-gray-600">Vendeurs Actifs</h3>
+                        <p id="total-vendors" class="text-4xl font-extrabold text-green-600 mt-2">56</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-bold text-gray-600">Produits en Ligne</h3>
+                        <p id="total-products" class="text-4xl font-extrabold text-purple-600 mt-2">8,912</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-bold text-gray-600">Ventes (30j)</h3>
+                        <p id="total-sales" class="text-4xl font-extrabold text-yellow-600 mt-2">$11,789</p>
+                    </div>
+                </div>
+                <!-- Further admin content goes here -->
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginView = document.getElementById('admin-login-view');
+            const dashboardView = document.getElementById('admin-dashboard-view');
+            const loginForm = document.getElementById('admin-login-form');
+            const logoutButton = document.getElementById('admin-logout-button');
+            
+            // For demonstration, using a simple password. 
+            // In a real application, this should be a secure server-side check.
+            const ADMIN_PASSWORD = "admin123";
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const password = document.getElementById('admin-password').value;
+                if (password === ADMIN_PASSWORD) {
+                    loginView.classList.add('hidden');
+                    dashboardView.classList.remove('hidden');
+                } else {
+                    alert('Mot de passe incorrect.');
+                }
+            });
+
+            logoutButton.addEventListener('click', () => {
+                dashboardView.classList.add('hidden');
+                loginView.classList.remove('hidden');
+                document.getElementById('admin-password').value = ''; // Clear password field
+            });
+        });
+    </script>
+
+</body>
+</html>

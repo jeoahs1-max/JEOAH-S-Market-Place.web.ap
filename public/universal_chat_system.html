@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ney - L'Intelligence de JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow: hidden; }
+        .chat-container { display: flex; flex-direction: column; height: 100vh; background-color: #f3f4f6; }
+        .chat-header { background-color: white; padding: 1rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .chat-messages { flex-grow: 1; padding: 1.5rem; overflow-y: auto; }
+        .chat-input-container { padding: 1rem; background-color: white; border-top: 1px solid #e5e7eb; flex-shrink: 0; }
+        .message { margin-bottom: 1rem; display: flex; }
+        .message.user { justify-content: flex-end; }
+        .message.ney { justify-content: flex-start; }
+        .message-bubble { max-width: 80%; padding: 0.75rem 1.25rem; border-radius: 1.5rem; line-height: 1.6; word-break: break-word; }
+        .message.user .message-bubble { background-color: #3b82f6; color: white; border-bottom-right-radius: 0.5rem; }
+        .message.ney .message-bubble { background-color: #e5e7eb; color: #1f2937; border-bottom-left-radius: 0.5rem; }
+        .pilot-verified-animation { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <header class="chat-header">
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <i class="fas fa-brain text-purple-600 text-3xl"></i>
+                    <span id="status-indicator" class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white bg-gray-400"></span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Ney</h1>
+                    <p id="ney-status" class="text-sm text-gray-500">Initialisation...</p>
+                </div>
+            </div>
+            <a href="index.html" class="text-gray-500 hover:text-gray-800 transition"><i class="fas fa-times fa-lg"></i></a>
+        </header>
+
+        <main id="chat-messages" class="chat-messages"></main>
+        
+        <footer class="chat-input-container">
+            <div class="flex items-center bg-gray-100 rounded-full px-2">
+                <input id="chat-input" type="text" placeholder="Consulter Ney..." class="w-full bg-transparent p-3 border-0 focus:outline-none focus:ring-0" disabled>
+                <button id="send-button" class="bg-purple-600 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-purple-700 transition" disabled><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </footer>
+    </div>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Configuration ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyAt0NRbbszX8MSikgsYJngdmWzdfYLoBB0",
+          authDomain: "jeoahs1-max-03326376-49b27.firebaseapp.com",
+          projectId: "jeoahs1-max-03326376-49b27",
+          storageBucket: "jeoahs1-max-03326376-49b27.appspot.com",
+          messagingSenderId: "893693678979",
+          appId: "1:893693678979:web:3243772acee2fde171d2b6"
+        };
+        const PILOT_UID = "z71VmTXooyQZBslcaHSfM0LCGUM2";
+
+        // --- Main Application Logic ---
+        document.addEventListener("DOMContentLoaded", () => {
+            try {
+                // --- Initialize Firebase ---
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+
+                // --- DOM Elements ---
+                const ui = {
+                    chatMessages: document.getElementById('chat-messages'),
+                    chatInput: document.getElementById('chat-input'),
+                    sendButton: document.getElementById('send-button'),
+                    neyStatus: document.getElementById('ney-status'),
+                    statusIndicator: document.getElementById('status-indicator')
+                };
+
+                let currentUser = null;
+
+                // --- UI & State Management ---
+                const updateUIForAuthState = (user) => {
+                    if (user) {
+                        currentUser = user;
+                        ui.statusIndicator.classList.replace('bg-gray-400', 'bg-green-500');
+                        ui.neyStatus.textContent = "Connecté";
+                        
+                        if (user.uid === PILOT_UID) {
+                            ui.neyStatus.textContent = "Pilote authentifié";
+                            ui.neyStatus.classList.add('text-purple-600', 'font-semibold', 'pilot-verified-animation');
+                            ui.chatInput.disabled = false;
+                            ui.sendButton.disabled = false;
+                            addMessage('ney', '<strong>Bonjour Pilote.</strong> Je suis Ney, votre intelligence artificielle. Je suis entièrement à votre disposition. Que souhaitez-vous accomplir aujourd''hui ?', true);
+                        } else {
+                            addMessage('ney', `Bonjour. Je suis Ney. Mes fonctionnalités sont limitées pour les utilisateurs non-pilotes.`, true);
+                        }
+                    } else {
+                        currentUser = null;
+                        ui.statusIndicator.classList.replace('bg-green-500', 'bg-gray-400');
+                        ui.neyStatus.textContent = "Déconnecté";
+                        ui.chatInput.disabled = true;
+                        ui.sendButton.disabled = true;
+                        addMessage('ney', "Veuillez vous <a href='auth.html' class='text-blue-600 underline'>connecter</a> pour interagir avec moi.", true);
+                    }
+                };
+
+                // --- Messaging Functions ---
+                const addMessage = (sender, text, isHtml = false) => {
+                    const messageEl = document.createElement('div');
+                    messageEl.classList.add('message', sender);
+                    const bubble = document.createElement('div');
+                    bubble.classList.add('message-bubble');
+                    if (isHtml) {
+                        bubble.innerHTML = text;
+                    } else {
+                        bubble.textContent = text;
+                    }
+                    messageEl.appendChild(bubble);
+                    ui.chatMessages.appendChild(messageEl);
+                    ui.chatMessages.scrollTop = ui.chatMessages.scrollHeight;
+                };
+
+                const sendMessage = async () => {
+                    const messageText = ui.chatInput.value.trim();
+                    if (messageText === '' || !currentUser) return;
+
+                    addMessage('user', messageText);
+                    ui.chatInput.value = '';
+                    ui.sendButton.disabled = true; // Disable while sending
+
+                    try {
+                        await addDoc(collection(db, "chats", "universal_chat", "messages"), {
+                            text: messageText,
+                            senderId: currentUser.uid,
+                            timestamp: serverTimestamp()
+                        });
+                    } catch (error) {
+                        console.error("Error sending message:", error);
+                        addMessage('ney', "Désolé, une erreur est survenue lors de l'envoi. Veuillez vérifier votre connexion et réessayer.");
+                    } finally {
+                        ui.sendButton.disabled = false; // Re-enable after sending
+                    }
+                };
+
+                // --- Event Listeners ---
+                ui.sendButton.addEventListener('click', sendMessage);
+                ui.chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+
+                // --- Firebase Auth State Listener ---
+                onAuthStateChanged(auth, updateUIForAuthState, (error) => {
+                    console.error("Auth state error:", error);
+                    neyStatus.textContent = "Erreur d'authentification";
+                    addMessage('ney', "Une erreur critique est survenue lors de la vérification de votre statut. Veuillez rafraîchir la page.");
+                });
+
+            } catch (error) {
+                console.error("Fatal initialization error:", error);
+                document.body.innerHTML = '<div class="w-full h-screen flex items-center justify-center text-red-500"><h1>Erreur Critique</h1><p>Ney n'a pas pu démarrer. Consultez la console pour plus de détails.</p></div>';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification Administrateur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; } </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg text-center max-w-lg">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">Votre Identifiant Utilisateur (UID)</h1>
+        <p class="text-gray-600 mb-6">Connectez-vous si nécessaire. Une fois connecté, votre UID personnel s'affichera ici. Copiez-le et donnez-le moi pour finaliser la création de votre tableau de bord Admin.</p>
+        
+        <div id="auth-container">
+             <!-- AuthUI will be rendered here -->
+        </div>
+
+        <div id="uid-display" class="hidden mt-6">
+            <p class="text-gray-700">Voici votre UID :</p>
+            <code id="user-uid" class="block bg-gray-100 text-blue-700 font-mono text-lg p-4 rounded-lg mt-2 break-all"></code>
+             <p class="text-sm text-green-600 mt-4 font-semibold">C'est l'information dont j'ai besoin !</p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAt0NRbbszX8MSikgsYJngdmWzdfYLoBB0",
+          authDomain: "jeoahs1-max-03326376-49b27.firebaseapp.com",
+          projectId: "jeoahs1-max-03326376-49b27",
+          storageBucket: "jeoahs1-max-03326376-49b27.appspot.com",
+          messagingSenderId: "893693678979",
+          appId: "1:893693678979:web:3243772acee2fde171d2b6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // FirebaseUI config.
+        const uiConfig = {
+            signInSuccessUrl: 'admin_check.html',
+            signInOptions: [ EmailAuthProvider.PROVIDER_ID ],
+            tosUrl: '#',
+            privacyPolicyUrl: '#'
+        };
+
+        const ui = new firebaseui.auth.AuthUI(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('auth-container').style.display = 'none';
+                const uidDisplay = document.getElementById('uid-display');
+                uidDisplay.classList.remove('hidden');
+                document.getElementById('user-uid').textContent = user.uid;
+            } else {
+                ui.start('#auth-container', uiConfig);
+                 document.getElementById('uid-display').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

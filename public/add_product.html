@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter un Produit - JEOAH'S</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        #image-preview-container { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+        .img-preview-wrapper { position: relative; width: 100px; height: 100px; }
+        .img-preview { width: 100%; height: 100%; object-cover: cover; border-radius: 0.5rem; }
+        .remove-img-btn { position: absolute; top: -5px; right: -5px; background: rgba(0,0,0,0.7); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen py-12">
+
+    <div class="max-w-3xl w-full bg-white p-8 rounded-2xl shadow-lg">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-gray-900">Ajouter un Nouveau Produit</h1>
+            <p class="text-gray-600 mt-2">Remplissez les détails pour mettre votre produit en vente.</p>
+        </div>
+
+        <form id="add-product-form" class="space-y-6">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label for="product-name" class="block text-sm font-medium text-gray-700">Nom du produit</label>
+                    <input type="text" id="product-name" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label for="product-description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea id="product-description" rows="4" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+
+                <div>
+                    <label for="product-price" class="block text-sm font-medium text-gray-700">Prix (€)</label>
+                    <input type="number" id="product-price" step="0.01" min="0" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="product-category" class="block text-sm font-medium text-gray-700">Catégorie</label>
+                    <select id="product-category" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                         <option value="">Sélectionner...</option>
+                         <option>Mode & Vêtements</option> <option>Électronique</option> <option>Maison & Jardin</option> <option>Beauté & Santé</option>
+                         <option>Sports & Loisirs</option> <option>Livres & Médias</option> <option>Jouets & Enfants</option> <option>Automobile & Moto</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Image Upload -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Images du produit</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <div class="flex text-sm text-gray-600"><label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"><span>Uploader des fichiers</span><input id="file-upload" name="file-upload" type="file" class="sr-only" multiple accept="image/*"></label><p class="pl-1">ou glisser-déposer</p></div>
+                        <p class="text-xs text-gray-500">PNG, JPG, GIF jusqu'à 10MB</p>
+                    </div>
+                </div>
+                <div id="image-preview-container"></div>
+            </div>
+
+            <p id="form-error" class="text-red-500 text-sm hidden"></p>
+
+            <div class="pt-4 flex items-center space-x-4">
+                <button id="submit-btn" type="submit" class="w-full bg-gray-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-700 transition disabled:opacity-50 flex items-center justify-center">
+                    <span id="submit-btn-text">Ajouter le produit</span>
+                    <i id="submit-spinner" class="fas fa-spinner fa-spin hidden ml-2"></i>
+                </button>
+                 <a href="dashboard.html" class="w-full text-center py-3 px-8 border border-gray-300 rounded-lg shadow-sm text-lg font-medium text-gray-700 bg-white hover:bg-gray-100">Annuler</a>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAt0NRbbszX8MSikgsYJngdmWzdfYLoBB0",
+          authDomain: "jeoahs1-max-03326376-49b27.firebaseapp.com",
+          projectId: "jeoahs1-max-03326376-49b27",
+          storageBucket: "jeoahs1-max-03326376-49b27.appspot.com",
+          messagingSenderId: "893693678979",
+          appId: "1:893693678979:web:3243772acee2fde171d2b6"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        let currentUser = null;
+        let filesToUpload = [];
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) { currentUser = user; } 
+            else { window.location.href = 'auth.html'; }
+        });
+
+        const fileInput = document.getElementById('file-upload');
+        const previewContainer = document.getElementById('image-preview-container');
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(event) {
+            filesToUpload = [...filesToUpload, ...event.target.files];
+            renderImagePreviews();
+        }
+
+        function renderImagePreviews() {
+            previewContainer.innerHTML = '';
+            filesToUpload.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'img-preview-wrapper';
+                    wrapper.innerHTML = `
+                        <img src="${e.target.result}" class="img-preview">
+                        <div class="remove-img-btn" data-index="${index}">&times;</div>
+                    `;
+                    previewContainer.appendChild(wrapper);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        previewContainer.addEventListener('click', (e) => {
+            if(e.target.classList.contains('remove-img-btn')) {
+                const index = parseInt(e.target.dataset.index);
+                filesToUpload.splice(index, 1);
+                renderImagePreviews();
+            }
+        });
+
+        const form = document.getElementById('add-product-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser || filesToUpload.length === 0) {
+                document.getElementById('form-error').textContent = 'Veuillez ajouter au moins une image.';
+                document.getElementById('form-error').classList.remove('hidden');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            document.getElementById('submit-btn-text').textContent = 'Sauvegarde...';
+            document.getElementById('submit-spinner').classList.remove('hidden');
+            
+            try {
+                const imageUrls = await uploadImages(filesToUpload);
+                await saveProduct(imageUrls);
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                 document.getElementById('form-error').textContent = `Erreur: ${error.message}`;
+                 document.getElementById('form-error').classList.remove('hidden');
+                 submitBtn.disabled = false;
+                 document.getElementById('submit-btn-text').textContent = 'Ajouter le produit';
+                 document.getElementById('submit-spinner').classList.add('hidden');
+            }
+        });
+        
+        async function uploadImages(files) {
+            const uploadPromises = files.map(file => {
+                const storageRef = ref(storage, `products/${currentUser.uid}/${Date.now()}_${file.name}`);
+                const uploadTask = uploadBytesResumable(storageRef, file);
+                return new Promise((resolve, reject) => {
+                    uploadTask.on('state_changed', 
+                        null, 
+                        (error) => reject(error), 
+                        () => { getDownloadURL(uploadTask.snapshot.ref).then(url => resolve(url)); }
+                    );
+                });
+            });
+            return await Promise.all(uploadPromises);
+        }
+
+        async function saveProduct(imageUrls) {
+            await addDoc(collection(db, 'products'), {
+                sellerId: currentUser.uid,
+                name: document.getElementById('product-name').value,
+                description: document.getElementById('product-description').value,
+                price: parseFloat(document.getElementById('product-price').value),
+                category: document.getElementById('product-category').value,
+                imageUrls: imageUrls,
+                createdAt: serverTimestamp()
+            });
+        }
+    </script>
+</body>
+</html>

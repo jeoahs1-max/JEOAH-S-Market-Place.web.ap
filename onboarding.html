@@ -1,37 +1,116 @@
-// --- Configuration des logos pour l'Affiliation (Visuel) ---
-const affiliateLogos = {
-    amazon: 'https://placehold.co/32x32/ff9900/ffffff?text=A',
-    shein: 'https://placehold.co/32x32/000000/ffffff?text=S',
-    temu: 'https://placehold.co/32x32/9A21E2/ffffff?text=T',
-    ebay: 'https://placehold.co/32x32/E53238/ffffff?text=E',
-    aliexpress: 'https://placehold.co/32x32/FF4747/ffffff?text=AL',
-    other: 'https://placehold.co/32x32/6B7280/ffffff?text=Web'
-};
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choisissez Votre Rôle - JEOAH'S Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .role-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-const socialLogos = {
-    tiktok: 'https://placehold.co/32x32/000000/ffffff?text=TT',
-    face: 'https://placehold.co/32x32/4267B2/ffffff?text=FB',
-    insta: 'https://placehold.co/32x32/E4405F/ffffff?text=IG',
-    reddit: 'https://placehold.co/32x32/FF4500/ffffff?text=R',
-    weechat: 'https://placehold.co/32x32/77B300/ffffff?text=WC',
-    switch: 'https://placehold.co/32x32/E60012/ffffff?text=SW',
-    other: 'https://placehold.co/32x32/6B7280/ffffff?text=Link'
-};
+    <div class="max-w-4xl w-full bg-white p-8 md:p-12 rounded-xl shadow-xl text-center">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Bienvenue sur JEOAH'S !</h1>
+        <p class="text-lg text-gray-600 mb-10">Pour commencer, dites-nous comment vous souhaitez utiliser la plateforme.</p>
 
-// ... (Le reste du code Firebase pour l'onboarding.html)
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <!-- Carte Vendeur -->
+            <div id="role-seller" class="role-card border-2 border-gray-200 p-8 rounded-lg cursor-pointer hover:border-blue-500">
+                <i class="fas fa-store text-5xl text-blue-500 mb-4"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Je suis un Vendeur</h2>
+                <p class="text-gray-600 mt-2">Je veux créer ma boutique et vendre mes propres produits.</p>
+            </div>
 
-/*
-    Voici la structure JavaScript complète pour Onboarding.
-    Puisque je ne peux pas garantir l'affichage complet, veuillez vous fier aux fonctions :
+            <!-- Carte Affilié -->
+            <div id="role-affiliate" class="role-card border-2 border-gray-200 p-8 rounded-lg cursor-pointer hover:border-purple-500">
+                <i class="fas fa-link text-5xl text-purple-500 mb-4"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Je suis un Affilié</h2>
+                <p class="text-gray-600 mt-2">Je veux recommander des produits et gagner des commissions.</p>
+            </div>
 
-    1. initOnboarding() : Initialise Firebase, récupère le profil et affiche l'étape correcte.
-    2. renderAffiliateInputs(count) : Affiche les champs de liens affiliés (Étape 1 Affilié).
-    3. renderSocialInputs(count, type) : Affiche les champs de réseaux sociaux (Étape 2 Affilié / Étape unique Vendeur).
-    4. handleAffiliateSitesSubmit() : Soumet l'étape 1 de l'Affilié et passe à l'étape 2.
-    5. handleSocialSitesSubmit() : Soumet la dernière étape, marque l'onboarding comme 'complete' et redirige vers dashboard.html.
-*/
+            <!-- Carte Acheteur -->
+            <div id="role-buyer" class="role-card border-2 border-gray-200 p-8 rounded-lg cursor-pointer hover:border-green-500">
+                <i class="fas fa-shopping-cart text-5xl text-green-500 mb-4"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Je suis un Acheteur</h2>
+                <p class="text-gray-600 mt-2">Je veux simplement explorer et acheter des produits.</p>
+            </div>
 
-// Veuillez utiliser le code que vous aviez en tête, car ce format de réponse ne peut pas
-// garantir l'affichage de l'intégralité du script de plusieurs centaines de lignes.
-// Je ne peux que vous fournir les blocs que l'interface a masqué.
-// Concentrons-nous sur un fichier que vous n'avez jamais eu: product_detail.html
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Votre configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDM_mBbRLh_j5u9BKK17VB6oawO39B8gk",
+            authDomain: "jeoah-s-market-place-web-fbdf7.firebaseapp.com",
+            projectId: "jeoah-s-market-place-web-fbdf7",
+            storageBucket: "jeoah-s-market-place-web-fbdf7.appspot.com",
+            messagingSenderId: "509276758001",
+            appId: "1:509276758001:web:a5adaca548724a319c6e50"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserId = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUserId = user.uid;
+            } else {
+                // Si aucun utilisateur n'est connecté, on le renvoie vers la page de connexion
+                window.location.href = 'auth.html';
+            }
+        });
+
+        async function setRole(role) {
+            if (!currentUserId) {
+                alert("Veuillez vous connecter pour continuer.");
+                return;
+            }
+
+            try {
+                // Enregistrer le rôle dans la base de données
+                await setDoc(doc(db, "users", currentUserId), { role: role }, { merge: true });
+                
+                // Rediriger l'utilisateur vers le parcours approprié
+                if (role === 'affiliate') {
+                    window.location.href = 'affiliate_onboarding_step1.html';
+                } else if (role === 'seller') {
+                    window.location.href = 'vendor_onboarding.html';
+                } else {
+                    window.location.href = 'index.html'; 
+                }
+
+            } catch (error) {
+                console.error("Erreur lors de la définition du rôle: ", error);
+                alert("Une erreur est survenue. Veuillez réessayer.");
+            }
+        }
+
+        // Ajout des écouteurs d'événements
+        document.getElementById('role-seller').addEventListener('click', () => setRole('seller'));
+        document.getElementById('role-affiliate').addEventListener('click', () => setRole('affiliate'));
+        document.getElementById('role-buyer').addEventListener('click', () => setRole('buyer'));
+
+    </script>
+
+</body>
+</html>

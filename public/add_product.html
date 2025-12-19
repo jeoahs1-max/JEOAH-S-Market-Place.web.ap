@@ -193,5 +193,26 @@
             });
         }
     </script>
+    
+    <!-- DIV pour le footer -->
+    <div id="footer-container"></div>
+
+    <!-- DIV pour le widget Ney -->
+    <div id="ney-widget-container"></div>
+
+    <script>
+        // Charger le footer et le widget
+        fetch('/footer.html').then(res => res.text()).then(data => document.getElementById('footer-container').innerHTML = data);
+        fetch('/ney-widget.html').then(res => res.text()).then(data => {
+            document.getElementById('ney-widget-container').innerHTML = data;
+            // Exécuter le script du widget après l'avoir chargé
+            const scriptEl = document.querySelector('#ney-widget-container script');
+            if (scriptEl) {
+                const newScript = document.createElement('script');
+                newScript.innerHTML = scriptEl.innerHTML;
+                document.body.appendChild(newScript);
+            }
+        });
+    </script>
 </body>
 </html>

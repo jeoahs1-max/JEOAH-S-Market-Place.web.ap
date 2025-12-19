@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -11,84 +12,121 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="icon" href="/assets/logo.png" type="image/png">
 
-    <!-- Script Multilingue -->
-    <script>
-        function setLang(l){ localStorage.setItem("lang", l); location.reload(); }
-        const TEXT = { fr: { title: "Contactez-Nous", subtitle: "Une question ? Une suggestion ? N'hésitez pas.", send: "Envoyer le Message" }, 
-                     en: { title: "Contact Us", subtitle: "A question? A suggestion? Don't hesitate.", send: "Send Message" }, 
-                     es: { title: "Contáctenos", subtitle: "¿Una pregunta? ¿Una sugerencia? No lo dude.", send: "Enviar Mensaje" } };
-        const L = TEXT[ localStorage.getItem("lang") || "fr" ];
-    </script>
-
     <style>
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
 
-    <!-- Header (Optionnel, mais bon pour la consistance) -->
-    <header class="bg-white shadow-sm">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="/index.html" class="flex items-center text-2xl font-extrabold text-gray-900">
-                <img src="/assets/logo.png" alt="JEOAH'S Logo" class="h-8 mr-3">
-                <span>JEOAH'S</span>
-            </a>
-            <a href="/auth.html" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-full hover:bg-purple-700 transition">Portail</a>
-        </nav>
-    </header>
+    <!-- Header Placeholder -->
+    <div id="header-container"></div>
 
     <!-- Main Content -->
     <main class="flex-grow container mx-auto px-6 py-12">
         <div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-md">
             <div class="text-center mb-8">
-                <h1 id="t-title" class="text-4xl font-extrabold text-gray-900"></h1>
-                <p id="t-subtitle" class="mt-2 text-gray-600"></p>
+                <h1 class="text-4xl font-extrabold text-gray-900" data-translate="contact_title">Contactez-Nous</h1>
+                <p class="mt-2 text-gray-600" data-translate="contact_subtitle">Une question ? Une suggestion ? N'hésitez pas.</p>
             </div>
 
-            <form action="#" method="POST">
+            <form id="contact-form" method="POST">
                 <div class="space-y-6">
                     <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700">Nom complet</label>
-                        <input type="text" name="name" id="name" autocomplete="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500">
+                        <label for="name" class="block text-sm font-medium text-gray-700" data-translate="contact_name_label">Nom complet</label>
+                        <input type="text" name="name" id="name" autocomplete="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" required>
                     </div>
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Adresse e-mail</label>
-                        <input type="email" name="email" id="email" autocomplete="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500">
+                        <label for="email" class="block text-sm font-medium text-gray-700" data-translate="contact_email_label">Adresse e-mail</label>
+                        <input type="email" name="email" id="email" autocomplete="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" required>
                     </div>
                     <div>
-                        <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
-                        <textarea id="message" name="message" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"></textarea>
+                        <label for="message" class="block text-sm font-medium text-gray-700" data-translate="contact_message_label">Message</label>
+                        <textarea id="message" name="message" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500" required></textarea>
                     </div>
                     <div>
-                        <button type="submit" id="t-send" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"></button>
+                        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500" data-translate="contact_send_button">Envoyer le Message</button>
                     </div>
                 </div>
             </form>
+            <div id="form-status" class="mt-4 text-center"></div>
         </div>
     </main>
 
-    <!-- DIV pour le footer -->
+    <!-- Footer Placeholder -->
     <div id="footer-container"></div>
 
-    <!-- DIV pour le widget Ney -->
+    <!-- Ney Widget Placeholder -->
     <div id="ney-widget-container"></div>
 
+    <script src="/assets/js/translator.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Appliquer les textes de langue
-            document.getElementById('t-title').innerText = L.title;
-            document.getElementById('t-subtitle').innerText = L.subtitle;
-            document.getElementById('t-send').innerText = L.send;
+            const loadComponent = (url, containerId) => {
+                return fetch(url)
+                    .then(response => response.text())
+                    .then(data => {
+                        const container = document.getElementById(containerId);
+                        if(container) {
+                            container.innerHTML = data;
+                            const scripts = container.querySelectorAll('script');
+                            scripts.forEach(script => {
+                                const newScript = document.createElement('script');
+                                for (let i = 0; i < script.attributes.length; i++) {
+                                     newScript.setAttribute(script.attributes[i].name, script.attributes[i].value);
+                                }
+                                newScript.innerHTML = script.innerHTML;
+                                document.body.appendChild(newScript);
+                                script.remove(); 
+                            });
+                        }
+                    });
+            };
 
-            // Charger le footer et le widget
-            fetch('/footer.html').then(res => res.text()).then(data => document.getElementById('footer-container').innerHTML = data);
-            fetch('/ney-widget.html').then(res => res.text()).then(data => {
-                document.getElementById('ney-widget-container').innerHTML = data;
-                const scriptEl = document.querySelector('#ney-widget-container script');
-                if (scriptEl) {
-                    const newScript = document.createElement('script');
-                    newScript.innerHTML = scriptEl.innerHTML;
-                    document.body.appendChild(newScript);
+            Promise.all([
+                loadComponent('/header.html', 'header-container'),
+                loadComponent('/footer.html', 'footer-container'),
+                loadComponent('/ney-widget.html', 'ney-widget-container')
+            ]).then(() => {
+                initializeTranslator();
+            });
+
+            const contactForm = document.getElementById('contact-form');
+            const formStatus = document.getElementById('form-status');
+
+            contactForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                formStatus.textContent = 'Envoi en cours...';
+                formStatus.style.color = '#6B7280';
+
+                const formData = new FormData(contactForm);
+                const data = {
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    message: formData.get('message'),
+                };
+
+                try {
+                    const response = await fetch('/api/contact', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+
+                    if (response.ok) {
+                        formStatus.textContent = 'Message envoyé avec succès !';
+                        formStatus.style.color = '#10B981';
+                        contactForm.reset();
+                    } else {
+                        const errorData = await response.json();
+                        formStatus.textContent = `Erreur: ${errorData.message || 'Impossible d\'envoyer le message.'}`;
+                        form-status.style.color = '#EF4444';
+                    }
+                } catch (error) {
+                    console.error('Erreur de soumission:', error);
+                    formStatus.textContent = 'Une erreur s\'est produite. Veuillez réessayer.';
+                    formStatus.style.color = '#EF4444';
                 }
             });
         });

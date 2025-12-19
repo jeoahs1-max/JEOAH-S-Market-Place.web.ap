@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription & Connexion - JEOAH'S</title>
+    <meta name="description" content="Rejoignez JEOAH'S en tant qu'acheteur, vendeur ou affilié. L'inscription est simple et rapide.">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .role-option:checked + label {
+            border-color: #8b5cf6; 
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+    <main class="flex-grow flex items-center justify-center py-12 px-4">
+        <div class="max-w-md w-full bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+            <div class="text-center mb-6">
+                <a href="index.html" class="text-3xl font-extrabold text-gray-900">JEOAH'S</a>
+                <p class="mt-2 text-sm text-gray-600">Choisissez votre rôle pour commencer</p>
+            </div>
+            <form id="auth-form">
+                <p id="auth-error" class="text-red-500 text-sm hidden text-center mb-4"></p>
+                <div class="space-y-4 mb-6">
+                    <h3 class="text-sm font-semibold text-gray-700 text-center">Je suis un...</h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <input type="radio" name="role" id="role-buyer" value="acheteur" class="hidden role-option">
+                        <label for="role-buyer" class="block text-center p-4 border rounded-lg cursor-pointer hover:border-purple-400 transition">
+                            <span class="font-semibold text-sm">Acheteur</span>
+                        </label>
+                        <input type="radio" name="role" id="role-seller" value="vendeur" class="hidden role-option">
+                        <label for="role-seller" class="block text-center p-4 border rounded-lg cursor-pointer hover:border-purple-400 transition">
+                            <span class="font-semibold text-sm">Vendeur</span>
+                        </label>
+                        <input type="radio" name="role" id="role-affiliate" value="affilie" class="hidden role-option">
+                        <label for="role-affiliate" class="block text-center p-4 border rounded-lg cursor-pointer hover:border-purple-400 transition">
+                            <span class="font-semibold text-sm">Affilié</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <button type="button" id="google-signin-btn" class="w-full flex items-center justify-center bg-gray-200 text-gray-500 font-semibold py-3 rounded-lg transition cursor-not-allowed" disabled>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" class="w-6 h-6 mr-3">
+                        <span>S'inscrire avec Google</span>
+                    </button>
+                </div>
+            </form>
+            <div class="text-center mt-6">
+                 <p class="text-xs text-gray-500">
+                    <span>En continuant, vous acceptez nos</span>
+                    <a href="/terms.html" class="underline hover:text-blue-600">Termes & Conditions</a>
+                </p>
+                <a href="/index.html" class="text-sm text-indigo-600 hover:text-indigo-500 mt-4 inline-block"> &larr; Retour à l'accueil</a>
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+    <div id="ney-widget-container"></div>
+
+    <script src="/assets/js/translator.js"></script>
+    <script>
+      // CONFIGURATION FIREBASE v8 - Essentielle pour cette page
+      const firebaseConfig = {
+        apiKey: "AIzaSyAt0NRbbszX8MSikgsYJngdmWzdfYLoBB0",
+        authDomain: "jeoahs1-max-03326376-49b27.firebaseapp.com",
+        projectId: "jeoahs1-max-03326376-49b27",
+        storageBucket: "jeoahs1-max-03326376-49b27.appspot.com",
+        messagingSenderId: "893693678979",
+        appId: "1:893693678979:web:3243772acee2fde171d2b6"
+      };
+
+      // Initialisation de Firebase v8
+      // On vérifie qu'une app n'a pas déjà été initialisée pour éviter les conflits
+      if (!firebase.apps.length) {
+          const app = firebase.initializeApp(firebaseConfig);
+      } else {
+          const app = firebase.app(); // Utiliser l'app existante
+      }
+      
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      const errorElement = document.getElementById('auth-error');
+      const googleBtn = document.getElementById('google-signin-btn');
+      const authForm = document.getElementById('auth-form');
+
+      auth.onAuthStateChanged(async (user) => {
+          if (user) {
+              // La logique de redirection reste la même
+          }
+      });
+
+      let selectedRole = null;
+      authForm.addEventListener('change', (e) => {
+          if (e.target.name === 'role') {
+              selectedRole = e.target.value;
+              googleBtn.disabled = false;
+              googleBtn.classList.remove('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+              googleBtn.classList.add('bg-white', 'text-gray-700', 'border', 'border-gray-300', 'hover:bg-gray-50');
+              errorElement.classList.add('hidden');
+          }
+      });
+
+      googleBtn.addEventListener('click', async () => {
+          if (!selectedRole) {
+              errorElement.textContent = "Veuillez sélectionner un rôle.";
+              errorElement.classList.remove('hidden');
+              return;
+          }
+
+          const provider = new firebase.auth.GoogleAuthProvider();
+          try {
+              const result = await auth.signInWithPopup(provider);
+              // ... la suite de la logique reste inchangée
+          } catch (error) {
+              console.error("Authentication Error:", error);
+              if (error.code !== 'auth/popup-closed-by-user') {
+                errorElement.textContent = "Une erreur est survenue lors de l'inscription. Veuillez réessayer. Détail: " + error.message;
+                errorElement.classList.remove('hidden');
+              }
+          }
+      });
+
+      // Chargement du footer et widget
+      fetch('/footer.html').then(res => res.text()).then(data => document.getElementById('footer-container').innerHTML = data);
+      fetch('/ney-widget.html').then(res => res.text()).then(data => {
+            document.getElementById('ney-widget-container').innerHTML = data;
+            const scriptEl = document.querySelector('#ney-widget-container script');
+            if (scriptEl) {
+                const newScript = document.createElement('script');
+                newScript.innerHTML = scriptEl.innerHTML;
+                document.body.appendChild(newScript);
+            }
+        });
+    </script>
+</body>
+</html>

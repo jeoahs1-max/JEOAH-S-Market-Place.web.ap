@@ -11,19 +11,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="icon" href="/assets/logo.png" type="image/png">
 
-    <!-- Script Multilingue -->
-    <script>
-        function setLang(l){ localStorage.setItem("lang", l); location.reload(); }
-        const TEXT = { 
-            fr: { title: "Fonctionnalités Clés", subtitle: "Découvrez tout ce que JEOAH'S peut faire pour vous." }, 
-            en: { title: "Key Features", subtitle: "Discover everything JEOAH'S can do for you." }, 
-            es: { title: "Características Clave", subtitle: "Descubra todo lo que JEOAH'S puede hacer por usted." } 
-        };
-        const L = TEXT[ localStorage.getItem("lang") || "fr" ];
-    </script>
-
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .feature-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .icon-circle {
+            background-color: #ede9fe; /* violet-100 */
+            color: #8b5cf6; /* violet-500 */
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 4rem;
+            width: 4rem;
+            margin-bottom: 1.5rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
@@ -35,18 +46,45 @@
                 <img src="/assets/logo.png" alt="JEOAH'S Logo" class="h-8 mr-3">
                 <span>JEOAH'S</span>
             </a>
-            <a href="/auth.html" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-full hover:bg-purple-700 transition">Portail</a>
+            <a href="/auth.html" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-full hover:bg-purple-700 transition" data-translate="portal_button"></a>
         </nav>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow container mx-auto px-6 py-12">
-        <div class="text-center mb-12">
-            <h1 id="t-title" class="text-4xl font-extrabold text-gray-900 sm:text-5xl"></h1>
-            <p id="t-subtitle" class="mt-4 text-xl text-gray-600"></p>
+    <main class="flex-grow container mx-auto px-6 py-16">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl" data-translate="features_title_page"></h1>
+            <p class="mt-4 text-xl text-gray-600" data-translate="features_subtitle_page"></p>
         </div>
 
-        <!-- Contenu spécifique à la page fonctionnalités ici -->
+        <div class="grid md:grid-cols-3 gap-8 text-center">
+            <!-- Feature pour les Vendeurs -->
+            <div class="feature-card">
+                <div class="icon-circle">
+                    <i class="fas fa-store text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4" data-translate="feature_sellers_title"></h3>
+                <p class="text-gray-600" data-translate="feature_sellers_text_extended"></p>
+            </div>
+
+            <!-- Feature pour les Affiliés -->
+            <div class="feature-card">
+                <div class="icon-circle">
+                    <i class="fas fa-link text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4" data-translate="feature_affiliates_title"></h3>
+                <p class="text-gray-600" data-translate="feature_affiliates_text_extended"></p>
+            </div>
+
+            <!-- Feature pour les Acheteurs -->
+            <div class="feature-card">
+                <div class="icon-circle">
+                    <i class="fas fa-shopping-bag text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4" data-translate="feature_buyers_title"></h3>
+                <p class="text-gray-600" data-translate="feature_buyers_text"></p>
+            </div>
+        </div>
 
     </main>
 
@@ -56,11 +94,9 @@
     <!-- DIV pour le widget Ney -->
     <div id="ney-widget-container"></div>
 
+    <script src="/assets/js/translator.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('t-title').innerText = L.title;
-            document.getElementById('t-subtitle').innerText = L.subtitle;
-
             fetch('/footer.html').then(res => res.text()).then(data => document.getElementById('footer-container').innerHTML = data);
             fetch('/ney-widget.html').then(res => res.text()).then(data => {
                 document.getElementById('ney-widget-container').innerHTML = data;

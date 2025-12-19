@@ -1,60 +1,71 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>À Propos de Nous - JEOAH'S Market Place</title>
+    <title>À Propos - JEOAH'S</title>
+
+    <!-- Config & Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-white">
+<body class="bg-gray-100 flex flex-col min-h-screen">
 
     <!-- Header -->
-    <header class="shadow-sm border-b border-gray-100 sticky top-0 bg-white z-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-extrabold text-gray-900">JEOAH'S <span class="text-blue-600">Market Place</span></a>
-            <nav class="hidden md:flex items-center space-x-8 text-gray-600 font-medium">
-                <a href="index.html" class="hover:text-blue-600 transition">Accueil</a>
-                <a href="index.html#features" class="hover:text-blue-600 transition">Fonctionnalités</a>
-                <a href="plans.html" class="hover:text-blue-600 transition">Tarifs</a>
-                <a href="contact.html" class="hover:text-blue-600 transition">Contact</a>
-            </nav>
-            <a href="auth.html" class="px-5 py-2 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-700 transition duration-300">Se connecter</a>
-        </div>
+    <header class="bg-white shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="/index.html" class="flex items-center text-2xl font-extrabold text-gray-900">
+                <img src="/assets/logo.png" alt="JEOAH'S Logo" class="h-8 mr-3">
+                <span>JEOAH'S</span>
+            </a>
+            <a href="/auth.html" class="bg-purple-600 text-white font-bold py-2 px-4 rounded-full hover:bg-purple-700 transition" data-translate="portal_button"></a>
+        </nav>
     </header>
 
     <!-- Main Content -->
-    <main class="py-16 sm:py-24">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl">Notre Histoire</h1>
-                <p class="mt-4 text-xl text-gray-600">Plus qu'une plateforme, une révolution pour les entrepreneurs.</p>
-            </div>
+    <main class="flex-grow container mx-auto px-6 py-16">
+        <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+            <div class="p-10">
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl" data-translate="about_title"></h1>
+                    <p class="mt-4 text-xl text-gray-600" data-translate="about_subtitle"></p>
+                </div>
 
-            <div class="prose prose-lg max-w-none text-gray-700">
-                <p>JEOAH'S Market Place est née d'un constat simple mais puissant : d'innombrables entrepreneurs, créateurs et vendeurs passionnés peinent à donner à leurs produits la visibilité qu'ils méritent. Le fondateur, après avoir lui-même connu les défis de la vente en ligne en solitaire, a réalisé que le plus grand obstacle n'était pas la qualité des produits, mais le manque de temps, de ressources et de compétences en marketing digital.</p>
-                
-                <blockquote class="border-l-4 border-blue-500 pl-4 italic text-gray-800 my-8">
-                    "Comment pourrais-je concurrencer les géants du e-commerce alors que je passe plus de temps à essayer de comprendre les algorithmes des réseaux sociaux qu'à perfectionner mon propre produit ?"
-                </blockquote>
-
-                <p>Cette question a été le point de départ de JEOAH'S. L'idée était de créer un écosystème où la technologie travaillerait POUR les vendeurs, et non l'inverse. Nous avons alors développé "Ney", notre intelligence artificielle, pour qu'elle devienne l'expert marketing personnel de chaque vendeur abonné sur notre plateforme.</p>
-
-                <h2 class="text-3xl font-bold text-gray-800 mt-12 mb-4">Notre Mission</h2>
-                <p>Notre mission est de démocratiser le succès en e-commerce. Nous voulons fournir aux entrepreneurs les outils pour se concentrer sur ce qu'ils font de mieux : créer des produits exceptionnels. Nous nous occupons du reste. En automatisant la publicité et la promotion, nous nivelons le terrain de jeu et donnons à chaque produit une chance égale de trouver son public.</p>
-
-                <p>En rejoignant JEOAH'S, vous ne rejoignez pas seulement une place de marché. Vous rejoignez un mouvement d'entrepreneurs qui croient en la puissance de la collaboration et de l'innovation pour atteindre de nouveaux sommets.</p>
+                <div class="space-y-8 text-lg text-gray-700">
+                    <p data-translate="about_paragraph_1"></p>
+                    <p data-translate="about_paragraph_2"></p>
+                    <p data-translate="about_paragraph_3"></p>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white pt-16 pb-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p>&copy; 2025 JEOAH'S Marketplace. Tous droits réservés.</p>
-        </div>
-    </footer>
+    <!-- DIV pour le footer -->
+    <div id="footer-container"></div>
+
+    <!-- DIV pour le widget Ney -->
+    <div id="ney-widget-container"></div>
+
+    <script src="/assets/js/translator.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/footer.html').then(res => res.text()).then(data => document.getElementById('footer-container').innerHTML = data);
+            fetch('/ney-widget.html').then(res => res.text()).then(data => {
+                document.getElementById('ney-widget-container').innerHTML = data;
+                const scriptEl = document.querySelector('#ney-widget-container script');
+                if (scriptEl) {
+                    const newScript = document.createElement('script');
+                    newScript.innerHTML = scriptEl.innerHTML;
+                    document.body.appendChild(newScript);
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>

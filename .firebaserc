@@ -1,6 +1,19 @@
-
-
+{
   "projects": {
-    "default": "jeoah-s-market-place-web-fbdf7"
-  }
+    "default": "jeoahs-dev",
+    "live": "jeoahs1-max-03326376-49b27"
+  },
+  "targets": {
+    "jeoahs1-max-03326376-49b27": {
+      "hosting": {
+        "live": [
+          "jeoahs1-max-03326376-49b27"
+        ],
+        "dev": [
+          "jeoahs-dev"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

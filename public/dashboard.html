@@ -9,10 +9,11 @@
     <!-- META SEO & OPEN GRAPH -->
     <meta name="robots" content="noindex, nofollow"> 
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- Firebase SDK from reserved hosting URLs -->
+    <script src="/__/firebase/8.10.1/firebase-app.js"></script>
+    <script src="/__/firebase/8.10.1/firebase-auth.js"></script>
+    <script src="/__/firebase/8.10.1/firebase-firestore.js"></script>
+    <script src="/__/firebase/init.js"></script>
 
     <!-- Config & Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -99,16 +100,7 @@
 
     <script src="/assets/js/translator.js"></script>
     <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyAt0NRbbszX8MSikgsYJngdmWzdfYLoBB0",
-        authDomain: "jeoahs1-max-03326376-49b27.firebaseapp.com",
-        projectId: "jeoahs1-max-03326376-49b27",
-        storageBucket: "jeoahs1-max-03326376-49b27.firebasestorage.app",
-        messagingSenderId: "893693678979",
-        appId: "1:893693678979:web:3243772acee2fde171d2b6"
-      };
-
-      const app = firebase.initializeApp(firebaseConfig);
+      // Firebase is initialized by /__/firebase/init.js
       const auth = firebase.auth();
       const db = firebase.firestore();
 

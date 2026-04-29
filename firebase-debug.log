@@ -1,0 +1,200 @@
+[debug] [2026-03-06T01:23:59.008Z] ----------------------------------------------------------------------
+[debug] [2026-03-06T01:23:59.010Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting
+[debug] [2026-03-06T01:23:59.011Z] CLI Version:   15.1.0
+[debug] [2026-03-06T01:23:59.011Z] Platform:      linux
+[debug] [2026-03-06T01:23:59.011Z] Node Version:  v20.19.1
+[debug] [2026-03-06T01:23:59.011Z] Time:          Fri Mar 06 2026 01:23:59 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-03-06T01:23:59.011Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-06T01:24:00.371Z] No OAuth tokens found
+[debug] [2026-03-06T01:24:00.371Z] No OAuth tokens found
+[error] Failed to fetch Firebase Project from current Studio Workspace: Unable to refresh auth: not yet authenticated.
+[debug] [2026-03-06T01:24:00.375Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T01:24:00.375Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T01:24:00.375Z] [iam] checking project jeoahs1-marketplacev2 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-03-06T01:24:00.376Z] No OAuth tokens found
+[debug] [2026-03-06T01:24:00.376Z] No OAuth tokens found
+[debug] [2026-03-06T01:24:00.376Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T01:24:00.376Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T01:24:00.377Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions [none]
+[debug] [2026-03-06T01:24:00.381Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions x-goog-quota-user=projects/jeoahs1-marketplacev2
+[debug] [2026-03-06T01:24:00.382Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-03-06T01:24:00.446Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions 401
+[debug] [2026-03-06T01:24:00.446Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions","service":"cloudresourcemanager.googleapis.com"}}]}}
+[debug] [2026-03-06T01:24:00.446Z] Got a 401 Unauthenticated error for a call that required authentication. Refreshing tokens.
+[debug] [2026-03-06T01:24:00.446Z] No OAuth tokens found
+[debug] [2026-03-06T01:24:00.446Z] No OAuth tokens found
+[debug] [2026-03-06T01:24:00.447Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T01:24:00.447Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T01:24:00.447Z] [iam] error while checking permissions, command may fail: Request to https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions had HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[debug] [2026-03-06T01:24:00.448Z] No OAuth tokens found
+[debug] [2026-03-06T01:24:00.448Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 [none]
+[debug] [2026-03-06T01:24:00.557Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 401
+[debug] [2026-03-06T01:24:00.557Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
+[debug] [2026-03-06T01:24:00.557Z] Got a 401 Unauthenticated error for a call that required authentication. Refreshing tokens.
+[debug] [2026-03-06T01:24:00.557Z] No OAuth tokens found
+[debug] [2026-03-06T01:24:00.557Z] No OAuth tokens found
+[debug] [2026-03-06T01:24:00.557Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T01:24:00.557Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T01:24:00.557Z] Request to https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 had HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
+[debug] [2026-03-06T14:00:47.135Z] ----------------------------------------------------------------------
+[debug] [2026-03-06T14:00:47.137Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting
+[debug] [2026-03-06T14:00:47.138Z] CLI Version:   15.1.0
+[debug] [2026-03-06T14:00:47.138Z] Platform:      linux
+[debug] [2026-03-06T14:00:47.138Z] Node Version:  v20.19.1
+[debug] [2026-03-06T14:00:47.138Z] Time:          Fri Mar 06 2026 14:00:47 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-03-06T14:00:47.138Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-06T14:00:49.064Z] No OAuth tokens found
+[debug] [2026-03-06T14:00:49.064Z] No OAuth tokens found
+[error] Failed to fetch Firebase Project from current Studio Workspace: Unable to refresh auth: not yet authenticated.
+[debug] [2026-03-06T14:00:49.068Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T14:00:49.068Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T14:00:49.068Z] [iam] checking project jeoahs1-marketplacev2 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-03-06T14:00:49.069Z] No OAuth tokens found
+[debug] [2026-03-06T14:00:49.069Z] No OAuth tokens found
+[debug] [2026-03-06T14:00:49.069Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T14:00:49.069Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T14:00:49.070Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions [none]
+[debug] [2026-03-06T14:00:49.075Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions x-goog-quota-user=projects/jeoahs1-marketplacev2
+[debug] [2026-03-06T14:00:49.075Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-03-06T14:00:49.135Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions 401
+[debug] [2026-03-06T14:00:49.135Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions","service":"cloudresourcemanager.googleapis.com"}}]}}
+[debug] [2026-03-06T14:00:49.135Z] Got a 401 Unauthenticated error for a call that required authentication. Refreshing tokens.
+[debug] [2026-03-06T14:00:49.135Z] No OAuth tokens found
+[debug] [2026-03-06T14:00:49.135Z] No OAuth tokens found
+[debug] [2026-03-06T14:00:49.136Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T14:00:49.136Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T14:00:49.136Z] [iam] error while checking permissions, command may fail: Request to https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions had HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[debug] [2026-03-06T14:00:49.137Z] No OAuth tokens found
+[debug] [2026-03-06T14:00:49.137Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 [none]
+[debug] [2026-03-06T14:00:49.184Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 401
+[debug] [2026-03-06T14:00:49.184Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
+[debug] [2026-03-06T14:00:49.184Z] Got a 401 Unauthenticated error for a call that required authentication. Refreshing tokens.
+[debug] [2026-03-06T14:00:49.184Z] No OAuth tokens found
+[debug] [2026-03-06T14:00:49.184Z] No OAuth tokens found
+[debug] [2026-03-06T14:00:49.184Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T14:00:49.184Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T14:00:49.185Z] Request to https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 had HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
+[debug] [2026-03-06T15:08:04.445Z] ----------------------------------------------------------------------
+[debug] [2026-03-06T15:08:04.447Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/bin/firebase.js login
+[debug] [2026-03-06T15:08:04.448Z] CLI Version:   15.1.0
+[debug] [2026-03-06T15:08:04.448Z] Platform:      linux
+[debug] [2026-03-06T15:08:04.448Z] Node Version:  v20.19.1
+[debug] [2026-03-06T15:08:04.448Z] Time:          Fri Mar 06 2026 15:08:04 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-03-06T15:08:04.448Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-06T15:08:04.703Z] No OAuth tokens found
+[debug] [2026-03-06T15:08:04.703Z] No OAuth tokens found
+[error] Failed to fetch Firebase Project from current Studio Workspace: Unable to refresh auth: not yet authenticated.
+[info] i  The Firebase CLI’s MCP server feature can optionally make use of Gemini in Firebase. Learn more about Gemini in Firebase and how it uses your data: https://firebase.google.com/docs/gemini-in-firebase#how-gemini-in-firebase-uses-your-data 
+[info] 
+[info] i  Firebase optionally collects CLI and Emulator Suite usage and error reporting information to help improve our products. Data is collected in accordance with Google's privacy policy (https://policies.google.com/privacy) and is not used to identify you. 
+[info] 
+[info] i  To change your preferences at any time, run `firebase logout` and `firebase login` again. 
+[debug] [2026-03-06T15:08:47.843Z] >>> [apiv2][query] POST https://auth.firebase.tools/attest [none]
+[debug] [2026-03-06T15:08:47.843Z] >>> [apiv2][body] POST https://auth.firebase.tools/attest {"session_id":"2790567c-5561-4867-87ca-020f244c275f"}
+[debug] [2026-03-06T15:08:48.099Z] <<< [apiv2][status] POST https://auth.firebase.tools/attest 200
+[debug] [2026-03-06T15:08:48.100Z] <<< [apiv2][body] POST https://auth.firebase.tools/attest {"token":"KndsyZ4SggRQ3fjf9vJwBAVlXIzz0dpddN6h2Qi9ne0"}
+[info] 
+[info] To sign in to the Firebase CLI:
+[info] 
+[info] 1. Take note of your session ID:
+[info] 
+[info]    27905
+[info] 
+[info] 2. Visit the URL below on any device and follow the instructions to get your code:
+[info] 
+[info]    https://auth.firebase.tools/login?code_challenge=VjN8pq_rfvuNuGqi6EF6aWRMoBVCist7bSC02TUjuh4&session=2790567c-5561-4867-87ca-020f244c275f&attest=KndsyZ4SggRQ3fjf9vJwBAVlXIzz0dpddN6h2Qi9ne0
+[info] 
+[info] 3. Paste or enter the authorization code below once you have it:
+[info] 
+[debug] [2026-03-06T15:18:08.189Z] ----------------------------------------------------------------------
+[debug] [2026-03-06T15:18:08.191Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting
+[debug] [2026-03-06T15:18:08.191Z] CLI Version:   15.1.0
+[debug] [2026-03-06T15:18:08.191Z] Platform:      linux
+[debug] [2026-03-06T15:18:08.191Z] Node Version:  v20.19.1
+[debug] [2026-03-06T15:18:08.191Z] Time:          Fri Mar 06 2026 15:18:08 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-03-06T15:18:08.192Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-06T15:18:09.647Z] No OAuth tokens found
+[debug] [2026-03-06T15:18:09.647Z] No OAuth tokens found
+[error] Failed to fetch Firebase Project from current Studio Workspace: Unable to refresh auth: not yet authenticated.
+[debug] [2026-03-06T15:18:09.651Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T15:18:09.652Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T15:18:09.652Z] [iam] checking project jeoahs1-marketplacev2 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-03-06T15:18:09.652Z] No OAuth tokens found
+[debug] [2026-03-06T15:18:09.652Z] No OAuth tokens found
+[debug] [2026-03-06T15:18:09.652Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T15:18:09.653Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T15:18:09.654Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions [none]
+[debug] [2026-03-06T15:18:09.654Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions x-goog-quota-user=projects/jeoahs1-marketplacev2
+[debug] [2026-03-06T15:18:09.654Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-03-06T15:18:09.723Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions 401
+[debug] [2026-03-06T15:18:09.723Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"service":"cloudresourcemanager.googleapis.com","method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions"}}]}}
+[debug] [2026-03-06T15:18:09.723Z] Got a 401 Unauthenticated error for a call that required authentication. Refreshing tokens.
+[debug] [2026-03-06T15:18:09.723Z] No OAuth tokens found
+[debug] [2026-03-06T15:18:09.723Z] No OAuth tokens found
+[debug] [2026-03-06T15:18:09.724Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T15:18:09.724Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T15:18:09.724Z] [iam] error while checking permissions, command may fail: Request to https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions had HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[debug] [2026-03-06T15:18:09.725Z] No OAuth tokens found
+[debug] [2026-03-06T15:18:09.726Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 [none]
+[debug] [2026-03-06T15:18:09.762Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 401
+[debug] [2026-03-06T15:18:09.762Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
+[debug] [2026-03-06T15:18:09.762Z] Got a 401 Unauthenticated error for a call that required authentication. Refreshing tokens.
+[debug] [2026-03-06T15:18:09.763Z] No OAuth tokens found
+[debug] [2026-03-06T15:18:09.763Z] No OAuth tokens found
+[debug] [2026-03-06T15:18:09.763Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-03-06T15:18:09.763Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-03-06T15:18:09.763Z] Request to https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 had HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
+[debug] [2026-04-26T21:53:14.153Z] ----------------------------------------------------------------------
+[debug] [2026-04-26T21:53:14.156Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/bin/firebase.js deploy --only hosting
+[debug] [2026-04-26T21:53:14.156Z] CLI Version:   15.1.0
+[debug] [2026-04-26T21:53:14.156Z] Platform:      linux
+[debug] [2026-04-26T21:53:14.156Z] Node Version:  v20.19.1
+[debug] [2026-04-26T21:53:14.156Z] Time:          Sun Apr 26 2026 21:53:14 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-04-26T21:53:14.156Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-26T21:53:14.159Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-04-26T21:53:16.258Z] No OAuth tokens found
+[debug] [2026-04-26T21:53:16.259Z] No OAuth tokens found
+[error] Failed to fetch Firebase Project from current Studio Workspace: Unable to refresh auth: not yet authenticated.
+[debug] [2026-04-26T21:53:16.263Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-04-26T21:53:16.264Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-04-26T21:53:16.264Z] [iam] checking project jeoahs1-marketplacev2 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-04-26T21:53:16.264Z] No OAuth tokens found
+[debug] [2026-04-26T21:53:16.264Z] No OAuth tokens found
+[debug] [2026-04-26T21:53:16.265Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-04-26T21:53:16.265Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-04-26T21:53:16.265Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions [none]
+[debug] [2026-04-26T21:53:16.265Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions x-goog-quota-user=projects/jeoahs1-marketplacev2
+[debug] [2026-04-26T21:53:16.265Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-26T21:53:16.291Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-04-26T21:53:16.291Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-04-26T21:53:16.306Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions 401
+[debug] [2026-04-26T21:53:16.306Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions","service":"cloudresourcemanager.googleapis.com"}}]}}
+[debug] [2026-04-26T21:53:16.306Z] Got a 401 Unauthenticated error for a call that required authentication. Refreshing tokens.
+[debug] [2026-04-26T21:53:16.306Z] No OAuth tokens found
+[debug] [2026-04-26T21:53:16.306Z] No OAuth tokens found
+[debug] [2026-04-26T21:53:16.307Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-04-26T21:53:16.307Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-04-26T21:53:16.307Z] [iam] error while checking permissions, command may fail: Request to https://cloudresourcemanager.googleapis.com/v1/projects/jeoahs1-marketplacev2:testIamPermissions had HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[debug] [2026-04-26T21:53:16.308Z] No OAuth tokens found
+[debug] [2026-04-26T21:53:16.309Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 [none]
+[debug] [2026-04-26T21:53:16.435Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 401
+[debug] [2026-04-26T21:53:16.435Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
+[debug] [2026-04-26T21:53:16.435Z] Got a 401 Unauthenticated error for a call that required authentication. Refreshing tokens.
+[debug] [2026-04-26T21:53:16.436Z] No OAuth tokens found
+[debug] [2026-04-26T21:53:16.436Z] No OAuth tokens found
+[debug] [2026-04-26T21:53:16.436Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-04-26T21:53:16.436Z] > authorizing via signed-in user (jeoahs1@gmail.com)
+[debug] [2026-04-26T21:53:16.436Z] Request to https://firebase.googleapis.com/v1beta1/projects/jeoahs1-marketplacev2 had HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
+[error] 
+[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier

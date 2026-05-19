@@ -4,13 +4,13 @@
     "lang_es": "Español",
     "portal_button": "Portal",
 
-    "hero_title": "Welcome to JEOAH\'S",
-    "hero_subtitle": "JEOAH\'S is the all-in-one platform that connects sellers, affiliates, and buyers for mutual growth. Launch your shop, find the best products, and grow your business.",
+    "hero_title": "Welcome to JEOAH'S",
+    "hero_subtitle": "JEOAH'S is the all-in-one platform that connects sellers, affiliates, and buyers for mutual growth. Launch your shop, find the best products, and grow your business.",
     "launch_offer_title": "Special Launch Offer!",
     "launch_offer_text": "The first 25 members get exclusive benefits. Join us now!",
     
     "features_title": "One Platform, Three Key Roles",
-    "features_subtitle": "Discover how JEOAH\'S helps you achieve your goals, whether you are a seller, an affiliate, or a buyer.",
+    "features_subtitle": "Discover how JEOAH'S helps you achieve your goals, whether you are a seller, an affiliate, or a buyer.",
     "feature_sellers_title": "For Sellers",
     "feature_sellers_text": "Launch your shop in just a few clicks. Import your products, manage your inventory, and track your sales from a unified dashboard. Reach a new audience through our affiliate network.",
     "feature_affiliates_title": "For Affiliates",
@@ -19,12 +19,12 @@
     "feature_buyers_text": "Discover and buy unique, quality products recommended by trusted creators. A smooth, secure, and centralized shopping experience.",
     
     "features_title_page": "Key Features",
-    "features_subtitle_page": "Discover everything JEOAH\'S can do for you.",
+    "features_subtitle_page": "Discover everything JEOAH'S can do for you.",
     "feature_sellers_text_extended": "Launch your store in a few clicks. Upload your products (up to 3 photos per item), manage your inventory, and connect your social networks. Reach a new audience through our powerful affiliate network.",
-    "feature_affiliates_text_extended": "Monetize your audience. Add your external affiliate links (up to 10) and share our sellers\' products to earn commissions. Simple tools to develop an income stream and for real-time tracking.",
+    "feature_affiliates_text_extended": "Monetize your audience. Add your external affiliate links (up to 10) and share our sellers' products to earn commissions. Simple tools to develop an income stream and for real-time tracking.",
 
     "pricing_title": "Plans for Every Ambition",
-    "pricing_subtitle": "Whether you\'re just starting out or are an established seller, we have the right plan for you. Cancel anytime.",
+    "pricing_subtitle": "Whether you're just starting out or are an established seller, we have the right plan for you. Cancel anytime.",
     "plan_free_name": "Discovery",
     "plan_free_price": "$0",
     "plan_free_period": "for life",
@@ -50,17 +50,17 @@
     "plan_affiliate_cta": "Become a Premium Affiliate",
 
     "referral_title": "The Referral Program",
-    "referral_text_1": "Invite your audience to join JEOAH\'S. Our program is designed to reward members who help us build our community. The more active your network is, the more benefits you unlock.",
+    "referral_text_1": "Invite your audience to join JEOAH'S. Our program is designed to reward members who help us build our community. The more active your network is, the more benefits you unlock.",
     "referral_text_2": "Copy your unique link and start building your network today.",
     "referral_cta_placeholder": "Your referral link will appear here...",
     "referral_cta_button": "Copy Link",
     
     "faq_title": "Frequently Asked Questions",
     "faq_subtitle": "Got questions? We have the answers.",
-    "faq_1_q": "What exactly is JEOAH\'S?",
-    "faq_1_a": "JEOAH\'S is an all-in-one platform that serves as an ecosystem for sellers, affiliates, and buyers. Sellers can create their own online store, affiliates can promote products to earn commissions, and buyers can discover trusted products in one place.",
+    "faq_1_q": "What exactly is JEOAH'S?",
+    "faq_1_a": "JEOAH'S is an all-in-one platform that serves as an ecosystem for sellers, affiliates, and buyers. Sellers can create their own online store, affiliates can promote products to earn commissions, and buyers can discover trusted products in one place.",
     "faq_2_q": "Do I have to pay to sign up?",
-    "faq_2_a": "Signing up on JEOAH\'S is free! You can create an account, explore the platform, and participate in the referral program without a subscription. A paid subscription is required to unlock selling features (for sellers) and to withdraw referral rewards.",
+    "faq_2_a": "Signing up on JEOAH'S is free! You can create an account, explore the platform, and participate in the referral program without a subscription. A paid subscription is required to unlock selling features (for sellers) and to withdraw referral rewards.",
     "faq_3_q": "How does the referral program work?",
     "faq_3_a": "Each member receives a unique referral link to invite new users. As your network of referrals grows and becomes active on the platform, you get rewarded. To withdraw your rewards, an active subscription is necessary, but you can start building your network right after signing up for free.",
     "faq_4_q": "What types of products can I sell?",
@@ -68,7 +68,7 @@
     "faq_5_q": "How do I get paid as an affiliate or seller?",
     "faq_5_a": "Payments for sales and commissions are processed through secure platforms like Stripe and PayPal. You can configure your payment preferences in your dashboard and track all your income in real-time.",
     
-    "footer_all_rights_reserved": "© 2025 JEOAH\'S. All rights reserved.",
+    "footer_all_rights_reserved": "© 2025 JEOAH'S. All rights reserved.",
     "footer_terms": "Terms of Service",
     "footer_privacy": "Privacy Policy",
     
@@ -82,7 +82,7 @@
     "auth_terms_link": "Terms",
     
     "contact_title": "Contact Us",
-    "contact_subtitle": "A question? A suggestion? Don\'t hesitate.",
+    "contact_subtitle": "A question? A suggestion? Don't hesitate.",
     "contact_name_label": "Full name",
     "contact_email_label": "Email address",
     "contact_message_label": "Message",
@@ -102,11 +102,11 @@
     "onboarding_next_step": "Next Step",
 
     "about_title": "Our Mission: Connect and Simplify",
-    "about_subtitle": "At JEOAH\'S, we believe in the power of connection. Our goal is to create the simplest, most powerful ecosystem for web entrepreneurs.",
-    "about_paragraph_1": "JEOAH\'S was born from a simple observation: the tools to sell online, promote products, or simply shop with confidence are scattered, complex, and often expensive. We wanted to create a single solution that brings everyone together: product creators, those with an audience, and those looking for quality products.",
-    "about_paragraph_2": "Our platform is designed to be intuitive, flexible, and powerful. Whether you are a seller launching your first store, an affiliate looking to monetize your content, or a buyer in search of discoveries, JEOAH\'S gives you the tools to succeed, without the technical complexity.",
-    "about_paragraph_3": "We are more than just technology. We are a community. By joining JEOAH\'S, you enter a network of mutual support where everyone\'s growth benefits everyone. Welcome to the adventure.",
+    "about_subtitle": "At JEOAH'S, we believe in the power of connection. Our goal is to create the simplest, most powerful ecosystem for web entrepreneurs.",
+    "about_paragraph_1": "JEOAH'S was born from a simple observation: the tools to sell online, promote products, or simply shop with confidence are scattered, complex, and often expensive. We wanted to create a single solution that brings everyone together: product creators, those with an audience, and those looking for quality products.",
+    "about_paragraph_2": "Our platform is designed to be intuitive, flexible, and powerful. Whether you are a seller launching your first store, an affiliate looking to monetize your content, or a buyer in search of discoveries, JEOAH'S gives you the tools to succeed, without the technical complexity.",
+    "about_paragraph_3": "We are more than just technology. We are a community. By joining JEOAH'S, you enter a network of mutual support where everyone's growth benefits everyone. Welcome to the adventure.",
 
-    "showcase_title": "The JEOAH\'S Showcase",
+    "showcase_title": "The JEOAH'S Showcase",
     "showcase_subtitle": "Discover unique products from our community of sellers and affiliates."
 }
